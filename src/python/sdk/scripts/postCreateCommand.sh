@@ -41,3 +41,11 @@ pip3 install -e .
 # add repo to git safe.directory
 REPO=$(pwd)
 git config --global --add safe.directory $REPO
+
+echo "#######################################################"
+echo "### VADF package status                             ###"
+echo "#######################################################"
+velocitas upgrade --dry-run
+
+# Don't let container creation fail if lifecycle management fails
+echo "Done!"
