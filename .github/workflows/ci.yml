@@ -38,3 +38,30 @@ jobs:
 
       - name: Run Linters
         uses: ./.github/actions/pre-commit-action
+
+  unit-test:
+    name: "Run unit tests"
+    runs-on: ubuntu-latest
+    container: ghcr.io/eclipse-velocitas/devcontainer-base-images/python:latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install required packages
+        run: |
+          pip install -r model-generator/src/requirements.txt
+          pip install -r model-generator/test/requirements.txt
+
+      - name: unit test
+        shell: bash
+        run: |
+          pytest --rootdir=./model-generator/test --override-ini junit_family=xunit1 --junit-xml=./results/UnitTest/junit.xml --cov ./model-generator/test --cov-report=xml:results/CodeCoverage/cobertura-coverage.xml --cov-branch ./model-generator/test
+          coverage2clover -i results/CodeCoverage/cobertura-coverage.xml -o results/CodeCoverage/clover.xml
+          coveragepy-lcov --data_file_path ./.coverage --output_file_path results/CodeCoverage/lcov.info
+
+      - name: Publish Unit Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          junit_files: ./results/UnitTest/junit.xml

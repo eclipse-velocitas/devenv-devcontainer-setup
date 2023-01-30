@@ -5,15 +5,15 @@
             "type": "setup",
             "files": [
                 {
-                    "src": "src/common",
+                    "src": "setup/src/common",
                     "dst": ".devcontainer"
                 },
                 {
-                    "src": "src/${{ language }}/common",
+                    "src": "setup/src/${{ language }}/common",
                     "dst": ".devcontainer"
                 },
                 {
-                    "src": "src/${{ language }}/${{ repoType }}",
+                    "src": "setup/src/${{ language }}/${{ repoType }}",
                     "dst": ".devcontainer"
                 }
             ],
@@ -35,6 +35,52 @@
                     "type": "string",
                     "required": true,
                     "description": "Path of the AppManifest file, relative to the .velocitas.json"
+                }
+            ]
+        },
+        {
+            "id": "model-generator",
+            "type": "setup",
+            "onPostInit": [
+                {
+                    "ref": "install-deps"
+                },
+                {
+                    "ref": "download-vspec"
+                },
+                {
+                    "ref": "generate-model"
+                }
+            ],
+            "programs": [
+                {
+                    "id": "install-deps",
+                    "executable": "python",
+                    "args": ["./model-generator/src/install_deps.py"]
+                },
+                {
+                    "id": "download-vspec",
+                    "executable": "python",
+                    "args": ["./model-generator/src/download_vspec.py"]
+                },
+                {
+                    "id": "generate-model",
+                    "executable": "python",
+                    "args": ["./model-generator/src/generate_model.py"]
+                }
+            ],
+            "variables": [
+                {
+                    "name": "installModelGenerator",
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Should the initialization of this component download and install the model generator? Not needed, if it already is part of the base image."
+                },
+                {
+                    "name": "generatedModelPath",
+                    "type": "string",
+                    "default": "auto",
+                    "description": "Absolute path where to generate the vehicle model. If set to 'auto' the model will be generated in the project cache."
                 }
             ]
         }
