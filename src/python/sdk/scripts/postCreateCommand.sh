@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2022 Robert Bosch GmbH and Microsoft Corporation
+# Copyright (c) 2022-2023 Robert Bosch GmbH and Microsoft Corporation
 #
 # This program and the accompanying materials are made available under the
 # terms of the Apache License, Version 2.0 which is available at
@@ -41,3 +41,11 @@ pip3 install -e .
 # add repo to git safe.directory
 REPO=$(pwd)
 git config --global --add safe.directory $REPO
+
+echo "#######################################################"
+echo "### VADF package status                             ###"
+echo "#######################################################"
+velocitas upgrade --dry-run
+
+# Don't let container creation fail if lifecycle management fails
+echo "Done!"
