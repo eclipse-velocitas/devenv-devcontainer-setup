@@ -39,6 +39,7 @@ jobs:
       - name: Install deps
         run: |
           pip install mypy
+          pip install types-requests
 
       - name: Run Linters
         uses: ./.github/actions/pre-commit-action
