@@ -55,13 +55,13 @@ jobs:
 
       - name: Install required packages
         run: |
-          pip install -r model-generator/src/requirements.txt
-          pip install -r model-generator/test/requirements.txt
+          pip install -r vehicle-model-lifecycle/src/requirements.txt
+          pip install -r vehicle-model-lifecycle/test/requirements.txt
 
       - name: unit test
         shell: bash
         run: |
-          pytest --rootdir=./model-generator/test --override-ini junit_family=xunit1 --junit-xml=./results/UnitTest/junit.xml --cov ./model-generator/test --cov-report=xml:results/CodeCoverage/cobertura-coverage.xml --cov-branch ./model-generator/test
+          pytest --rootdir=./vehicle-model-lifecycle/test --override-ini junit_family=xunit1 --junit-xml=./results/UnitTest/junit.xml --cov ./vehicle-model-lifecycle/test --cov-report=xml:results/CodeCoverage/cobertura-coverage.xml --cov-branch ./vehicle-model-lifecycle/test
           coverage2clover -i results/CodeCoverage/cobertura-coverage.xml -o results/CodeCoverage/clover.xml
           coveragepy-lcov --data_file_path ./.coverage --output_file_path results/CodeCoverage/lcov.info
 

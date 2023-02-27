@@ -45,7 +45,7 @@ repos:
     rev: "v1.0.1"
     hooks:
       - id: mypy
-        args: [model-generator/src]
+        args: [vehicle-model-lifecycle/src]
         language: system
         pass_filenames: false
 

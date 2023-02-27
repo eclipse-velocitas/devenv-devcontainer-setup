@@ -39,7 +39,7 @@
             ]
         },
         {
-            "id": "model-generator",
+            "id": "vehicle-model-lifecycle",
             "type": "setup",
             "onPostInit": [
                 {
@@ -56,17 +56,17 @@
                 {
                     "id": "install-deps",
                     "executable": "python",
-                    "args": ["./model-generator/src/install_deps.py"]
+                    "args": ["./vehicle-model-lifecycle/src/install_deps.py"]
                 },
                 {
                     "id": "download-vspec",
                     "executable": "python",
-                    "args": ["./model-generator/src/download_vspec.py"]
+                    "args": ["./vehicle-model-lifecycle/src/download_vspec.py"]
                 },
                 {
                     "id": "generate-model",
                     "executable": "python",
-                    "args": ["./model-generator/src/generate_model.py"]
+                    "args": ["./vehicle-model-lifecycle/src/generate_model.py"]
                 }
             ],
             "variables": [
@@ -81,6 +81,18 @@
                     "type": "string",
                     "default": "auto",
                     "description": "Absolute path where to generate the vehicle model. If set to 'auto' the model will be generated in the project cache."
+                },
+                {
+                    "name": "modelGeneratorGitRepo",
+                    "type": "string",
+                    "default": "https://github.com/eclipse-velocitas/vehicle-model-generator.git",
+                    "description": "Git repository of the model generator."
+                },
+                {
+                    "name": "modelGeneratorGitRef",
+                    "type": "string",
+                    "default": "v0.3.0",
+                    "description": "Git ref of the model generator repo. Can be a tag, branch or SHA"
                 }
             ]
         }

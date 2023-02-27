@@ -19,6 +19,24 @@ import subprocess
 import sys
 
 
+def require_env(name: str) -> str:
+    """Require and return an environment variable.
+
+    Args:
+        name (str): The name of the variable.
+
+    Raises:
+        ValueError: In case the environment variable is not set.
+
+    Returns:
+        str: The value of the variable.
+    """
+    var = os.getenv(name)
+    if not var:
+        raise ValueError(f"environment variable {var!r} not set!")
+    return var
+
+
 def get_script_path() -> str:
     """Return the absolute path to the directory the invoked Python script
     is located in."""
@@ -45,8 +63,8 @@ def install_packages():
     VSpec download."""
     script_path = get_script_path()
 
-    model_gen_version = "v0.3.0"
-    model_gen_repo = "https://github.com/eclipse-velocitas/vehicle-model-generator.git"
+    model_gen_version = require_env("modelGeneratorGitRepo")
+    model_gen_repo = require_env("modelGeneratorGitRef")
 
     pip(["install", "-r", f"{script_path}/requirements.txt"])
 
