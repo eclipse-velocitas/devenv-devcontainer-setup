@@ -36,6 +36,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Install deps
+        run: |
+          pip install mypy
+
       - name: Run Linters
         uses: ./.github/actions/pre-commit-action
 
