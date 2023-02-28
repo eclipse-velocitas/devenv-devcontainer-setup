@@ -63,8 +63,8 @@ def install_packages():
     VSpec download."""
     script_path = get_script_path()
 
-    model_gen_version = require_env("modelGeneratorGitRepo")
-    model_gen_repo = require_env("modelGeneratorGitRef")
+    model_gen_repo = require_env("modelGeneratorGitRepo")
+    model_gen_version = require_env("modelGeneratorGitRef")
 
     pip(["install", "-r", f"{script_path}/requirements.txt"])
 
