@@ -1,7 +1,7 @@
-import io
-import json
 import os
 import sys
+
+from test_lib import capture_stdout, mock_env
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "src"))
 from download_vspec import download_file, is_uri, main  # noqa
@@ -23,38 +23,24 @@ def test_download_file():
     assert os.path.isfile(local_file_path)
 
 
-def test_vspec_file_path_from_absolute():
-    capturedOutput = io.StringIO()
-    sys.stdout = capturedOutput
-    os.environ["VELOCITAS_CACHE_DIR"] = "/tmp/velocitas"
-    os.environ["VELOCITAS_WORKSPACE_DIR"] = "/workspaces/my_vehicle_app"
-
+def test_int_relative_src_converted_to_absolute():
     app_manifest["VehicleModel"]["src"] = "./app/vspec.json"
-    os.environ["VELOCITAS_APP_MANIFEST"] = json.dumps(app_manifest)
+    with capture_stdout() as capture, mock_env(app_manifest):
+        main()
 
-    main()
-    sys.stdout = sys.__stdout__
-    vspec_file_path = get_vspec_file_path_value(capturedOutput.getvalue())
-
-    assert os.path.isabs(vspec_file_path)
-    assert vspec_file_path == "/workspaces/my_vehicle_app/app/vspec.json"
+        vspec_file_path = get_vspec_file_path_value(capture.getvalue())
+        assert os.path.isabs(vspec_file_path)
+        assert vspec_file_path == "/workspaces/my_vehicle_app/app/vspec.json"
 
 
-def test_vspec_file_path_from_uri():
-    capturedOutput = io.StringIO()
-    sys.stdout = capturedOutput
-    os.environ["VELOCITAS_CACHE_DIR"] = "/tmp/velocitas"
-    os.environ["VELOCITAS_WORKSPACE_DIR"] = "/workspaces/my_vehicle_app"
-
+def test_int_uri_src_downloaded_and_stored_in_cache():
     app_manifest["VehicleModel"]["src"] = vspec_300_uri
-    os.environ["VELOCITAS_APP_MANIFEST"] = json.dumps(app_manifest)
+    with capture_stdout() as capture, mock_env(app_manifest):
+        main()
 
-    main()
-    sys.stdout = sys.__stdout__
-    vspec_file_path = get_vspec_file_path_value(capturedOutput.getvalue())
-
-    assert os.path.isabs(vspec_file_path)
-    assert vspec_file_path == "/tmp/velocitas/vspec.json"
+        vspec_file_path = get_vspec_file_path_value(capture.getvalue())
+        assert os.path.isabs(vspec_file_path)
+        assert vspec_file_path == "/tmp/velocitas/vspec.json"
 
 
 def get_vspec_file_path_value(capturedOutput: str) -> str:
