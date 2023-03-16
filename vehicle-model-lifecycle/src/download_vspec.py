@@ -60,6 +60,15 @@ def get_project_cache_dir() -> str:
     return require_env("VELOCITAS_CACHE_DIR")
 
 
+def get_velocitas_workspace_dir() -> str:
+    """Return the project's workspace directory.
+
+    Returns:
+        str: The path to the project's workspace directory.
+    """
+    return require_env("VELOCITAS_WORKSPACE_DIR")
+
+
 def download_file(uri: str, local_file_path: str):
     """Download vspec file from the given URI to the project cache.
 
@@ -75,14 +84,22 @@ def download_file(uri: str, local_file_path: str):
                 outfile.write(chunk)
 
 
-if __name__ == "__main__":
+def main():
     manifest_data_str = require_env("VELOCITAS_APP_MANIFEST")
     manifest_data = json.loads(manifest_data_str)
     vspec_src = manifest_data["VehicleModel"]["src"]
+    local_vspec_path = os.path.join(
+        get_velocitas_workspace_dir(), os.path.normpath(vspec_src)
+    )
 
     if is_uri(vspec_src):
         local_vspec_path = os.path.join(get_project_cache_dir(), "vspec.json")
         download_file(vspec_src, local_vspec_path)
-        vspec_src = local_vspec_path
+
+    vspec_src = local_vspec_path
 
     print(f"vspec_file_path={vspec_src!r} >> VELOCITAS_CACHE")
+
+
+if __name__ == "__main__":
+    main()
