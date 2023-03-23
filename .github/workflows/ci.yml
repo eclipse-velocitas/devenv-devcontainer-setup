@@ -46,7 +46,7 @@ jobs:
 
   unit-test:
     name: "Run unit tests"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     container: ghcr.io/eclipse-velocitas/devcontainer-base-images/python:latest
 
     steps:
@@ -70,3 +70,88 @@ jobs:
         if: always()
         with:
           junit_files: ./results/UnitTest/junit.xml
+
+  run-integration-tests:
+    name: Run Integration Test
+    runs-on: ubuntu-22.04
+    container: ghcr.io/eclipse-velocitas/devcontainer-base-images/${{ matrix.language }}:latest
+    strategy:
+      matrix:
+        language: ["python", "cpp"]
+      fail-fast: false
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Checkout template repo
+        uses: actions/checkout@v3
+        with:
+          repository: eclipse-velocitas/vehicle-app-${{ matrix.language }}-template
+          path: test/${{ matrix.language }}/repo
+
+      - name: Prepare .velocitas.json for integration test
+        run: |
+          NEW_CONFIG="$(jq --arg GITHUB_SHA "$GITHUB_SHA" '.packages[0].version |= $GITHUB_SHA' test/${{ matrix.language }}/.velocitas.json)"
+          echo "${NEW_CONFIG}" > test/${{ matrix.language }}/repo/.velocitas.json
+
+      - name: Init velocitas project
+        run: |
+          cd test/${{ matrix.language }}/repo
+          velocitas init
+
+      - name: Check if vehicle model is generated
+        run: |
+          cd test/${{ matrix.language }}/repo
+          generatedModelPath=$(cat .velocitas.json | jq -r .variables.generatedModelPath)
+          if [ -d "$generatedModelPath" ];
+          then
+            echo "$generatedModelPath directory exists."
+          else
+            echo "$generatedModelPath does not exist."
+            exit 1
+          fi
+
+      - name: Sync velocitas project
+        run: |
+          cd test/${{ matrix.language }}/repo
+          velocitas sync
+
+      - name: Reset .velocitas.json to latest template state
+        run: |
+          cd test/${{ matrix.language }}/repo
+          git checkout .velocitas.json
+
+      - name: Fix dubious ownership
+        run: |
+          git config --global --add safe.directory $( pwd )
+
+      - name: Identify changes in devenv repo
+        uses: dorny/paths-filter@v2
+        id: changesInPath
+        with:
+          filters: |
+            setupCommon:
+              - 'setup/src/common/**'
+            setupLang:
+              - 'setup/src/${{ matrix.language }}/**'
+
+      - name: Check if cloned template repo has changes after sync
+        if: (steps.changesInPath.outputs.setupCommon == 'true' || steps.changesInPath.outputs.setupLang == 'true')
+        id: changes
+        run: |
+          cd test/${{ matrix.language }}/repo
+          git diff
+          if [[ -z "$(git status --porcelain .)" ]];
+          then
+            echo "No Changes"
+            echo "changed=0" >> $GITHUB_OUTPUT
+          else
+            echo "Changes"
+            echo "changed=1" >> $GITHUB_OUTPUT
+          fi
+        shell: bash
+
+      - name: Fail if there are changes in setup files detected but sync probably failed
+        if: |
+          (steps.changes.outputs.changed == 0 && steps.changesInPath.outputs.setupCommon == 'true') ||
+          (steps.changes.outputs.changed == 0 && steps.changesInPath.outputs.setupLang == 'true')
+        run: exit 1
