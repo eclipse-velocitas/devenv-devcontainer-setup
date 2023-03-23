@@ -88,7 +88,7 @@ def get_vehicle_model_src():
     manifest_data_str = require_env("VELOCITAS_APP_MANIFEST")
     manifest_data = json.loads(manifest_data_str)
 
-    possible_keys = ["vehicle-model", "VehicleModel"]
+    possible_keys = ["vehicleModel", "VehicleModel"]
 
     for key in possible_keys:
         if key in manifest_data:
