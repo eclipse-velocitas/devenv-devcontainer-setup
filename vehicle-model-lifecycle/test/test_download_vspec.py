@@ -38,13 +38,13 @@ def test_download_file():
     assert os.path.isfile(local_file_path)
 
 
-def test_new_vehicle_model_key():
-    app_manifest_dict = {"vehicle-model": {"src": "foo"}}
+def test_camel_case_vehicle_model_key():
+    app_manifest_dict = {"vehicleModel": {"src": "foo"}}
     with mock_env(app_manifest_dict):
         assert get_vehicle_model_src() == "foo"
 
 
-def test_old_vehicle_model_key():
+def test_pascal_case_vehicle_model_key():
     app_manifest_dict = {"VehicleModel": {"src": "bar"}}
     with mock_env(app_manifest_dict):
         assert get_vehicle_model_src() == "bar"
