@@ -15,10 +15,11 @@
 import os
 import sys
 
+import pytest
 from test_lib import capture_stdout, mock_env
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "src"))
-from download_vspec import download_file, is_uri, main  # noqa
+from download_vspec import download_file, get_vehicle_model_src, is_uri, main  # noqa
 
 vspec_300_uri = "https://github.com/COVESA/vehicle_signal_specification/releases/download/v3.0/vss_rel_3.0.json"  # noqa
 app_manifest = {"VehicleModel": {"src": ""}}
@@ -35,6 +36,25 @@ def test_download_file():
     download_file(vspec_300_uri, local_file_path)
 
     assert os.path.isfile(local_file_path)
+
+
+def test_camel_case_vehicle_model_key():
+    app_manifest_dict = {"vehicleModel": {"src": "foo"}}
+    with mock_env(app_manifest_dict):
+        assert get_vehicle_model_src() == "foo"
+
+
+def test_pascal_case_vehicle_model_key():
+    app_manifest_dict = {"VehicleModel": {"src": "bar"}}
+    with mock_env(app_manifest_dict):
+        assert get_vehicle_model_src() == "bar"
+
+
+def test_invalid_vehicle_model_key():
+    app_manifest_dict = {"Vehicle.Model": {"src": "baz"}}
+    with mock_env(app_manifest_dict):
+        with pytest.raises(KeyError):
+            get_vehicle_model_src()
 
 
 def test_int_relative_src_converted_to_absolute():

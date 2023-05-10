@@ -84,10 +84,21 @@ def download_file(uri: str, local_file_path: str):
                 outfile.write(chunk)
 
 
-def main():
+def get_vehicle_model_src():
     manifest_data_str = require_env("VELOCITAS_APP_MANIFEST")
     manifest_data = json.loads(manifest_data_str)
-    vspec_src = manifest_data["VehicleModel"]["src"]
+
+    possible_keys = ["vehicleModel", "VehicleModel"]
+
+    for key in possible_keys:
+        if key in manifest_data:
+            return manifest_data[key]["src"]
+
+    raise KeyError("App manifest does not contain a valid vehicle model!")
+
+
+def main():
+    vspec_src = get_vehicle_model_src()
     local_vspec_path = os.path.join(
         get_velocitas_workspace_dir(), os.path.normpath(vspec_src)
     )
