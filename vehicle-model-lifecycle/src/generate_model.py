@@ -20,6 +20,7 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
+from sdv.model_generator.main import generate_model
 
 
 def require_env(name: str) -> str:
@@ -81,19 +82,8 @@ def invoke_generator(
         f"Invoking model generator for language {output_language} and file "
         f"{vspec_file_path!r}"
     )
-    subprocess.check_call(
-        [
-            sys.executable,
-            "-m",
-            "sdv.model_generator.main",
-            "-l",
-            output_language,
-            "-T",
-            output_path,
-            vspec_file_path,
-        ],
-        cwd=get_workspace_dir(),
-    )
+
+    generate_model(output_language, vspec_file_path, target_folder=output_path)
 
 
 def install_model_if_required(language: str, model_path: str) -> None:

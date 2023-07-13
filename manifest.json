@@ -91,7 +91,7 @@
                 {
                     "name": "modelGeneratorGitRef",
                     "type": "string",
-                    "default": "v0.3.0",
+                    "default": "vehicle-model-generator-improvement",
                     "description": "Git ref of the model generator repo. Can be a tag, branch or SHA"
                 }
             ]
