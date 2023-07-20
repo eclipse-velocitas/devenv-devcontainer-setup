@@ -19,7 +19,8 @@ import os
 import shutil
 import subprocess
 from pathlib import Path
-from sdv.model_generator.main import generate_model
+
+from sdv.model_generator.main import generate_model  # type: ignore
 
 
 def require_env(name: str) -> str:
@@ -93,7 +94,7 @@ def install_model_if_required(language: str, model_path: str) -> None:
         model_path (str): The path where the generated model is stored.
     """
     if language == "python":
-        subprocess.check_call(["pip", "install", model_path])
+        subprocess.check_call(["sys.executable", "-m", "pip", "install", model_path])
 
 
 if __name__ == "__main__":

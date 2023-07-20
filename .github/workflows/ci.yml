@@ -57,6 +57,7 @@ jobs:
         run: |
           pip install -r vehicle-model-lifecycle/src/requirements.txt
           pip install -r vehicle-model-lifecycle/test/requirements.txt
+          python vehicle-model-lifecycle/src/install_deps.py
 
       - name: unit test
         shell: bash
