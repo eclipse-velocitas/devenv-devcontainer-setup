@@ -56,17 +56,17 @@
                 {
                     "id": "install-deps",
                     "executable": "python",
-                    "args": ["./vehicle-model-lifecycle/src/install_deps.py"]
+                    "args": [ "./vehicle-model-lifecycle/src/install_deps.py" ]
                 },
                 {
                     "id": "download-vspec",
                     "executable": "python",
-                    "args": ["./vehicle-model-lifecycle/src/download_vspec.py"]
+                    "args": [ "./vehicle-model-lifecycle/src/download_vspec.py" ]
                 },
                 {
                     "id": "generate-model",
                     "executable": "python",
-                    "args": ["./vehicle-model-lifecycle/src/generate_model.py"]
+                    "args": [ "./vehicle-model-lifecycle/src/generate_model.py" ]
                 }
             ],
             "variables": [
@@ -93,6 +93,55 @@
                     "type": "string",
                     "default": "v0.3.0",
                     "description": "Git ref of the model generator repo. Can be a tag, branch or SHA"
+                }
+            ]
+        },
+        {
+            "id": "sdk-installer",
+            "type": "setup",
+            "onPostInit": [
+                {
+                    "ref": "install-deps"
+                },
+                {
+                    "ref": "run"
+                }
+            ],
+            "programs": [
+                {
+                    "id": "install-deps",
+                    "executable": "python",
+                    "args": [ "-m", "pip", "install", "-r", "./sdk-installer/requirements.txt" ]
+                },
+                {
+                    "id": "run",
+                    "executable": "python",
+                    "args": [ "./sdk-installer/src/run.py" ]
+                }
+            ]
+        },
+        {
+            "id": "grpc-interface-support",
+            "type": "setup",
+            "onPostInit": [
+                {
+                    "ref": "install-deps"
+                },
+                {
+                    "ref": "generate-sdk"
+                }
+            ],
+            "programs": [
+                {
+                    "id": "install-deps",
+                    "executable": "python",
+                    "args": [ "-m", "pip", "install", "-r", "./grpc-interface-support/requirements.txt" ]
+                },
+                {
+                    "id": "generate-sdk",
+                    "description": "Generates service client SDKs to be used in business logic.",
+                    "executable": "python",
+                    "args": [ "./grpc-interface-support/src/main.py" ]
                 }
             ]
         }

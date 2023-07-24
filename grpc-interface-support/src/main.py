@@ -1,0 +1,95 @@
+# Copyright (c) 2023 Contributors to the Eclipse Foundation
+#
+# This program and the accompanying materials are made available under the
+# terms of the Apache License, Version 2.0 which is available at
+# https://www.apache.org/licenses/LICENSE-2.0.
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
+
+import os
+import shutil
+from typing import Any, Dict
+
+import proto
+from cpp import CppGrpcInterfaceGenerator
+from generator import GrpcInterfaceGenerator
+from python import PythonGrpcInterfaceGenerator
+from util import create_truncated_string
+from velocitas_lib import download_file, get_programming_language, get_project_cache_dir
+from velocitas_lib.functional_interface import get_interfaces_for_type
+
+DEPENDENCY_TYPE_KEY = "grpc-interface"
+LANGUAGE_GENERATORS = {
+    "cpp": CppGrpcInterfaceGenerator(),
+    "python": PythonGrpcInterfaceGenerator(),
+}
+
+
+def download_proto(config: Dict[str, Any]) -> proto.ProtoFileHandle:
+    service_if_spec_src = config["src"]
+    _, filename = os.path.split(service_if_spec_src)
+
+    cached_proto_file_path = os.path.join(get_project_cache_dir(), "services", filename)
+
+    download_file(service_if_spec_src, cached_proto_file_path)
+
+    return proto.ProtoFileHandle(cached_proto_file_path)
+
+
+def create_service_sdk_dir(proto_file_handle: proto.ProtoFileHandle) -> str:
+    service_name = proto_file_handle.get_service_name()
+    service_sdk_path = os.path.join(
+        get_project_cache_dir(), "services", service_name.lower()
+    )
+    if os.path.isdir(service_sdk_path):
+        shutil.rmtree(service_sdk_path)
+    os.makedirs(service_sdk_path, exist_ok=True)
+
+    return service_sdk_path
+
+
+def generate_single_service(
+    generator: GrpcInterfaceGenerator, if_config: Dict[str, Any]
+) -> None:
+    print(
+        f"Generating service SDK for {create_truncated_string(if_config['src'], 40)!r}"
+    )
+    proto_file_handle = download_proto(if_config)
+    service_sdk_dir = create_service_sdk_dir(proto_file_handle)
+
+    if "requires" in if_config:
+        generator.generate_service_client_sdk(service_sdk_dir, proto_file_handle)
+    if "provides" in if_config:
+        pass
+
+
+def main() -> None:
+    interfaces = get_interfaces_for_type(DEPENDENCY_TYPE_KEY)
+
+    if len(interfaces) <= 0:
+        return
+
+    if get_programming_language() not in LANGUAGE_GENERATORS:
+        print(
+            "gRPC interface not yet supported for programming language "
+            f"{get_programming_language()!r}"
+        )
+        return
+
+    generator = LANGUAGE_GENERATORS[get_programming_language()]
+
+    generator.install_tooling()
+
+    for grpc_service in interfaces:
+        if_config = grpc_service["config"]
+        generate_single_service(generator, if_config)
+
+
+if __name__ == "__main__":
+    main()

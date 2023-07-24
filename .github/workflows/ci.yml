@@ -48,6 +48,10 @@ jobs:
     name: "Run unit tests"
     runs-on: ubuntu-22.04
     container: ghcr.io/eclipse-velocitas/devcontainer-base-images/python:v0.1
+    strategy:
+      matrix:
+        component: ["setup", "grpc-interface-support", "vehicle-model-lifecycle", "sdk-installer"]
+      fail-fast: false
 
     steps:
       - name: Checkout repository
@@ -55,19 +59,23 @@ jobs:
 
       - name: Install required packages
         run: |
-          pip install -r vehicle-model-lifecycle/src/requirements.txt
-          pip install -r vehicle-model-lifecycle/test/requirements.txt
+          if [ -e "${{ matrix.component }}/requirements.txt" ]; then
+            pip install -r ${{ matrix.component }}/requirements.txt
+          fi
+
+          if [ -e "${{ matrix.component }}/test/requirements.txt" ]; then
+            pip install -r ${{ matrix.component }}/test/requirements.txt
+          fi
 
       - name: unit test
         shell: bash
         run: |
-          pytest --rootdir=./vehicle-model-lifecycle/test \
-          --override-ini junit_family=xunit1 \
+          pytest --override-ini junit_family=xunit1 \
           --junit-xml=./results/UnitTest/junit.xml \
           --cov . \
           --cov-report=xml:results/CodeCoverage/cobertura-coverage.xml \
           --cov-branch \
-          ./vehicle-model-lifecycle/test
+          ./${{ matrix.component }}/test/unit
 
       - name: Publish Test Report
         uses: mikepenz/action-junit-report@v3
@@ -93,96 +101,32 @@ jobs:
     strategy:
       matrix:
         language: ["python", "cpp"]
+        component: ["setup", "grpc-interface-support", "vehicle-model-lifecycle", "sdk-installer"]
       fail-fast: false
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-      - name: Checkout template repo
+
+      - name: Checkout template repository
         uses: actions/checkout@v3
         with:
           repository: eclipse-velocitas/vehicle-app-${{ matrix.language }}-template
           path: test/${{ matrix.language }}/repo
 
-      - name: Install requirements
-        run: pip install -r test/requirements.txt
-
-      - name: Prepare .velocitas.json for integration test
+      - name: Replace Velocitas JSON content
         run: |
-          COMMIT_REF=$GITHUB_SHA
+          cp -f test/${{ matrix.language }}/.velocitas.json test/${{ matrix.language }}/repo
 
-          if [ "$GITHUB_EVENT_NAME" = "pull_request" ];
-          then
-            echo "Running in context of a PR!"
-            COMMIT_REF=$GITHUB_HEAD_REF
-          fi
-
-          NEW_CONFIG="$(jq --arg COMMIT_REF "$COMMIT_REF" '.packages[0].version |= $COMMIT_REF' test/${{ matrix.language }}/.velocitas.json)"
-          echo "${NEW_CONFIG}" > test/${{ matrix.language }}/repo/.velocitas.json
-
-      - name: Init velocitas project
-        run: |
-          cd test/${{ matrix.language }}/repo
-          velocitas init
-
-      - name: Check if vehicle model is generated
-        run: |
-          cd test/${{ matrix.language }}/repo
-          generatedModelPath=$(cat .velocitas.json | jq -r .variables.generatedModelPath)
-          if [ -d "$generatedModelPath" ];
-          then
-            echo "$generatedModelPath directory exists."
-          else
-            echo "$generatedModelPath does not exist."
-            exit 1
-          fi
-
-      - name: Sync velocitas project
-        run: |
-          cd test/${{ matrix.language }}/repo
-          velocitas sync
-
-      - name: Test for CLI Auto-Upgrade
-        run: |
-          cd test/${{ matrix.language }}/repo
-          pytest -s ../../integration/test_poststart.py
-
-      - name: Reset .velocitas.json to latest template state
-        run: |
-          cd test/${{ matrix.language }}/repo
-          git checkout .velocitas.json
-
-      - name: Fix dubious ownership
-        run: |
-          git config --global --add safe.directory $( pwd )
-
-      - name: Identify changes in devenv repo
-        uses: dorny/paths-filter@v2
-        id: changesInPath
+      - name: Update Velocitas JSON with correct version
+        uses: ./.github/actions/update-velocitas-json
         with:
-          filters: |
-            setupCommon:
-              - 'setup/src/common/**'
-            setupLang:
-              - 'setup/src/${{ matrix.language }}/**'
+          project_path: test/${{ matrix.language }}/repo
 
-      - name: Check if cloned template repo has changes after sync
-        if: (steps.changesInPath.outputs.setupCommon == 'true' || steps.changesInPath.outputs.setupLang == 'true')
-        id: changes
+      - name: Run integration tests
         run: |
-          cd test/${{ matrix.language }}/repo
-          git diff
-          if [[ -z "$(git status --porcelain .)" ]];
-          then
-            echo "No Changes"
-            echo "changed=0" >> $GITHUB_OUTPUT
-          else
-            echo "Changes"
-            echo "changed=1" >> $GITHUB_OUTPUT
-          fi
-        shell: bash
+          export VELOCITAS_TEST_LANGUAGE=${{ matrix.language }}
+          export VELOCITAS_TEST_ROOT=test/${{ matrix.language }}/repo
 
-      - name: Fail if there are changes in setup files detected but sync probably failed
-        if: |
-          (steps.changes.outputs.changed == 0 && steps.changesInPath.outputs.setupCommon == 'true') ||
-          (steps.changes.outputs.changed == 0 && steps.changesInPath.outputs.setupLang == 'true')
-        run: exit 1
+          python -m pip install -r ./${{ matrix.component }}/test/requirements.txt
+          python -m pip install -r ./${{ matrix.component }}/requirements.txt
+          pytest ./${{ matrix.component }}/test/integration

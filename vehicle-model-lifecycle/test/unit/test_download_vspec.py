@@ -18,14 +18,12 @@ import sys
 import pytest
 from test_lib import capture_stdout, mock_env
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "..", "src"))
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "..", "src"))
 from download_vspec import (  # noqa
-    download_file,
     get_legacy_model_src,
     is_proper_interface_type,
     is_uri,
     main,
-    require_env,
 )
 
 vspec_300_uri = "https://github.com/COVESA/vehicle_signal_specification/releases/download/v3.0/vss_rel_3.0.json"  # noqa
@@ -43,13 +41,6 @@ def test_is_uri():
     assert is_uri(vspec_300_uri)
     assert is_uri("ftp://my-file")
     assert not is_uri("./local/path/to/file.file")
-
-
-def test_download_file():
-    local_file_path = "/tmp/mydownloadedfile"
-    download_file(vspec_300_uri, local_file_path)
-
-    assert os.path.isfile(local_file_path)
 
 
 def test_get_legacy_model_src__camel_case_vehicle_model_key():
@@ -78,11 +69,6 @@ def test_proper_interface_type__no_type():
 
 def test_proper_interface_type__correct_type():
     assert is_proper_interface_type({"type": "vehicle-signal-interface"})
-
-
-def test_require_env__var_not_present__raises_error():
-    with pytest.raises(ValueError):
-        require_env("foo")
 
 
 @pytest.mark.parametrize(

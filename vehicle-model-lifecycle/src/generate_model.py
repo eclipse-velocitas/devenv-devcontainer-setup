@@ -107,7 +107,7 @@ def install_model_if_required(language: str, model_path: str) -> None:
         subprocess.check_call([sys.executable, "-m", "pip", "install", model_path])
 
 
-def main():
+def main() -> None:
     """Main entry point for generation of vehicle models."""
     cache_data = json.loads(require_env("VELOCITAS_CACHE_DATA"))
 

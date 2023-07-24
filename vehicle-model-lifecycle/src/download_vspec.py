@@ -14,32 +14,14 @@
 
 """Provides methods and functions to download vehicle model source files."""
 
-import json
 import os
 import re
 from typing import Any, Dict, List
 
 import requests
+from velocitas_lib import get_app_manifest, get_project_cache_dir, get_workspace_dir
 
 FUNCTIONAL_INTERFACE_TYPE_KEY = "vehicle-signal-interface"
-
-
-def require_env(name: str) -> str:
-    """Require and return an environment variable.
-
-    Args:
-        name (str): The name of the variable.
-
-    Raises:
-        ValueError: In case the environment variable is not set.
-
-    Returns:
-        str: The value of the variable.
-    """
-    var = os.getenv(name)
-    if not var:
-        raise ValueError(f"environment variable {var!r} not set!")
-    return var
 
 
 def is_uri(path: str) -> bool:
@@ -54,25 +36,7 @@ def is_uri(path: str) -> bool:
     return re.match(r"(\w+)\:\/\/(\w+)", path) is not None
 
 
-def get_project_cache_dir() -> str:
-    """Return the project's cache directory.
-
-    Returns:
-        str: The path to the project's cache directory.
-    """
-    return require_env("VELOCITAS_CACHE_DIR")
-
-
-def get_velocitas_workspace_dir() -> str:
-    """Return the project's workspace directory.
-
-    Returns:
-        str: The path to the project's workspace directory.
-    """
-    return require_env("VELOCITAS_WORKSPACE_DIR")
-
-
-def download_file(uri: str, local_file_path: str):
+def download_file(uri: str, local_file_path: str) -> None:
     """Download vspec file from the given URI to the project cache.
 
     Args:
@@ -112,7 +76,7 @@ def get_legacy_model_src(app_manifest_dict: Dict[str, Any]) -> str:
 
     for key in possible_keys:
         if key in app_manifest_dict:
-            return app_manifest_dict[key]["src"]
+            return str(app_manifest_dict[key]["src"])
 
     raise KeyError("App manifest does not contain a valid vehicle model!")
 
@@ -159,10 +123,10 @@ def get_vehicle_signal_interface_src(interface: Dict[str, Any]) -> str:
     Returns:
         str: The URI of the source for the Vehicle Signal Interface.
     """
-    return interface["config"]["src"]
+    return str(interface["config"]["src"])
 
 
-def main(app_manifest_dict: Dict[str, Any]):
+def main(app_manifest_dict: Dict[str, Any]) -> None:
     """Entry point for downloading the vspec file for a
     vehicle-signal-interface.
 
@@ -185,9 +149,7 @@ def main(app_manifest_dict: Dict[str, Any]):
             return
         vspec_src = get_vehicle_signal_interface_src(interfaces[0])
 
-    local_vspec_path = os.path.join(
-        get_velocitas_workspace_dir(), os.path.normpath(vspec_src)
-    )
+    local_vspec_path = os.path.join(get_workspace_dir(), os.path.normpath(vspec_src))
 
     if is_uri(vspec_src):
         local_vspec_path = os.path.join(get_project_cache_dir(), "vspec.json")
@@ -199,7 +161,4 @@ def main(app_manifest_dict: Dict[str, Any]):
 
 
 if __name__ == "__main__":
-    manifest_data_str = require_env("VELOCITAS_APP_MANIFEST")
-    app_manifest_dict = json.loads(manifest_data_str)
-
-    main(app_manifest_dict)
+    main(get_app_manifest())
