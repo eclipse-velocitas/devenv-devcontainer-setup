@@ -64,7 +64,7 @@ jobs:
           pytest --rootdir=./vehicle-model-lifecycle/test \
           --override-ini junit_family=xunit1 \
           --junit-xml=./results/UnitTest/junit.xml \
-          --cov ./vehicle-model-lifecycle \
+          --cov . \
           --cov-report=xml:results/CodeCoverage/cobertura-coverage.xml \
           --cov-branch \
           ./vehicle-model-lifecycle/test
