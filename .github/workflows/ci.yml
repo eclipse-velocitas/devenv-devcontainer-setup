@@ -61,15 +61,30 @@ jobs:
       - name: unit test
         shell: bash
         run: |
-          pytest --rootdir=./vehicle-model-lifecycle/test --override-ini junit_family=xunit1 --junit-xml=./results/UnitTest/junit.xml --cov ./vehicle-model-lifecycle/test --cov-report=xml:results/CodeCoverage/cobertura-coverage.xml --cov-branch ./vehicle-model-lifecycle/test
-          coverage2clover -i results/CodeCoverage/cobertura-coverage.xml -o results/CodeCoverage/clover.xml
-          coveragepy-lcov --data_file_path ./.coverage --output_file_path results/CodeCoverage/lcov.info
+          pytest --rootdir=./vehicle-model-lifecycle/test \
+          --override-ini junit_family=xunit1 \
+          --junit-xml=./results/UnitTest/junit.xml \
+          --cov . \
+          --cov-report=xml:results/CodeCoverage/cobertura-coverage.xml \
+          --cov-branch \
+          ./vehicle-model-lifecycle/test
 
-      - name: Publish Unit Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v2
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v3
         if: always()
         with:
-          junit_files: ./results/UnitTest/junit.xml
+          report_paths: ./results/UnitTest/junit.xml
+          summary: true
+          update_check: true
+          annotate_only: true
+
+      - uses: 5monkeys/cobertura-action@master
+        with:
+          path: results/CodeCoverage/cobertura-coverage.xml
+          minimum_coverage: 80
+          show_line: true
+          show_branch: true
+          fail_below_threshold: false
 
   run-integration-tests:
     name: Run Integration Test
