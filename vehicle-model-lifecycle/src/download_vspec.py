@@ -17,8 +17,11 @@
 import json
 import os
 import re
+from typing import Any, Dict, List
 
 import requests
+
+FUNCTIONAL_INTERFACE_TYPE_KEY = "vehicle-signal-interface"
 
 
 def require_env(name: str) -> str:
@@ -84,21 +87,104 @@ def download_file(uri: str, local_file_path: str):
                 outfile.write(chunk)
 
 
-def get_vehicle_model_src():
-    manifest_data_str = require_env("VELOCITAS_APP_MANIFEST")
-    manifest_data = json.loads(manifest_data_str)
+def is_legacy_app_manifest(app_manifest_dict: Dict[str, Any]) -> bool:
+    """Check if the used app manifest is a legacy file.
 
+    Args:
+        app_manifest_dict (Dict[str, Any]): The app manifest.
+
+    Returns:
+        bool: True if the app manifest is a legacy file, False if not.
+    """
+    return "manifestVersion" not in app_manifest_dict
+
+
+def get_legacy_model_src(app_manifest_dict: Dict[str, Any]) -> str:
+    """Get the source from the legacy vehicle model (app manifest < v3)
+
+    Args:
+        app_manifest_dict (Dict[str, Any]): The app manifest dict.
+
+    Returns:
+        str: The source URI of the vehicle model
+    """
     possible_keys = ["vehicleModel", "VehicleModel"]
 
     for key in possible_keys:
-        if key in manifest_data:
-            return manifest_data[key]["src"]
+        if key in app_manifest_dict:
+            return app_manifest_dict[key]["src"]
 
     raise KeyError("App manifest does not contain a valid vehicle model!")
 
 
-def main():
-    vspec_src = get_vehicle_model_src()
+def is_proper_interface_type(interface: Dict[str, Any]) -> bool:
+    """Return if the interface is of the correct type.
+
+    Args:
+        interface (Dict[str, Any]): The interface to check.
+
+    Returns:
+        bool: True if the type matches, False otherwise.
+    """
+    return "type" in interface and interface["type"] == FUNCTIONAL_INTERFACE_TYPE_KEY
+
+
+def get_vehicle_signal_interfaces(
+    app_manifest_dict: Dict[str, Any]
+) -> List[Dict[str, Any]]:
+    """Return all vehicle signal interfaces in the app manifest.
+
+    Args:
+        app_manifest_dict (Dict[str, Any]): The app manifest.
+
+    Returns:
+        List[Dict[str, Any]]: List containing all functional interfaces
+            of type {FUNCTIONAL_INTERFACE_TYPE_KEY}
+    """
+    interfaces = list()
+
+    for interface in app_manifest_dict["interfaces"]:
+        if is_proper_interface_type(interface):
+            interfaces.append(interface)
+
+    return interfaces
+
+
+def get_vehicle_signal_interface_src(interface: Dict[str, Any]) -> str:
+    """Return the URI of the source for the Vehicle Signal Interface.
+
+    Args:
+        interface (Dict[str, Any]): The interface.
+
+    Returns:
+        str: The URI of the source for the Vehicle Signal Interface.
+    """
+    return interface["config"]["src"]
+
+
+def main(app_manifest_dict: Dict[str, Any]):
+    """Entry point for downloading the vspec file for a
+    vehicle-signal-interface.
+
+    Args:
+        app_manifest_dict (Dict[str, Any]): The app manifest.
+
+    Raises:
+        KeyError: If there are multiple vehicle signal interfaces defined
+            in the app manifest.
+    """
+    if is_legacy_app_manifest(app_manifest_dict):
+        vspec_src = get_legacy_model_src(app_manifest_dict)
+    else:
+        interfaces = get_vehicle_signal_interfaces(app_manifest_dict)
+        if len(interfaces) > 1:
+            raise KeyError(
+                f"Only up to one {FUNCTIONAL_INTERFACE_TYPE_KEY!r} supported!"
+            )
+        elif len(interfaces) == 0:
+            return
+        vspec_src = get_vehicle_signal_interface_src(interfaces[0])
+
     local_vspec_path = os.path.join(
         get_velocitas_workspace_dir(), os.path.normpath(vspec_src)
     )
@@ -113,4 +199,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    manifest_data_str = require_env("VELOCITAS_APP_MANIFEST")
+    app_manifest_dict = json.loads(manifest_data_str)
+
+    main(app_manifest_dict)
