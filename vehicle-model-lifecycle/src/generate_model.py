@@ -107,8 +107,14 @@ def install_model_if_required(language: str, model_path: str) -> None:
         subprocess.check_call([sys.executable, "-m", "pip", "install", model_path])
 
 
-if __name__ == "__main__":
-    model_src_file = json.loads(require_env("VELOCITAS_CACHE_DATA"))["vspec_file_path"]
+def main():
+    """Main entry point for generation of vehicle models."""
+    cache_data = json.loads(require_env("VELOCITAS_CACHE_DATA"))
+
+    if "vspec_file_path" not in cache_data:
+        return
+
+    model_src_file = cache_data["vspec_file_path"]
     model_language = require_env("language")
     model_output_dir = get_model_output_dir()
     os.makedirs(model_output_dir, exist_ok=True)
@@ -116,3 +122,7 @@ if __name__ == "__main__":
     remove_old_model(model_output_dir)
     invoke_generator(model_src_file, model_language, model_output_dir)
     install_model_if_required(model_language, model_output_dir)
+
+
+if __name__ == "__main__":
+    main()

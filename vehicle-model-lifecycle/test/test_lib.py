@@ -55,5 +55,5 @@ class MockEnv:
         del os.environ["VELOCITAS_WORKSPACE_DIR"]
 
 
-def mock_env(app_manifest) -> MockEnv:
+def mock_env(app_manifest=None) -> MockEnv:
     return MockEnv(app_manifest)

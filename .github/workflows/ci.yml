@@ -105,7 +105,15 @@ jobs:
 
       - name: Prepare .velocitas.json for integration test
         run: |
-          NEW_CONFIG="$(jq --arg GITHUB_SHA "$GITHUB_SHA" '.packages[0].version |= $GITHUB_SHA' test/${{ matrix.language }}/.velocitas.json)"
+          COMMIT_REF=$GITHUB_SHA
+
+          if [ "$GITHUB_EVENT_NAME" = "pull_request" ];
+          then
+            echo "Running in context of a PR!"
+            COMMIT_REF=$GITHUB_HEAD_REF
+          fi
+
+          NEW_CONFIG="$(jq --arg COMMIT_REF "$COMMIT_REF" '.packages[0].version |= $COMMIT_REF' test/${{ matrix.language }}/.velocitas.json)"
           echo "${NEW_CONFIG}" > test/${{ matrix.language }}/repo/.velocitas.json
 
       - name: Init velocitas project
