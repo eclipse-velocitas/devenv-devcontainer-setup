@@ -17,6 +17,40 @@
 set -e
 
 echo "#######################################################"
+echo "### Auto-Upgrade CLI                                ###"
+echo "#######################################################"
+
+AUTHORIZATION_HEADER=""
+if [ "${GITHUB_API_TOKEN}" != "" ]; then
+  AUTHORIZATION_HEADER="-H \"Authorization: Bearer ${GITHUB_API_TOKEN}\""
+fi
+
+# Get latest available version
+LATEST_VERSION=$(curl -s -L \
+  -H "Accept: application/vnd.github+json" \
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  ${AUTHORIZATION_HEADER} \
+  https://api.github.com/repos/eclipse-velocitas/cli/releases/latest | jq -r .name)
+
+# Get installed version
+INSTALLED_VERSION=v$(velocitas --version | sed -E 's/velocitas-cli\/(\w+.\w+.\w+).*/\1/')
+
+if [ "$LATEST_VERSION" != "$INSTALLED_VERSION" ]; then
+  echo "> Upgrading CLI..."
+  CLI_ASSET_NAME=velocitas-linux-$(arch | sed 's/amd64/x64/g' | sed 's/aarch64/arm64/g')
+  CLI_INSTALL_PATH=/usr/bin/velocitas
+  CLI_DOWNLOAD_URL="https://github.com/eclipse-velocitas/cli/releases/download/${LATEST_VERSION}/${CLI_ASSET_NAME}"
+
+  echo "> Downloading Velocitas CLI from ${CLI_DOWNLOAD_URL}"
+  sudo curl -s -L ${CLI_DOWNLOAD_URL} -o "${CLI_INSTALL_PATH}"
+  sudo chmod +x "${CLI_INSTALL_PATH}"
+else
+  echo "> Up to date!"
+fi
+
+echo "> Using CLI: $(velocitas --version)"
+
+echo "#######################################################"
 echo "### Run VADF Lifecycle Management                   ###"
 echo "#######################################################"
 # needed to get rid of old leftovers
