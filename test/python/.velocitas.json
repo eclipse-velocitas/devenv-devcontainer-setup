@@ -11,5 +11,6 @@
         "appManifestPath": "app/AppManifest.json",
         "githubRepoId": "eclipse-velocitas/vehicle-app-python-template",
         "generatedModelPath": "./gen/vehicle_model"
-    }
+    },
+    "cliVersion": "latest"
 }
