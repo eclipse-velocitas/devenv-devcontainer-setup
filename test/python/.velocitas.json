@@ -12,5 +12,5 @@
         "githubRepoId": "eclipse-velocitas/vehicle-app-python-template",
         "generatedModelPath": "./gen/vehicle_model"
     },
-    "cliVersion": "latest"
+    "cliVersion": "v0.5.5"
 }
