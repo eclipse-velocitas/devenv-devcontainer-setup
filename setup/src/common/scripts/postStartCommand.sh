@@ -17,13 +17,23 @@ echo "#######################################################"
 echo "### Auto-Upgrade CLI                                ###"
 echo "#######################################################"
 
+ROOT_DIRECTORY=$( realpath "$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )/../.." )
+DESIRED_VERSION=$(cat $ROOT_DIRECTORY/.velocitas.json | jq .cliVersion | tr -d '"')
+
+# Get installed CLI version
+INSTALLED_VERSION=v$(velocitas --version | sed -E 's/velocitas-cli\/(\w+.\w+.\w+).*/\1/')
+
+if [ "$DESIRED_VERSION" = "$INSTALLED_VERSION" ]; then
+  echo "> Already up to date!"
+  exit 0
+else
+  echo "> Checking upgrade to $DESIRED_VERSION"
+fi
+
 AUTHORIZATION_HEADER=""
 if [ "${GITHUB_API_TOKEN}" != "" ]; then
   AUTHORIZATION_HEADER="-H \"Authorization: Bearer ${GITHUB_API_TOKEN}\""
 fi
-
-ROOT_DIRECTORY=$( realpath "$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )/../.." )
-DESIRED_VERSION=$(cat $ROOT_DIRECTORY/.velocitas.json | jq .cliVersion | tr -d '"')
 
 if [ "$DESIRED_VERSION" = "latest" ]; then
   CLI_RELEASES_URL=https://api.github.com/repos/eclipse-velocitas/cli/releases/latest
@@ -49,9 +59,6 @@ if [ "$DESIRED_VERSION_TAG" = "null" ] || [ "$DESIRED_VERSION_TAG" = "" ]; then
   echo "> Can't find desired Velocitas CLI version: $DESIRED_VERSION. Skipping Auto-Upgrade."
   exit 0
 fi
-
-# Get installed version
-INSTALLED_VERSION=v$(velocitas --version | sed -E 's/velocitas-cli\/(\w+.\w+.\w+).*/\1/')
 
 if [ "$DESIRED_VERSION_TAG" != "$INSTALLED_VERSION" ]; then
   echo "> Upgrading CLI..."

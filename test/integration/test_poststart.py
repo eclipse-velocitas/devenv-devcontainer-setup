@@ -49,8 +49,24 @@ def download_older_cli_version():
     Popen(chmod, stdout=PIPE, shell=True)
 
 
+def get_cli_version():
+    velocitas_version_output = check_output(["velocitas", "--version"]).decode()
+    search_velocitas_version_regex: Pattern[str] = compile(
+        r"velocitas-cli\/(\w+.\w+.\w+).*"
+    )
+    cli_version = search(
+        search_velocitas_version_regex, velocitas_version_output
+    ).group(1)
+    return f"v{cli_version}"
+
+
 def test_post_start_auto_upgrade_cli():
     download_older_cli_version()
+    # This should be the right check
+    # But since we do not have a proper version output
+    # on previous CLI releases we need to have a workaround
+    # assert get_cli_version() == older_cli_version
+    assert get_cli_version() == "v0.0.0"
 
     post_create_script_path = os.path.join(
         os.getcwd(),
@@ -65,14 +81,6 @@ def test_post_start_auto_upgrade_cli():
 
     post_create_script_process.wait()
 
-    velocitas_version_output = check_output(["velocitas", "--version"]).decode()
-    search_velocitas_version_regex: Pattern[str] = compile(
-        r"velocitas-cli\/(\w+.\w+.\w+).*"
-    )
-    updated_cli_version = search(
-        search_velocitas_version_regex, velocitas_version_output
-    ).group(1)
-
     velocitas_json = open(os.path.join(os.getcwd(), ".velocitas.json"))
     data = json.load(velocitas_json)
-    assert data["cliVersion"] == f"v{updated_cli_version}"
+    assert data["cliVersion"] == get_cli_version()
