@@ -103,6 +103,9 @@ jobs:
           repository: eclipse-velocitas/vehicle-app-${{ matrix.language }}-template
           path: test/${{ matrix.language }}/repo
 
+      - name: Install requirements
+        run: pip install -r test/requirements.txt
+
       - name: Prepare .velocitas.json for integration test
         run: |
           COMMIT_REF=$GITHUB_SHA
@@ -137,6 +140,11 @@ jobs:
         run: |
           cd test/${{ matrix.language }}/repo
           velocitas sync
+
+      - name: Test for CLI Auto-Upgrade
+        run: |
+          cd test/${{ matrix.language }}/repo
+          pytest -s ../../integration/test_poststart.py
 
       - name: Reset .velocitas.json to latest template state
         run: |

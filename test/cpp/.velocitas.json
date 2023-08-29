@@ -12,5 +12,6 @@
         "githubRepoId": "eclipse-velocitas/vehicle-app-cpp-template",
         "appExecutionPlatforms": "linux/amd64",
         "generatedModelPath": "./app/vehicle_model"
-    }
+    },
+    "cliVersion": "v0.5.5"
 }
