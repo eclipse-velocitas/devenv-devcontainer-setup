@@ -9,6 +9,10 @@
                     "dst": ".devcontainer"
                 },
                 {
+                    "src": "setup/src/nodeRed",
+                    "dst": "nodeRed"
+                },
+                {
                     "src": "setup/src/${{ language }}/common",
                     "dst": ".devcontainer"
                 },

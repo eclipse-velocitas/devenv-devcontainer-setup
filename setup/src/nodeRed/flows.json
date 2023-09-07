@@ -1,0 +1,194 @@
+[
+    {
+        "id": "f6f2187d.f17ca8",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "3cc11d24.ff01a2",
+        "type": "comment",
+        "z": "f6f2187d.f17ca8",
+        "name": "WARNING: please check you have started this container with a volume that is mounted to /data\\n otherwise any flow changes are lost when you redeploy or upgrade the container\\n (e.g. upgrade to a more recent node-red docker image).\\n  If you are using named volumes you can ignore this warning.\\n Double click or see info side panel to learn how to start Node-RED in Docker to save your work",
+        "info": "\nTo start docker with a bind mount volume (-v option), for example:\n\n```\ndocker run -it -p 1880:1880 -v /home/user/node_red_data:/data --name mynodered nodered/node-red\n```\n\nwhere `/home/user/node_red_data` is a directory on your host machine where you want to store your flows.\n\nIf you do not do this then you can experiment and redploy flows, but if you restart or upgrade the container the flows will be disconnected and lost. \n\nThey will still exist in a hidden data volume, which can be recovered using standard docker techniques, but that is much more complex than just starting with a named volume as described above.",
+        "x": 350,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "d458d3289067a619",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 760,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "1b1ae04e32012790",
+        "type": "grpc-call",
+        "z": "f6f2187d.f17ca8",
+        "name": "GetDatapoint",
+        "server": "f69e74a22a42dcdc",
+        "service": "Broker",
+        "method": "GetDatapoints",
+        "chain": "",
+        "key": "",
+        "x": 520,
+        "y": 360,
+        "wires": [
+            [
+                "c3a80a646d50e83d"
+            ]
+        ]
+    },
+    {
+        "id": "fc7ae8c4f5913325",
+        "type": "inject",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "{\"datapoints\":[\"Vehicle.Cabin.Seat.Row1.Pos1.Position\",\"Vehicle.Cabin.Seat.Row1.Pos1.IsOccupied\"]}",
+        "payloadType": "json",
+        "x": 230,
+        "y": 340,
+        "wires": [
+            [
+                "1b1ae04e32012790",
+                "d458d3289067a619"
+            ]
+        ]
+    },
+    {
+        "id": "c3a80a646d50e83d",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "debug 2",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 900,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "9eb49e543a2ceb4e",
+        "type": "grpc-call",
+        "z": "f6f2187d.f17ca8",
+        "name": "SetDatapoint",
+        "server": "f69e74a22a42dcdc",
+        "service": "Broker",
+        "method": "SetDatapoints",
+        "chain": "",
+        "key": "",
+        "x": 510,
+        "y": 460,
+        "wires": [
+            [
+                "1ac806138643b4e4"
+            ]
+        ]
+    },
+    {
+        "id": "c4572f035bce0dae",
+        "type": "inject",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "{\"datapoints\":{\"Vehicle.Cabin.Seat.Row1.Pos1.Position\":{\"timestamp\":{\"seconds\":\"1694084821\",\"nanos\":657237173},\"uint32_value\":25,\"value\":\"uint32_value\"}}}",
+        "payloadType": "json",
+        "x": 230,
+        "y": 440,
+        "wires": [
+            [
+                "9eb49e543a2ceb4e",
+                "a87f9af5e08238fa"
+            ]
+        ]
+    },
+    {
+        "id": "1ac806138643b4e4",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "debug 3",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 720,
+        "y": 460,
+        "wires": []
+    },
+    {
+        "id": "a87f9af5e08238fa",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "debug 4",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 380,
+        "y": 520,
+        "wires": []
+    },
+    {
+        "id": "f69e74a22a42dcdc",
+        "type": "grpc-server",
+        "port": "55555",
+        "name": "databroker",
+        "server": "localhost",
+        "protoFile": "/********************************************************************************\n * Copyright (c) 2022 Contributors to the Eclipse Foundation\n *\n * See the NOTICE file(s) distributed with this work for additional\n * information regarding copyright ownership.\n *\n * This program and the accompanying materials are made available under the\n * terms of the Apache License 2.0 which is available at\n * http://www.apache.org/licenses/LICENSE-2.0\n *\n * SPDX-License-Identifier: Apache-2.0\n ********************************************************************************/\n\nsyntax = \"proto3\";\n\npackage sdv.databroker.v1;\n\n// Data type of a signal\n//\n// Protobuf doesn't support int8, int16, uint8 or uint16.\n// These are mapped to sint32 and uint32 respectively.\n//\nenum DataType {\n  STRING          = 0;\n  BOOL            = 1;\n  INT8            = 2;\n  INT16           = 3;\n  INT32           = 4;\n  INT64           = 5;\n  UINT8           = 6;\n  UINT16          = 7;\n  UINT32          = 8;\n  UINT64          = 9;\n  FLOAT           = 10;\n  DOUBLE          = 11;\n  TIMESTAMP       = 12;\n  STRING_ARRAY    = 20;\n  BOOL_ARRAY      = 21;\n  INT8_ARRAY      = 22;\n  INT16_ARRAY     = 23;\n  INT32_ARRAY     = 24;\n  INT64_ARRAY     = 25;\n  UINT8_ARRAY     = 26;\n  UINT16_ARRAY    = 27;\n  UINT32_ARRAY    = 28;\n  UINT64_ARRAY    = 29;\n  FLOAT_ARRAY     = 30;\n  DOUBLE_ARRAY    = 31;\n  TIMESTAMP_ARRAY = 32;\n}\n\nenum DatapointError {\n  UNKNOWN_DATAPOINT = 0;\n  INVALID_TYPE      = 1;\n  ACCESS_DENIED     = 2;\n  INTERNAL_ERROR    = 3;\n  OUT_OF_BOUNDS     = 4;\n}\n\nenum EntryType {\n  ENTRY_TYPE_UNSPECIFIED = 0;\n  ENTRY_TYPE_SENSOR      = 1;\n  ENTRY_TYPE_ACTUATOR    = 2;\n  ENTRY_TYPE_ATTRIBUTE   = 3;\n}\n\nenum ChangeType {\n  STATIC    = 0;   // Value never changes\n  ON_CHANGE = 1;   // Updates are provided every time the value changes (i.e.\n                   // window is open / closed)\n  CONTINUOUS = 2;  // Value is updated continuously. Broker needs to tell\n                   // provider the preferred (update) frequency.\n}\n\nmessage Timestamp {\n  // Represents seconds of UTC time since Unix epoch\n  // 1970-01-01T00:00:00Z. Must be from 0001-01-01T00:00:00Z to\n  // 9999-12-31T23:59:59Z inclusive.\n  int64 seconds = 1;\n\n  // Non-negative fractions of a second at nanosecond resolution. Negative\n  // second values with fractions must still have non-negative nanos values\n  // that count forward in time. Must be from 0 to 999,999,999\n  // inclusive.\n  int32 nanos = 2;\n}\n\nmessage StringArray {\n  repeated string values = 1;\n}\n\nmessage BoolArray {\n  repeated bool values = 1;\n}\n\nmessage Int32Array {\n  repeated sint32 values = 1;\n}\n\nmessage Int64Array {\n  repeated sint64 values = 1;\n}\n\nmessage Uint32Array {\n  repeated uint32 values = 1;\n}\n\nmessage Uint64Array {\n  repeated uint64 values = 1;\n}\n\nmessage FloatArray {\n  repeated float values = 1;\n}\n\nmessage DoubleArray {\n  repeated double values = 1;\n}\n\nmessage Datapoint {\n  // Timestamp of the value\n  Timestamp timestamp = 1;\n\n  // values\n  oneof value {\n    Failure failure_value    = 10;\n    string string_value      = 11;\n    bool bool_value          = 12;\n    sint32 int32_value       = 13;\n    sint64 int64_value       = 14;\n    uint32 uint32_value      = 15;\n    uint64 uint64_value      = 16;\n    float float_value        = 17;\n    double double_value      = 18;\n    StringArray string_array = 21;\n    BoolArray bool_array     = 22;\n    Int32Array int32_array   = 23;\n    Int64Array int64_array   = 24;\n    Uint32Array uint32_array = 25;\n    Uint64Array uint64_array = 26;\n    FloatArray float_array   = 27;\n    DoubleArray double_array = 28;\n  }\n\n  enum Failure {\n    // The data point is known, but doesn't have a valid value\n    INVALID_VALUE = 0;\n    // The data point is known, but no value is available\n    NOT_AVAILABLE = 1;\n    // Unknown datapoint\n    UNKNOWN_DATAPOINT = 2;\n    // Access denied\n    ACCESS_DENIED = 3;\n    // Unexpected internal error\n    INTERNAL_ERROR = 4;\n  }\n}\n\nmessage Metadata {\n  // Id to be used in \"get\" and \"subscribe\" requests. Ids stay valid during\n  // one power cycle, only.\n  int32 id               = 1;\n  EntryType entry_type   = 2;\n  string name            = 4;\n  DataType data_type     = 5;\n  ChangeType change_type = 6;  // CONTINUOUS or STATIC or ON_CHANGE\n  string description     = 7;\n\n  // int32             min_update_hz       = 10; // Only for CONTINUOUS\n  // int32             max_update_hz       = 11; // Only for CONTINUOUS\n};\n\nservice Broker {\n  // Request a set of datapoints (values)\n  //\n  // Returns a list of requested data points.\n  //\n  // InvalidArgument is returned if the request is malformed.\n  rpc GetDatapoints(GetDatapointsRequest) returns (GetDatapointsReply);\n\n  // Set a datapoint (values)\n  rpc SetDatapoints(SetDatapointsRequest) returns (SetDatapointsReply);\n\n  // Subscribe to a set of data points or conditional expressions\n  // using the Data Broker Query Syntax (described in QUERY.md)\n  //\n  // Returns a stream of replies.\n  //\n  // InvalidArgument is returned if the request is malformed.\n  rpc Subscribe(SubscribeRequest) returns (stream SubscribeReply);\n\n  // Request the metadata of a set of datapoints\n  //\n  // Returns metadata of the requested data points that exist.\n  rpc GetMetadata(GetMetadataRequest) returns (GetMetadataReply);\n}\n\nmessage GetDatapointsRequest {\n  // A list of requested data points.\n  repeated string datapoints = 1;\n}\n\nmessage GetDatapointsReply {\n  // Contains the values of the requested data points.\n  // If a requested data point is not available, the corresponding Datapoint\n  // will have the respective failure value set.\n  map<string, Datapoint> datapoints = 1;\n}\n\nmessage SetDatapointsRequest {\n  // A map of data points to set\n  map<string, Datapoint> datapoints = 1;\n}\n\nmessage SetDatapointsReply {\n  // A map of errors (if any)\n  map<string, DatapointError> errors = 1;\n}\n\nmessage SubscribeRequest {\n  // Subscribe to a set of data points (or expressions) described\n  // by the provided query.\n  // The query syntax is a subset of SQL and is described in more\n  // detail in the QUERY.md file.\n  string query = 2;\n}\n\nmessage SubscribeReply {\n  // Contains the fields specified by the query.\n  // If a requested data point value is not available, the corresponding\n  // Datapoint will have it's respective failure value set.\n  map<string, Datapoint> fields = 1;\n}\n\nmessage GetMetadataRequest {\n  // Request metadata for a list of data points referenced by their names.\n  // e.g. \"Vehicle.Cabin.Seat.Row1.Pos1.Position\" or \"Vehicle.Speed\".\n  //\n  // If no names are provided, metadata for all known data points will be\n  // returned.\n  repeated string names = 1;\n}\n\nmessage GetMetadataReply {\n  // Contains metadata of the requested data points. If a data point\n  // doesn't exist (i.e. not known to the Data Broker) the corresponding\n  // Metadata isn't part of the returned list.\n  repeated Metadata list = 1;\n}\n",
+        "ca": "",
+        "chain": "",
+        "key": "",
+        "mutualTls": false,
+        "ssl": false,
+        "selfsigned": false,
+        "localServer": false
+    }
+]

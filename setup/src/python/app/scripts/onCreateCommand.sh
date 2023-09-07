@@ -55,5 +55,10 @@ echo "### VADF package status                             ###"
 echo "#######################################################"
 velocitas upgrade --dry-run
 
+# Build NodeRed
+ROOT_DIRECTORY=$( realpath "$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )/../.." )
+cd $ROOT_DIRECTORY/nodeRed
+docker build -t node_red_docker .
+
 # Don't let container creation fail if lifecycle management fails
 echo "Done!"
