@@ -10,6 +10,12 @@
 	"containerEnv": {
 		"GITHUB_API_TOKEN": "${localEnv:GITHUB_API_TOKEN}"
 	},
+	"forwardPorts": [1880],
+	"portsAttributes": {
+		"1880": {
+		"label": "Node-RED"
+		}
+	},
 	"customizations": {
 		"vscode": {
 			// Set *default* container specific settings.json values on container create.

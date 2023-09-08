@@ -14,6 +14,12 @@
 # SPDX-License-Identifier: Apache-2.0
 
 echo "#######################################################"
+echo "### Start NodeRed                                   ###"
+echo "#######################################################"
+
+docker run --network host --detach 'nodered'
+
+echo "#######################################################"
 echo "### Auto-Upgrade CLI                                ###"
 echo "#######################################################"
 
@@ -78,9 +84,3 @@ else
 fi
 
 echo "> Using CLI: $(velocitas --version)"
-
-echo "#######################################################"
-echo "### Start NodeRed                                   ###"
-echo "#######################################################"
-
-docker run --detach  -p 1880:1880 node_red_docker
