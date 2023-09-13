@@ -14,6 +14,7 @@
 
 import os
 import re
+import shutil
 import subprocess
 from typing import Optional
 
@@ -90,34 +91,21 @@ def main():
 
     print(f"Installing version {required_sdk_version!r}...")
 
-    if not os.path.exists(sdk_install_path):
-        subprocess.check_call(
-            [
-                "git",
-                "clone",
-                "--depth",
-                "1",
-                "-b",
-                get_tag_or_branch_name(required_sdk_version),
-                git_url,
-            ],
-            cwd=get_project_cache_dir(),
-        )
-    else:
-        print("Updating SDK repo...")
-        subprocess.check_call(
-            ["git", "fetch", "--all"],
-            cwd=sdk_install_path,
-        )
-        subprocess.check_call(
-            [
-                "git",
-                "reset",
-                "--hard",
-                f"origin/{get_tag_or_branch_name(required_sdk_version)}",
-            ],
-            cwd=sdk_install_path,
-        )
+    if os.path.exists(sdk_install_path):
+        shutil.rmtree(sdk_install_path)
+
+    subprocess.check_call(
+        [
+            "git",
+            "clone",
+            "--depth",
+            "1",
+            "-b",
+            get_tag_or_branch_name(required_sdk_version),
+            git_url,
+        ],
+        cwd=get_project_cache_dir(),
+    )
 
     subprocess.check_call(
         ["git", "config", "--global", "--add", "safe.directory", sdk_install_path]
