@@ -104,13 +104,9 @@ def main():
             cwd=get_project_cache_dir(),
         )
     else:
+        print("Updating SDK repo...")
         subprocess.check_call(
-            [
-                "git",
-                "reset",
-                "--hard",
-                get_tag_or_branch_name(required_sdk_version),
-            ],
+            ["git", "fetch", "--all"],
             cwd=sdk_install_path,
         )
         subprocess.check_call(
@@ -118,7 +114,7 @@ def main():
                 "git",
                 "reset",
                 "--hard",
-                get_tag_or_branch_name(required_sdk_version),
+                f"origin/{get_tag_or_branch_name(required_sdk_version)}",
             ],
             cwd=sdk_install_path,
         )
