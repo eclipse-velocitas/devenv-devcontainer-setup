@@ -34,7 +34,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install deps
         run: |
@@ -55,7 +55,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install required packages
         run: |
@@ -105,7 +105,9 @@ jobs:
       fail-fast: false
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Get template repo ref
         id: get-repo-ref
@@ -117,12 +119,11 @@ jobs:
           echo "ref=$REF" >> $GITHUB_OUTPUT
 
       - name: Checkout template repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: eclipse-velocitas/vehicle-app-${{ matrix.language }}-template
           path: test/${{ matrix.language }}/repo
           ref: ${{ steps.get-repo-ref.outputs.ref }}
-          fetch-depth: 0
 
       - name: Replace Velocitas JSON content
         run: |
