@@ -88,6 +88,7 @@ def test_post_start_auto_upgrade_cli():
 
 
 def test_files_synced():
+    print(os.environ["THIS_REPO_PATH"])
     # check if there are any changes in the files to sync
     changed_files = (
         subprocess.check_output(
