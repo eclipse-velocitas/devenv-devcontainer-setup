@@ -37,8 +37,11 @@ class ${{ service_name_camel_case }}ServiceConan(ConanFile):
 
     requires = [
         ("c-ares/1.19.1@#420a0b77e370f4b96bee88ef91837ccc"),
+        ("googleapis/cci.20221108@#e4bebdfa02f3b6f93bae1d5001b8d439"),
         ("grpc/1.50.1@#df352027120f88bccf24cbc40a2297ce"),
+        ("grpc-proto/cci.20220627@#3ad14e3ffdae516b4da2407d5f23c71d"),
         ("openssl/1.1.1u@#de76bbea24d8b46f8def8daa18b31fd9"),
+        ("protobuf/3.21.9@#515ceb0a1653cf84363d9968b812d6be"),
         ("vehicle-app-sdk/${{ core_sdk_version }}")
     ]
 

@@ -38,6 +38,9 @@ def get_required_sdk_version_python() -> str:
 
 
 class PythonGrpcInterfaceGenerator(GrpcInterfaceGenerator):  # type: ignore
+    def __init__(self, verbose: bool):
+        self._verbose = verbose
+
     def install_tooling(self) -> None:
         subprocess.check_call(["pip", "install", "grpcio-tools"])
 

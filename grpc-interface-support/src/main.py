@@ -12,6 +12,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+import argparse
 import os
 import shutil
 from typing import Any, Dict
@@ -25,10 +26,6 @@ from velocitas_lib import download_file, get_programming_language, get_project_c
 from velocitas_lib.functional_interface import get_interfaces_for_type
 
 DEPENDENCY_TYPE_KEY = "grpc-interface"
-LANGUAGE_GENERATORS = {
-    "cpp": CppGrpcInterfaceGenerator(),
-    "python": PythonGrpcInterfaceGenerator(),
-}
 
 
 def download_proto(config: Dict[str, Any]) -> proto.ProtoFileHandle:
@@ -69,11 +66,16 @@ def generate_single_service(
         pass
 
 
-def main() -> None:
+def main(verbose: bool) -> None:
     interfaces = get_interfaces_for_type(DEPENDENCY_TYPE_KEY)
 
     if len(interfaces) <= 0:
         return
+
+    LANGUAGE_GENERATORS = {
+        "cpp": CppGrpcInterfaceGenerator(verbose),
+        "python": PythonGrpcInterfaceGenerator(verbose),
+    }
 
     if get_programming_language() not in LANGUAGE_GENERATORS:
         print(
@@ -84,12 +86,17 @@ def main() -> None:
 
     generator = LANGUAGE_GENERATORS[get_programming_language()]
 
+    print("Installing tooling...")
     generator.install_tooling()
 
     for grpc_service in interfaces:
         if_config = grpc_service["config"]
+        print("Generating service SDK...")
         generate_single_service(generator, if_config)
 
 
 if __name__ == "__main__":
-    main()
+    argument_parser = argparse.ArgumentParser("generate-sdk")
+    argument_parser.add_argument("-v", "--verbose", action="store_true")
+    args = argument_parser.parse_args()
+    main(args.verbose)

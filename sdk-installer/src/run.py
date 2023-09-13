@@ -12,6 +12,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+import argparse
 import os
 import re
 import shutil
@@ -70,7 +71,7 @@ def get_tag_or_branch_name(tag_or_branch_name: str) -> str:
     return tag_or_branch_name
 
 
-def main():
+def main(verbose: bool):
     lang = get_programming_language()
     if lang not in SUPPORTED_LANGUAGES:
         print("gRPC interface not yet supported for programming language " f"{lang!r}")
@@ -108,16 +109,26 @@ def main():
     )
 
     subprocess.check_call(
-        ["git", "config", "--global", "--add", "safe.directory", sdk_install_path]
+        ["git", "config", "--global", "--add", "safe.directory", sdk_install_path],
+        stdout=subprocess.DEVNULL if not verbose else None,
     )
 
     if lang == "cpp":
-        subprocess.check_call(["conan", "export", "."], cwd=sdk_install_path)
+        subprocess.check_call(
+            ["conan", "export", "."],
+            stdout=subprocess.DEVNULL if not verbose else None,
+            cwd=sdk_install_path,
+        )
     elif lang == "python":
         subprocess.check_call(
-            ["python", "-m", "pip", "install", "."], cwd=sdk_install_path
+            ["python", "-m", "pip", "install", "."],
+            stdout=subprocess.DEVNULL if not verbose else None,
+            cwd=sdk_install_path,
         )
 
 
 if __name__ == "__main__":
-    main()
+    argument_parser = argparse.ArgumentParser("generate-sdk")
+    argument_parser.add_argument("-v", "--verbose", action="store_true")
+    args = argument_parser.parse_args()
+    main(args.verbose)

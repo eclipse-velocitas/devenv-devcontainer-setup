@@ -18,7 +18,6 @@ import shutil
 import subprocess
 import tempfile
 from pathlib import Path
-from typing import Optional
 
 import conan_helper
 from generator import GrpcInterfaceGenerator
@@ -29,6 +28,9 @@ CONAN_PROFILE_NAME = "host"
 
 
 class CppGrpcInterfaceGenerator(GrpcInterfaceGenerator):  # type: ignore
+    def __init__(self, verbose: bool):
+        self._verbose = verbose
+
     def __create_conan_profile(self) -> None:
         subprocess.check_call(
             ["conan", "profile", "new", CONAN_PROFILE_NAME, "--detect", "--force"],
@@ -43,7 +45,18 @@ class CppGrpcInterfaceGenerator(GrpcInterfaceGenerator):  # type: ignore
                 "settings.compiler.libcxx=libstdc++11",
                 CONAN_PROFILE_NAME,
             ],
-            stdout=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL if not self._verbose else None,
+        )
+        
+        subprocess.check_call(
+            [
+                "conan",
+                "profile",
+                "update",
+                "settings.build_type=Release",
+                CONAN_PROFILE_NAME,
+            ],
+            stdout=subprocess.DEVNULL if not self._verbose else None,
         )
 
     def __install_protoc_via_conan(self, conan_build_dir: str) -> None:
@@ -54,37 +67,26 @@ class CppGrpcInterfaceGenerator(GrpcInterfaceGenerator):  # type: ignore
             get_package_path(), "grpc-interface-support", "templates", "cpp"
         )
 
-        grpc_version: Optional[str] = None
-        cares_version: Optional[str] = None
-        grpc_pattern = re.compile(r"^.*\"(grpc\/.*)\".*$")
-        cares_pattern = re.compile(r"^.*\"(c-ares\/.*)\".*$")
+        deps_to_extract = ["grpc", "c-ares", "googleapis", "grpc-proto"]
+        deps_patterns = [
+            re.compile(r"^.*\"(" + dep + r"\/.*)\".*$") for dep in deps_to_extract
+        ]
+        deps_results = []
         with open(
             os.path.join(template_dir, "conanfile.py"), encoding="utf-8"
         ) as conanfile:
             for line in conanfile:
-                match = grpc_pattern.match(line)
-                if match is not None:
-                    grpc_version = match.group(1)
-                else:
-                    match = cares_pattern.match(line)
+                for pattern in deps_patterns:
+                    match = pattern.match(line)
                     if match is not None:
-                        cares_version = match.group(1)
-
-        if not grpc_version:
-            raise RuntimeError("conanfile.py does not have a dependency on gRPC!")
+                        deps_results.append(match.group(1))
 
         tmpdir = tempfile.mkdtemp()
         tooling_conanfile_path = os.path.join(tmpdir, "conanfile.txt")
         with open(
             tooling_conanfile_path, mode="w", encoding="utf-8"
         ) as tooling_conanfile:
-            tooling_conanfile.write(
-                f"""
-[requires]
-{grpc_version}
-{cares_version}
-"""
-            )
+            tooling_conanfile.write("[requires]\n" + "\n".join(deps_results))
 
         subprocess.check_call(
             [
@@ -98,7 +100,7 @@ class CppGrpcInterfaceGenerator(GrpcInterfaceGenerator):  # type: ignore
             ],
             cwd=conan_build_dir,
             env=env,
-            stdout=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL if not self._verbose else None,
         )
 
     def __extend_path_with_protoc_and_plugin(self, conan_install_dir: str) -> None:
@@ -140,7 +142,10 @@ class CppGrpcInterfaceGenerator(GrpcInterfaceGenerator):  # type: ignore
             proto_file_path,
         ]
         subprocess.check_call(
-            args, cwd=include_path, env=os.environ, stdout=subprocess.DEVNULL
+            args,
+            cwd=include_path,
+            env=os.environ,
+            stdout=subprocess.DEVNULL if not self._verbose else None,
         )
 
     def generate_service_client_sdk(
