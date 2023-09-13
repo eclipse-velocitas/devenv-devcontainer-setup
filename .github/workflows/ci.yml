@@ -122,6 +122,7 @@ jobs:
           repository: eclipse-velocitas/vehicle-app-${{ matrix.language }}-template
           path: test/${{ matrix.language }}/repo
           ref: ${{ steps.get-repo-ref.outputs.ref }}
+          fetch-depth: 0
 
       - name: Replace Velocitas JSON content
         run: |
@@ -134,6 +135,7 @@ jobs:
 
       - name: Run integration tests
         run: |
+          export THIS_REPO_PATH=$(pwd)
           export VELOCITAS_TEST_LANGUAGE=${{ matrix.language }}
           export VELOCITAS_TEST_ROOT=test/${{ matrix.language }}/repo
 

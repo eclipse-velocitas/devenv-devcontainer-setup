@@ -88,8 +88,12 @@ def test_post_start_auto_upgrade_cli():
 
 
 def test_files_synced():
+    # check if there are any changes in the files to sync
     changed_files = (
-        subprocess.check_output(["git", "diff", "origin/main", "--name-only"])
+        subprocess.check_output(
+            ["git", "diff", "origin/main", "--name-only"],
+            cwd=os.environ["THIS_REPO_PATH"],
+        )
         .decode()
         .split("\n")
     )
