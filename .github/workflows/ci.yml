@@ -107,11 +107,21 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Get template repo ref
+        id: get-repo-ref
+        run: |
+          REF=main
+          if [ "${{ matrix.language }}" = "cpp" ]; then
+            REF=manifest-v3
+          fi
+          echo "ref=$REF" >> $GITHUB_OUTPUT
+
       - name: Checkout template repository
         uses: actions/checkout@v3
         with:
           repository: eclipse-velocitas/vehicle-app-${{ matrix.language }}-template
           path: test/${{ matrix.language }}/repo
+          ref: ${{ steps.get-repo-ref.outputs.ref }}
 
       - name: Replace Velocitas JSON content
         run: |
