@@ -109,6 +109,10 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Add safe directory
+        run: |
+          git config --global --add safe.directory $(pwd)
+
       - name: Get template repo ref
         id: get-repo-ref
         run: |
@@ -124,6 +128,10 @@ jobs:
           repository: eclipse-velocitas/vehicle-app-${{ matrix.language }}-template
           path: test/${{ matrix.language }}/repo
           ref: ${{ steps.get-repo-ref.outputs.ref }}
+
+      - name: Add safe directory
+        run: |
+          git config --global --add safe.directory $(pwd)/test/${{ matrix.language }}/repo
 
       - name: Replace Velocitas JSON content
         run: |
