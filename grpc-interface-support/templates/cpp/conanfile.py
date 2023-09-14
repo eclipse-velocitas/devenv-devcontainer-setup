@@ -18,7 +18,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 
 class ${{ service_name_camel_case }}ServiceConan(ConanFile):
     name = "${{ service_name_lower }}-service-sdk"
-    version = "auto"
+    version = "generated"
 
     # Optional metadata
     license = "Apache-2.0"
