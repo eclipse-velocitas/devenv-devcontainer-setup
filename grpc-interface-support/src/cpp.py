@@ -160,7 +160,7 @@ class CppGrpcInterfaceGenerator(GrpcInterfaceGenerator):  # type: ignore
         conan_helper.export_conan_project(output_path)
 
         conan_helper.add_dependency_to_conanfile(
-            f"{proto_file_handle.get_service_name().lower()}-service-sdk/generated"
+            f"{proto_file_handle.get_service_name().lower()}-service-sdk", "generated"
         )
 
     def generate_service_server_sdk(self) -> None:

@@ -149,38 +149,72 @@ def export_conan_project(conan_project_path: str) -> None:
     )
 
 
-def add_dependency_to_conanfile(dependency_name: str) -> None:
+def _find_insertion_index(
+    lines: List[str], dependency_name: str
+) -> Tuple[int, bool, bool]:
+    """Find an insertion index for the dependency in a conanfile.txt.
+
+    Args:
+        lines (List[str]): The lines of the original conanfile.txt
+        dependency_name (str): The name of the dependency (without version) e.g. "grpc"
+            of the dependency to insert.
+
+    Returns:
+        Tuple[int, bool, bool]: A tuple consisting of
+            [0] = Insert index.
+            [1] = Whether the insert index replaces the original line or not.
+            [2] = Whether the original file has a requires section or not.
+    """
+    found_index: Optional[int] = None
+    replace: bool = False
+    in_requires_section = False
+    has_requires_section = False
+    for i in range(0, len(lines)):
+        stripped_line = lines[i].strip()
+        if stripped_line == "[requires]":
+            has_requires_section = True
+            in_requires_section = True
+            found_index = i + 1
+        elif in_requires_section and stripped_line.startswith("["):
+            in_requires_section = False
+
+        if in_requires_section:
+            if len(stripped_line) > 0:
+                if stripped_line.startswith(dependency_name):
+                    found_index = i
+                    replace = True
+
+    if found_index is None:
+        found_index = len(lines)
+
+    return (found_index, replace, has_requires_section)
+
+
+def add_dependency_to_conanfile(dependency_name: str, dependency_version: str) -> None:
     """Add the dependency name to the project's list of dependencies.
 
     Args:
-        dependency_name (str): The dependency to add e.g. grpc@1.50.1
+        dependency_name (str): The dependency to add e.g. grpc
+        dependency_version (str): The version of the dependency to add e.g. 1.50.1
     """
     conanfile_path = os.path.join(get_workspace_dir(), "conanfile.txt")
 
-    in_requires_section = False
     lines = []
-    requirements: List[str] = []
     with open(conanfile_path, encoding="utf-8", mode="r") as conanfile:
-        for line in conanfile:
-            if line.strip() == "[requires]":
-                in_requires_section = True
-            elif in_requires_section and line.strip().startswith("["):
-                in_requires_section = False
+        lines = conanfile.readlines()
 
-                if dependency_name not in requirements:
-                    lines.append(dependency_name)
-                    lines.append("\n")
+    insert_index, replace, has_requires_section = _find_insertion_index(
+        lines, dependency_name
+    )
 
-            if in_requires_section:
-                if len(line.strip()) > 0:
-                    requirements.append(line.strip())
-
-            lines.append(line)
-
-    # Check adding dependency in case [requires] section is last section of file
-    if in_requires_section and dependency_name not in requirements:
-        lines.append(dependency_name)
-        lines.append("\n")
+    dependency_line = f"{dependency_name}/{dependency_version}\n"
+    if replace:
+        lines[insert_index] = dependency_line
+    else:
+        if not has_requires_section:
+            lines.insert(insert_index, "[requires]\n")
+            insert_index = insert_index + 1
+        lines.insert(insert_index, dependency_line)
 
     with open(conanfile_path, encoding="utf-8", mode="w") as conanfile:
         conanfile.writelines(lines)

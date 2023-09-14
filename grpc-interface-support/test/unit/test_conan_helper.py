@@ -35,11 +35,11 @@ def test_add_dependency_to_conanfile__only_requires_section(fs: FakeFilesystem, 
 
     conanfile_path = os.path.join(get_workspace_dir(), "conanfile.txt")
     fs.create_file(conanfile_path, contents=contents)
-    add_dependency_to_conanfile("mydep")
+    add_dependency_to_conanfile("mydep", "myver")
 
     expected = """
 [requires]
-mydep
+mydep/myver
 """
 
     assert expected == open(conanfile_path, encoding="utf-8").read()
@@ -56,13 +56,61 @@ def test_add_dependency_to_conanfile__multiple_sections(fs: FakeFilesystem, env)
 
     conanfile_path = os.path.join(get_workspace_dir(), "conanfile.txt")
     fs.create_file(conanfile_path, contents=contents)
-    add_dependency_to_conanfile("mydep")
+    add_dependency_to_conanfile("mydep", "myver")
 
     expected = """
 [requires]
+mydep/myver
 
-mydep
 [foo]
+
+[bar]
+"""
+
+    assert expected == open(conanfile_path, encoding="utf-8").read()
+
+
+def test_add_dependency_to_conanfile__no_requires_section(fs: FakeFilesystem, env):
+    contents = """
+[foo]
+
+[bar]
+"""
+
+    conanfile_path = os.path.join(get_workspace_dir(), "conanfile.txt")
+    fs.create_file(conanfile_path, contents=contents)
+    add_dependency_to_conanfile("mydep", "myver")
+
+    expected = """
+[foo]
+
+[bar]
+[requires]
+mydep/myver
+"""
+
+    assert expected == open(conanfile_path, encoding="utf-8").read()
+
+
+def test_add_dependency_to_conanfile__pre_existing_dep_(fs: FakeFilesystem, env):
+    contents = """
+[foo]
+
+[requires]
+mydep/myver2
+
+[bar]
+"""
+
+    conanfile_path = os.path.join(get_workspace_dir(), "conanfile.txt")
+    fs.create_file(conanfile_path, contents=contents)
+    add_dependency_to_conanfile("mydep", "myver")
+
+    expected = """
+[foo]
+
+[requires]
+mydep/myver
 
 [bar]
 """
