@@ -47,7 +47,7 @@ class CppGrpcInterfaceGenerator(GrpcInterfaceGenerator):  # type: ignore
             ],
             stdout=subprocess.DEVNULL if not self._verbose else None,
         )
-        
+
         subprocess.check_call(
             [
                 "conan",
