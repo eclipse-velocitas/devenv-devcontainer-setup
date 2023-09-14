@@ -117,16 +117,10 @@ class CppGrpcInterfaceGenerator(GrpcInterfaceGenerator):  # type: ignore
         self.__install_protoc_via_conan(conan_install_dir)
         self.__extend_path_with_protoc_and_plugin(conan_install_dir)
 
-    def get_protoc_binary_path(self) -> str:
-        path = shutil.which("protoc")
+    def get_binary_path(self, binary_name: str) -> str:
+        path = shutil.which(binary_name)
         if path is None:
-            raise KeyError("protoc missing!")
-        return path
-
-    def get_protoc_cpp_plugin_binary_path(self) -> str:
-        path = shutil.which("grpc_cpp_plugin")
-        if path is None:
-            raise KeyError("grpc_cpp_plugin is missing!")
+            raise KeyError(f"{binary_name!r} missing!")
         return path
 
     def __invoke_code_generator(
@@ -134,8 +128,8 @@ class CppGrpcInterfaceGenerator(GrpcInterfaceGenerator):  # type: ignore
     ) -> None:
         print("Invoking gRPC code generator")
         args = [
-            self.get_protoc_binary_path(),
-            f"--plugin=protoc-gen-grpc={self.get_protoc_cpp_plugin_binary_path()}",
+            self.get_binary_path("protoc"),
+            f"--plugin=protoc-gen-grpc={self.get_binary_path('grpc_cpp_plugin')}",
             f"-I{include_path}",
             f"--cpp_out={output_path}",
             f"--grpc_out={output_path}",
@@ -166,7 +160,7 @@ class CppGrpcInterfaceGenerator(GrpcInterfaceGenerator):  # type: ignore
         conan_helper.export_conan_project(output_path)
 
         conan_helper.add_dependency_to_conanfile(
-            f"{proto_file_handle.get_service_name().lower()}-service-sdk/auto"
+            f"{proto_file_handle.get_service_name().lower()}-service-sdk/generated"
         )
 
     def generate_service_server_sdk(self) -> None:

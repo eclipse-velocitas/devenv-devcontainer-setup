@@ -53,7 +53,7 @@ def test_project_depends_on_grpc_package():
         elif line.startswith("["):
             in_requires_section = False
 
-        if in_requires_section and line.strip() == "seats-service-sdk/auto":
+        if in_requires_section and line.strip() == "seats-service-sdk/generated":
             dependency_count = dependency_count + 1
 
     assert dependency_count == 1

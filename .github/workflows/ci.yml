@@ -133,14 +133,11 @@ jobs:
         run: |
           git config --global --add safe.directory $(pwd)/test/${{ matrix.language }}/repo
 
-      - name: Replace Velocitas JSON content
-        run: |
-          cp -f test/${{ matrix.language }}/.velocitas.json test/${{ matrix.language }}/repo
-
       - name: Update Velocitas JSON with correct version
         uses: ./.github/actions/update-velocitas-json
         with:
           project_path: test/${{ matrix.language }}/repo
+          template_path: test/${{ matrix.language }}/.velocitas.json
 
       - name: Run integration tests
         run: |

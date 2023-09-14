@@ -12,12 +12,15 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-name: update-velocits-json
-description: run pre-commit
+name: update-velocitas-json
+description: Update the project's velocitas JSON.
 inputs:
   project_path:
     description: Path to the directory containing the Velocitas project
     required: true
+  template_path:
+    description: Path to a JSON file which will replace the .velocitas.json file.
+    default: None
 runs:
   using: composite
   steps:
@@ -28,6 +31,11 @@ runs:
         then
           echo "Running in context of a PR!"
           COMMIT_REF=$GITHUB_HEAD_REF
+        fi
+
+        if [ "${{ inputs.template_path }}" != "None" ]; then
+          echo "Copying template file..."
+          cp -f ${{ inputs.template_path }} ${{ inputs.project_path }}/.velocitas.json
         fi
 
         NEW_CONFIG="$(jq --arg COMMIT_REF "$COMMIT_REF" '.packages[0].version |= $COMMIT_REF' ${{ inputs.project_path }}/.velocitas.json)"
