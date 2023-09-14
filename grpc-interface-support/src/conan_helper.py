@@ -34,8 +34,8 @@ def get_required_sdk_version() -> Optional[str]:
         os.path.join(get_workspace_dir(), "conanfile.txt"), encoding="utf-8"
     ) as conanfile:
         for line in conanfile:
-            if line.startswith("vehicle-app-sdk"):
-                sdk_version = line.split("/")[1].strip()
+            if line.startswith("vehicle-app-sdk/"):
+                sdk_version = line.split("/", maxsplit=1)[1].split("@")[0].strip()
 
     return sdk_version
 
@@ -177,6 +177,7 @@ def add_dependency_to_conanfile(dependency_name: str) -> None:
 
             lines.append(line)
 
+    # Check adding dependency in case [requires] section is last section of file
     if in_requires_section and dependency_name not in requirements:
         lines.append(dependency_name)
         lines.append("\n")
