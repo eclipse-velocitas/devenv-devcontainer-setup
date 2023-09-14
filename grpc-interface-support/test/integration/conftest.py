@@ -25,10 +25,8 @@ def pytest_sessionstart(session):
 
     os.chdir(os.environ["VELOCITAS_TEST_ROOT"])
     shutil.copy("../../common/AppManifest.json", "./app/AppManifest.json")
-    shutil.copy("../../cpp/app_seat_service_client/SampleApp.h", "./app/SampleApp.h")
-    shutil.copy(
-        "../../cpp/app_seat_service_client/SampleApp.cpp", "./app/SampleApp.cpp"
-    )
+    shutil.copy("../app_seat_service_client/SampleApp.h", "./app/src/SampleApp.h")
+    shutil.copy("../app_seat_service_client/SampleApp.cpp", "./app/src/SampleApp.cpp")
 
     # FIXME: The C++ base image does not install conan globally
     # but just for the vscode user, hence we have to download
