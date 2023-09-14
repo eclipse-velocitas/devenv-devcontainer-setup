@@ -34,7 +34,7 @@ def get_required_sdk_version_cpp() -> str:
     Returns:
         str: The required version.
     """
-    sdk_version: str = "0.3.3"
+    sdk_version: str = "0.4.0"
     with open(
         os.path.join(get_workspace_dir(), "conanfile.txt"), encoding="utf-8"
     ) as conanfile:
@@ -65,6 +65,14 @@ def get_required_sdk_version_python() -> str:
 
 
 def get_tag_or_branch_name(tag_or_branch_name: str) -> str:
+    """Return the tag or branch name of a git ref.
+
+    Args:
+        tag_or_branch_name (str): A git ref.
+
+    Returns:
+        str: The tag (without a v prefix) or the branch name.
+    """
     version_tag_pattern = re.compile(r"^[0-9]+(\.[0-9]+){0,2}$")
     if version_tag_pattern.match(tag_or_branch_name):
         return f"v{tag_or_branch_name}"
@@ -72,6 +80,11 @@ def get_tag_or_branch_name(tag_or_branch_name: str) -> str:
 
 
 def main(verbose: bool):
+    """Installs the SDKs of the supported languages.
+
+    Args:
+        verbose (bool): Enable verbose logging.
+    """
     lang = get_programming_language()
     if lang not in SUPPORTED_LANGUAGES:
         print("gRPC interface not yet supported for programming language " f"{lang!r}")

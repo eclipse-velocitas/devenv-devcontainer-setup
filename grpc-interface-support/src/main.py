@@ -29,6 +29,15 @@ DEPENDENCY_TYPE_KEY = "grpc-interface"
 
 
 def download_proto(config: Dict[str, Any]) -> proto.ProtoFileHandle:
+    """Download the proto file defined in the grpc-interface
+    config to the local project cache.
+
+    Args:
+        config (Dict[str, Any]): The grpc-interface config.
+
+    Returns:
+        proto.ProtoFileHandle: A handle to the proto file.
+    """
     service_if_spec_src = config["src"]
     _, filename = os.path.split(service_if_spec_src)
 
@@ -40,6 +49,15 @@ def download_proto(config: Dict[str, Any]) -> proto.ProtoFileHandle:
 
 
 def create_service_sdk_dir(proto_file_handle: proto.ProtoFileHandle) -> str:
+    """Create a directory for the service SDK.
+
+    Args:
+        proto_file_handle (proto.ProtoFileHandle):
+            A handle to the proto file of the service.
+
+    Returns:
+        str: The absolute path to the SDK directory.
+    """
     service_name = proto_file_handle.get_service_name()
     service_sdk_path = os.path.join(
         get_project_cache_dir(), "services", service_name.lower()
@@ -54,6 +72,13 @@ def create_service_sdk_dir(proto_file_handle: proto.ProtoFileHandle) -> str:
 def generate_single_service(
     generator: GrpcInterfaceGenerator, if_config: Dict[str, Any]
 ) -> None:
+    """Generate an SDK for a single service.
+
+    Args:
+        generator (GrpcInterfaceGenerator):
+            The generator to invoke for generating the SDK.
+        if_config (Dict[str, Any]): The grpc-interface config.
+    """
     print(
         f"Generating service SDK for {create_truncated_string(if_config['src'], 40)!r}"
     )
@@ -67,6 +92,11 @@ def generate_single_service(
 
 
 def main(verbose: bool) -> None:
+    """Generate service SDKs for all grpc-interfaces defined in the AppManifest.json.
+
+    Args:
+        verbose (bool): Enable verbose logging.
+    """
     interfaces = get_interfaces_for_type(DEPENDENCY_TYPE_KEY)
 
     if len(interfaces) <= 0:
