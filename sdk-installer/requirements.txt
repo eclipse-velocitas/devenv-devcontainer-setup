@@ -1,0 +1,2 @@
+git+https://github.com/eclipse-velocitas/velocitas-lib.git@v0.0.2
+cloudevents # FIXME: this dep is missing in SDK!

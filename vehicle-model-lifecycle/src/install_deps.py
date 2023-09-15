@@ -58,7 +58,7 @@ def should_install_model_generator() -> bool:
     return False
 
 
-def install_packages():
+def install_packages() -> None:
     """Install all required Python packages for the model generator and
     VSpec download."""
     script_path = get_script_path()
@@ -66,7 +66,7 @@ def install_packages():
     model_gen_repo = require_env("modelGeneratorGitRepo")
     model_gen_version = require_env("modelGeneratorGitRef")
 
-    pip(["install", "-r", f"{script_path}/requirements.txt"])
+    pip(["install", "-r", f"{script_path}/../requirements.txt"])
 
     if should_install_model_generator():
         pip(["install", f"git+{model_gen_repo}@{model_gen_version}"])

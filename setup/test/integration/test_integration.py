@@ -15,6 +15,7 @@
 import json
 import os
 import platform
+import subprocess
 from re import Pattern, compile, search
 from subprocess import PIPE, Popen, check_output
 
@@ -81,6 +82,41 @@ def test_post_start_auto_upgrade_cli():
 
     post_create_script_process.wait()
 
-    velocitas_json = open(os.path.join(os.getcwd(), ".velocitas.json"))
+    velocitas_json = open(".velocitas.json")
     data = json.load(velocitas_json)
     assert data["cliVersion"] == get_cli_version()
+
+
+def test_files_synced():
+    repo_path = os.environ["THIS_REPO_PATH"]
+    print(repo_path)
+    # check if there are any changes in the files to sync
+    changed_files = (
+        subprocess.check_output(
+            ["git", "diff", "origin/main", "--name-only"],
+            cwd=repo_path,
+        )
+        .decode()
+        .split("\n")
+    )
+    language = os.environ["VELOCITAS_TEST_LANGUAGE"]
+
+    changes_in_common = False
+    changes_in_lang = False
+    for changed_file in changed_files:
+        changes_in_common = changes_in_common or (
+            changed_file.find("setup/src/common") != -1
+        )
+        changes_in_lang = changes_in_lang or (
+            changed_file.find(f"setup/src/{language}") != -1
+        )
+
+    subprocess.check_call(["velocitas", "init", "-f", "-v"], stdin=subprocess.PIPE)
+    subprocess.check_call(["velocitas", "sync"])
+
+    git_status_output = subprocess.check_output(
+        ["git", "status", "--porcelain", "."]
+    ).decode()
+
+    if changes_in_common or changes_in_lang:
+        assert git_status_output != ""
