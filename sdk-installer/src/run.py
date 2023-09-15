@@ -71,7 +71,7 @@ def get_tag_or_branch_name(tag_or_branch_name: str) -> str:
         tag_or_branch_name (str): A git ref.
 
     Returns:
-        str: The tag (without a v prefix) or the branch name.
+        str: The version tag (prepended with a 'v' prefix) or the (unchanged) tag/branch name.
     """
     version_tag_pattern = re.compile(r"^[0-9]+(\.[0-9]+){0,2}$")
     if version_tag_pattern.match(tag_or_branch_name):
