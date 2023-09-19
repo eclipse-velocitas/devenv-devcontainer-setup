@@ -47,7 +47,7 @@ jobs:
   unit-test:
     name: "Run unit tests"
     runs-on: ubuntu-22.04
-    container: ghcr.io/eclipse-velocitas/devcontainer-base-images/python:v0.1
+    container: ghcr.io/eclipse-velocitas/devcontainer-base-images/python:v0.2
     strategy:
       matrix:
         component: ["setup", "grpc-interface-support", "vehicle-model-lifecycle", "sdk-installer"]
@@ -71,9 +71,9 @@ jobs:
         shell: bash
         run: |
           pytest --override-ini junit_family=xunit1 \
-          --junit-xml=./results/UnitTest/junit.xml \
+          --junit-xml=./results/UnitTest/${{ matrix.component }}/junit.xml \
           --cov . \
-          --cov-report=xml:results/CodeCoverage/cobertura-coverage.xml \
+          --cov-report=xml:results/CodeCoverage/${{ matrix.component }}/cobertura-coverage.xml \
           --cov-branch \
           ./${{ matrix.component }}/test/unit
 
@@ -81,23 +81,24 @@ jobs:
         uses: mikepenz/action-junit-report@v3
         if: always()
         with:
-          report_paths: ./results/UnitTest/junit.xml
+          report_paths: ./results/UnitTest/${{ matrix.component }}/junit.xml
           summary: true
           update_check: true
           annotate_only: true
 
       - uses: 5monkeys/cobertura-action@master
         with:
-          path: results/CodeCoverage/cobertura-coverage.xml
+          path: results/CodeCoverage/${{ matrix.component }}/cobertura-coverage.xml
           minimum_coverage: 80
           show_line: true
           show_branch: true
           fail_below_threshold: false
+          report_name: "Coverage: ${{ matrix.component }}"
 
   run-integration-tests:
     name: Run Integration Test
     runs-on: ubuntu-22.04
-    container: ghcr.io/eclipse-velocitas/devcontainer-base-images/${{ matrix.language }}:v0.1
+    container: ghcr.io/eclipse-velocitas/devcontainer-base-images/${{ matrix.language }}:v0.2
     strategy:
       matrix:
         language: ["python", "cpp"]
@@ -113,21 +114,11 @@ jobs:
         run: |
           git config --global --add safe.directory $(pwd)
 
-      - name: Get template repo ref
-        id: get-repo-ref
-        run: |
-          REF=main
-          if [ "${{ matrix.language }}" = "cpp" ]; then
-            REF=manifest-v3
-          fi
-          echo "ref=$REF" >> $GITHUB_OUTPUT
-
       - name: Checkout template repository
         uses: actions/checkout@v4
         with:
           repository: eclipse-velocitas/vehicle-app-${{ matrix.language }}-template
           path: test/${{ matrix.language }}/repo
-          ref: ${{ steps.get-repo-ref.outputs.ref }}
 
       - name: Add safe directory
         run: |
