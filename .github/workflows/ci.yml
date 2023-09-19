@@ -47,7 +47,7 @@ jobs:
   unit-test:
     name: "Run unit tests"
     runs-on: ubuntu-22.04
-    container: ghcr.io/eclipse-velocitas/devcontainer-base-images/python:v0.1
+    container: ghcr.io/eclipse-velocitas/devcontainer-base-images/python:v0.2
     strategy:
       matrix:
         component: ["setup", "grpc-interface-support", "vehicle-model-lifecycle", "sdk-installer"]
@@ -97,7 +97,7 @@ jobs:
   run-integration-tests:
     name: Run Integration Test
     runs-on: ubuntu-22.04
-    container: ghcr.io/eclipse-velocitas/devcontainer-base-images/${{ matrix.language }}:v0.1
+    container: ghcr.io/eclipse-velocitas/devcontainer-base-images/${{ matrix.language }}:v0.2
     strategy:
       matrix:
         language: ["python", "cpp"]
