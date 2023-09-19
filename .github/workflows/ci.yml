@@ -93,6 +93,7 @@ jobs:
           show_line: true
           show_branch: true
           fail_below_threshold: false
+          report_name: "Coverage: ${{ matrix.component }}"
 
   run-integration-tests:
     name: Run Integration Test
