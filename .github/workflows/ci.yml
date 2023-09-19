@@ -71,9 +71,9 @@ jobs:
         shell: bash
         run: |
           pytest --override-ini junit_family=xunit1 \
-          --junit-xml=./results/UnitTest/junit.xml \
+          --junit-xml=./results/UnitTest/${{ matrix.component }}/junit.xml \
           --cov . \
-          --cov-report=xml:results/CodeCoverage/cobertura-coverage.xml \
+          --cov-report=xml:results/CodeCoverage/${{ matrix.component }}/cobertura-coverage.xml \
           --cov-branch \
           ./${{ matrix.component }}/test/unit
 
@@ -81,14 +81,14 @@ jobs:
         uses: mikepenz/action-junit-report@v3
         if: always()
         with:
-          report_paths: ./results/UnitTest/junit.xml
+          report_paths: ./results/UnitTest/${{ matrix.component }}/junit.xml
           summary: true
           update_check: true
           annotate_only: true
 
       - uses: 5monkeys/cobertura-action@master
         with:
-          path: results/CodeCoverage/cobertura-coverage.xml
+          path: results/CodeCoverage/${{ matrix.component }}/cobertura-coverage.xml
           minimum_coverage: 80
           show_line: true
           show_branch: true
