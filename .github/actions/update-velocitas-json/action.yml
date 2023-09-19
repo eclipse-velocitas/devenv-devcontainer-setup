@@ -24,20 +24,15 @@ inputs:
 runs:
   using: composite
   steps:
-    - run: |
-        COMMIT_REF=$GITHUB_SHA
-
-        if [ "$GITHUB_EVENT_NAME" = "pull_request" ];
-        then
-          echo "Running in context of a PR!"
-          COMMIT_REF=$GITHUB_HEAD_REF
-        fi
-
+    - name: Set commit id
+      shell: bash
+      env:
+        BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+      run: |
         if [ "${{ inputs.template_path }}" != "None" ]; then
           echo "Copying template file..."
           cp -f ${{ inputs.template_path }} ${{ inputs.project_path }}/.velocitas.json
         fi
 
-        NEW_CONFIG="$(jq --arg COMMIT_REF "$COMMIT_REF" '.packages[0].version |= $COMMIT_REF' ${{ inputs.project_path }}/.velocitas.json)"
+        NEW_CONFIG="$(jq --arg BRANCH "$BRANCH_NAME" '.packages[0].version |= $BRANCH'  ${{ inputs.project_path }}/.velocitas.json)"
         echo "${NEW_CONFIG}" > ${{ inputs.project_path }}/.velocitas.json
-      shell: bash
