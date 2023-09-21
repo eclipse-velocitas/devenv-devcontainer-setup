@@ -10,10 +10,12 @@
 	"containerEnv": {
 		"GITHUB_API_TOKEN": "${localEnv:GITHUB_API_TOKEN}"
 	},
-	"forwardPorts": [1880],
+	"forwardPorts": [
+		1880
+	],
 	"portsAttributes": {
 		"1880": {
-		"label": "Node-RED"
+			"label": "Node-RED"
 		}
 	},
 	"customizations": {
@@ -22,12 +24,6 @@
 			"settings": {
 				"python.defaultInterpreterPath": "/usr/bin/python3",
 				"python.analysis.typeCheckingMode": "basic",
-				// Strong Type Checker
-				"mypy.enabled": true,
-				"mypy.runUsingActiveInterpreter": true,
-				"mypy.targets": [
-					"app"
-				],
 				// Security Linter
 				"python.linting.banditEnabled": true,
 				"python.linting.banditArgs": [
@@ -86,7 +82,6 @@
 				"rpdswtk.vsmqtt",
 				"dotjoshjohnson.xml",
 				"ms-kubernetes-tools.vscode-kubernetes-tools",
-				"matangover.mypy",
 				"augustocdias.tasks-shell-input",
 				"ms-python.isort",
 				"ms-python.flake8",
