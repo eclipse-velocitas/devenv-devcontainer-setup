@@ -35,6 +35,9 @@ class ${{ service_name_camel_case }}ServiceConan(ConanFile):
     # Sources are located in the same place as this recipe, copy them to the recipe
     exports_sources = "CMakeLists.txt", "src/*", "include/*"
 
+    # In general: Pin recipe revisions of dependencies having further dependencies to avoid build issues due to updated recipes
+    # Workaround1: Pin recipe revision for transient dependency googleapis for enabling the container build
+    # Workaround2: Pin recipe revision for transient dependency paho-mqtt-c cause latest is pulling libanl which cannot be found
     requires = [
         ("c-ares/1.19.1@#420a0b77e370f4b96bee88ef91837ccc"),
         ("googleapis/cci.20221108@#e4bebdfa02f3b6f93bae1d5001b8d439"),
@@ -42,6 +45,7 @@ class ${{ service_name_camel_case }}ServiceConan(ConanFile):
         ("grpc-proto/cci.20220627@#3ad14e3ffdae516b4da2407d5f23c71d"),
         ("openssl/1.1.1u@#de76bbea24d8b46f8def8daa18b31fd9"),
         ("protobuf/3.21.9@#515ceb0a1653cf84363d9968b812d6be"),
+        ("zlib/1.3"),
         ("vehicle-app-sdk/${{ core_sdk_version }}")
     ]
 

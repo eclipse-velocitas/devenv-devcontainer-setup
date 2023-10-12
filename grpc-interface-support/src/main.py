@@ -85,9 +85,9 @@ def generate_single_service(
     proto_file_handle = download_proto(if_config)
     service_sdk_dir = create_service_sdk_dir(proto_file_handle)
 
-    if "requires" in if_config:
+    if "required" in if_config:
         generator.generate_service_client_sdk(service_sdk_dir, proto_file_handle)
-    if "provides" in if_config:
+    if "provided" in if_config:
         pass
 
 

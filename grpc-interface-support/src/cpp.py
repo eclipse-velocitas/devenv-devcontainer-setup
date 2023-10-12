@@ -67,7 +67,14 @@ class CppGrpcInterfaceGenerator(GrpcInterfaceGenerator):  # type: ignore
             get_package_path(), "grpc-interface-support", "templates", "cpp"
         )
 
-        deps_to_extract = ["grpc", "c-ares", "googleapis", "grpc-proto"]
+        deps_to_extract = [
+            "grpc",
+            "c-ares",
+            "googleapis",
+            "grpc-proto",
+            "zlib",
+            "protobuf",
+        ]
         deps_patterns = [
             re.compile(r"^.*\"(" + dep + r"\/.*)\".*$") for dep in deps_to_extract
         ]

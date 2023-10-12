@@ -34,7 +34,7 @@ def get_required_sdk_version_cpp() -> str:
     Returns:
         str: The required version.
     """
-    sdk_version: str = "0.4.0"
+    sdk_version: str = "0.4.1"
     with open(
         os.path.join(get_workspace_dir(), "conanfile.txt"), encoding="utf-8"
     ) as conanfile:
