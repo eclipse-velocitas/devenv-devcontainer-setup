@@ -86,7 +86,6 @@ class CppGrpcInterfaceGenerator(GrpcInterfaceGenerator):  # type: ignore
         with open(
             tooling_conanfile_path, mode="w", encoding="utf-8"
         ) as tooling_conanfile:
-            print("\n".join(deps_results))
             tooling_conanfile.write("[requires]\n" + "\n".join(deps_results))
 
         subprocess.check_call(
@@ -105,9 +104,7 @@ class CppGrpcInterfaceGenerator(GrpcInterfaceGenerator):  # type: ignore
         )
 
     def __extend_path_with_protoc_and_plugin(self, conan_install_dir: str) -> None:
-        with open(
-            os.path.join(conan_install_dir, "conanbuildinfo.txt"), encoding="utf-8"
-        ) as buildinfo:
+        with open(os.path.join(conan_install_dir, "conanbuildinfo.txt")) as buildinfo:
             for line in buildinfo:
                 if line.startswith("PATH=["):
                     addition = line.replace('PATH=["', "").replace('"]', "").strip()
