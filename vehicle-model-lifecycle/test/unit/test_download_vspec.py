@@ -137,6 +137,10 @@ def test_main__no_vehicle_signal_interface__adds_default_to_cache():
     with capture_stdout() as capture, mock_env():
         main(app_manifest)
 
-        expected_path = Path(__file__).parent.parent.joinpath("vss_rel_3.0.json")
-        expected_cache_line = f"vspec_file_path={expected_path!r} >> VELOCITAS_CACHE"
+        expected_path = str(
+            Path(__file__).parent.parent.joinpath(
+                "vehicle-model-lifecycle", "vss_rel_3.0.json"
+            )
+        )
+        expected_cache_line = f"vspec_file_path={expected_path!r} >> VELOCITAS_CACHE\n"
         assert capture.getvalue() == expected_cache_line

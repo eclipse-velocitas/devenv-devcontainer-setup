@@ -50,7 +50,7 @@ class MockEnv:
         os.environ["VELOCITAS_CACHE_DIR"] = self.cache_dir
         os.environ["VELOCITAS_WORKSPACE_DIR"] = self.workspace_dir
         os.environ["VELOCITAS_APP_MANIFEST"] = json.dumps(self.app_manifest)
-        os.environ["VELOCITAS_PACKAGE_DIR"] = Path(__file__).parent.parent.__str__()
+        os.environ["VELOCITAS_PACKAGE_DIR"] = str(Path(__file__).parent.parent)
 
     def __exit__(self, _type, _value, _traceback):
         del os.environ["VELOCITAS_CACHE_DIR"]
