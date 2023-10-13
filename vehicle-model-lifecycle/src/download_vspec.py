@@ -157,7 +157,7 @@ def main(app_manifest_dict: Dict[str, Any]) -> None:
             #        file. Code path can be removed once we have a dependency
             #        resolver for our runtimes.
             vspec_src = os.path.join(
-                get_package_path(), "vehicle-model-lifecycle", "vss_rel_3.0.json"
+                get_package_path(), "vehicle-model-lifecycle", "vss_rel_30.json"
             )
 
     local_vspec_path = os.path.join(get_workspace_dir(), os.path.normpath(vspec_src))
