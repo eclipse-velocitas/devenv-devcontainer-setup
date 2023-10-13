@@ -14,6 +14,7 @@
 
 import os
 import sys
+from pathlib import Path
 
 import pytest
 from test_lib import capture_stdout, mock_env
@@ -128,10 +129,18 @@ def test_main__duplicate_vehicle_signal_interface__raises_error():
         main(app_manifest)
 
 
-def test_main__no_vehicle_signal_interface__silently_exists():
+def test_main__no_vehicle_signal_interface__adds_default_to_cache():
     app_manifest = {
         "manifestVersion": "v3",
         "interfaces": [{"type": "pubsub", "config": {}}],
     }
-    with capture_stdout(), mock_env():
+    with capture_stdout() as capture, mock_env():
         main(app_manifest)
+
+        expected_path = str(
+            Path(__file__).parent.parent.joinpath(
+                "vehicle-model-lifecycle", "vss_rel_3.0.json"
+            )
+        )
+        expected_cache_line = f"vspec_file_path={expected_path!r} >> VELOCITAS_CACHE\n"
+        assert capture.getvalue() == expected_cache_line
