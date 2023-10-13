@@ -19,7 +19,12 @@ import re
 from typing import Any, Dict, List
 
 import requests
-from velocitas_lib import get_app_manifest, get_project_cache_dir, get_workspace_dir
+from velocitas_lib import (
+    get_app_manifest,
+    get_package_path,
+    get_project_cache_dir,
+    get_workspace_dir,
+)
 
 FUNCTIONAL_INTERFACE_TYPE_KEY = "vehicle-signal-interface"
 
@@ -145,9 +150,15 @@ def main(app_manifest_dict: Dict[str, Any]) -> None:
             raise KeyError(
                 f"Only up to one {FUNCTIONAL_INTERFACE_TYPE_KEY!r} supported!"
             )
-        elif len(interfaces) == 0:
-            return
-        vspec_src = get_vehicle_signal_interface_src(interfaces[0])
+        elif len(interfaces) == 1:
+            vspec_src = get_vehicle_signal_interface_src(interfaces[0])
+        else:
+            # FIXME: Fallback solution in case an app does not provide a VSS
+            #        file. Code path can be removed once we have a dependency
+            #        resolver for our runtimes.
+            vspec_src = os.path.join(
+                get_package_path(), "vehicle-model-lifecycle", "vss_rel_3.0.json"
+            )
 
     local_vspec_path = os.path.join(get_workspace_dir(), os.path.normpath(vspec_src))
 
