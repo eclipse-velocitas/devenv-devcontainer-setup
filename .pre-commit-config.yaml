@@ -111,7 +111,6 @@ repos:
           - --use-current-year
           - --allow-past-years
           - --skip-license-insertion-comment=This file is maintained by velocitas CLI, do not modify manually.
-          - --skip-license-insertion-comment=!/bin/bash
       - id: insert-license
         files: "Dockerfile.*"
         args:
