@@ -40,7 +40,7 @@ def create_truncated_string(input: str, length: int) -> str:
     if len(input) < length:
         return input
 
-    return f"...{input[- length + 3:]}"
+    return f"...{input[-length+3:]}"  # noqa: E226 intended behaviour
 
 
 def replace_in_file(file_path: str, text: str, replacement: str) -> None:
