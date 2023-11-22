@@ -12,7 +12,6 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-# skip E231 False positive findings
 import os
 from typing import List, Optional
 
