@@ -18,10 +18,10 @@ repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
     hooks:
-    - id: trailing-whitespace
-    - id: end-of-file-fixer
-    - id: check-yaml
-    - id: check-added-large-files
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
 
   - repo: https://github.com/PyCQA/isort
     rev: 5.12.0
@@ -77,7 +77,15 @@ repos:
     rev: "v1.0.1"
     hooks:
       - id: mypy
-        args: [--strict, --ignore-missing-imports, --exclude=conanfile.py, --exclude=.*templates.*.py, vehicle-model-lifecycle/src, grpc-interface-support/src]
+        args:
+          [
+            --strict,
+            --ignore-missing-imports,
+            --exclude=conanfile.py,
+            --exclude=.*templates.*.py,
+            vehicle-model-lifecycle/src,
+            grpc-interface-support/src,
+          ]
         language: system
         pass_filenames: false
 
@@ -92,7 +100,7 @@ repos:
       - id: forbid-crlf
       - id: remove-crlf
       - id: insert-license
-        files: '.*\.(py|pyi|yaml|yml|sh|helmignore|dockerignore|gitignore)$'
+        files: '.*\.(py|pyi|yaml|yml|sh)$'
         args:
           - --license-filepath
           - license_header.txt
