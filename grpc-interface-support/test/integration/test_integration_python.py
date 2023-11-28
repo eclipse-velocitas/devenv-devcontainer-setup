@@ -48,7 +48,7 @@ def test_pip_package_is_usable():
 
     class TestServiceLocator(ServiceLocator):
         def get_service_location(self, service_name: str) -> str:
-            return f"{service_name}@anyserver:anyport"
+            return f"{service_name}@anyserver:anyport"  # noqa: E231
 
         def get_metadata(self, service_name: Optional[str] = None):
             pass
