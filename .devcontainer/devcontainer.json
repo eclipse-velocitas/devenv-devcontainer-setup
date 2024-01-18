@@ -1,0 +1,49 @@
+// This file is maintained by velocitas CLI, do not modify manually. Change settings in .velocitas.json
+{
+    "name": "Devcontainer setup",
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
+    "runArgs": [
+        "--init",
+        "--privileged"
+    ],
+    "customizations": {
+        "vscode": {
+            // Set *default* container specific settings.json values on container create.
+            "settings": {
+                "python.defaultInterpreterPath": "/usr/bin/python3",
+                "python.analysis.typeCheckingMode": "basic",
+                // Strong Type Checker
+                "mypy.enabled": true,
+                "mypy.runUsingActiveInterpreter": true,
+                "python.testing.unittestEnabled": false,
+                "python.testing.pytestEnabled": true,
+                "[python]": {
+                    "editor.formatOnSave": true,
+                    "editor.codeActionsOnSave": {
+                        "source.fixAll": true,
+                        "source.organizeImports": true
+                    },
+                    "editor.defaultFormatter": "charliermarsh.ruff"
+                },
+                "terminal.integrated.defaultProfile.linux": "zsh",
+                "terminal.integrated.profiles.linux": {
+                    "zsh": {
+                        "path": "/usr/bin/zsh"
+                    }
+                }
+            },
+            // Add the IDs of extensions you want installed when the container is created.
+            "extensions": [
+                "ms-python.python",
+                "matangover.mypy",
+                "ms-python.mypy-type-checker",
+                "charliermarsh.ruff"
+            ]
+        }
+    },
+    "onCreateCommand": "bash .devcontainer/scripts/onCreateCommand.sh",
+    // Comment out connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
+    "remoteUser": "vscode"
+}

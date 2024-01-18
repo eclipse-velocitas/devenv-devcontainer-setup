@@ -23,7 +23,6 @@ class CopySpec:
         self.source_path = source_path
         self.target_path = target_path
 
-
     def get_target(self) -> str:
         """Get the target path of the copy spec.
 

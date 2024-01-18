@@ -93,9 +93,7 @@ def main(verbose: bool):
 
     required_sdk_version: Optional[str] = None
     sdk_install_path = os.path.join(get_project_cache_dir(), f"vehicle-app-{lang}-sdk")
-    git_url = (
-        f"https://github.com/eclipse-velocitas/vehicle-app-{lang}-sdk.git"  # noqa: E231
-    )
+    git_url = f"https://github.com/eclipse-velocitas/vehicle-app-{lang}-sdk.git"  # noqa: E231
 
     if lang == "cpp":
         required_sdk_version = get_required_sdk_version_cpp()
