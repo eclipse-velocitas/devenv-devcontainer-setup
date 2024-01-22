@@ -99,7 +99,7 @@ def is_proper_interface_type(interface: Dict[str, Any]) -> bool:
 
 
 def get_vehicle_signal_interfaces(
-    app_manifest_dict: Dict[str, Any]
+    app_manifest_dict: Dict[str, Any],
 ) -> List[Dict[str, Any]]:
     """Return all vehicle signal interfaces in the app manifest.
 

@@ -3,5 +3,3 @@ pytest-ordering==0.6
 pytest-asyncio==0.20.3
 pytest-cov==4.0.0
 types-mock
-coverage2clover==3.3.0
-coveragepy-lcov==0.1.2
