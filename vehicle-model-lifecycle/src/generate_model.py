@@ -85,7 +85,7 @@ def invoke_generator(
         [
             sys.executable,
             "-m",
-            "sdv.model_generator.main",
+            "velocitas.model_generator.cli",
             "-l",
             output_language,
             "-T",
