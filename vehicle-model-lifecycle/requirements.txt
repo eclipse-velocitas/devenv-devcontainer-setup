@@ -1,3 +1,4 @@
 git+https://github.com/eclipse-velocitas/velocitas-lib.git@v0.0.2
+velocitas-model-generator@git+https://github.com/eclipse-velocitas/vehicle-model-generator@fix/version
 types-requests
 requests
