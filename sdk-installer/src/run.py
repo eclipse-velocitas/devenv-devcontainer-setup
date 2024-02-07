@@ -51,7 +51,7 @@ def get_required_sdk_version_python() -> str:
     Returns:
         str: The required version.
     """
-    sdk_version: str = "0.12.0"
+    sdk_version: str = "0.13.0"
     requirements_path = os.path.join(
         get_workspace_dir(), "app", "requirements-velocitas.txt"
     )
