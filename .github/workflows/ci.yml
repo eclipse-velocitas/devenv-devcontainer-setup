@@ -42,7 +42,7 @@ jobs:
           pip install types-requests
 
       - name: Run Linters
-        uses: ./.github/actions/pre-commit-action
+        uses: pre-commit/action@v3.0.0
 
   unit-test:
     name: "Run unit tests"
