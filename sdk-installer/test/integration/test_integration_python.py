@@ -66,7 +66,6 @@ velocitas-sdk==0.12.0
 
     subprocess.check_call(
         ["velocitas", "init", "-f", "-v"],
-        shell=True,
         stdout=subprocess.STDOUT,
         stderr=subprocess.STDOUT,
     )
