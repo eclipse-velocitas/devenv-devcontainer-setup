@@ -124,7 +124,6 @@ def main(verbose: bool):
 
     subprocess.check_call(
         ["git", "config", "--global", "--add", "safe.directory", sdk_install_path],
-        stdout=subprocess.DEVNULL if not verbose else None,
     )
 
     if lang == "cpp":
@@ -136,7 +135,6 @@ def main(verbose: bool):
     elif lang == "python":
         subprocess.check_call(
             ["python", "-m", "pip", "install", "."],
-            stdout=subprocess.DEVNULL if not verbose else None,
             cwd=sdk_install_path,
         )
 
