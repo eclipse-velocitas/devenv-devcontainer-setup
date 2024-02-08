@@ -63,11 +63,7 @@ def get_cli_version():
 
 def test_post_start_auto_upgrade_cli():
     download_older_cli_version()
-    # This should be the right check
-    # But since we do not have a proper version output
-    # on previous CLI releases we need to have a workaround
-    # assert get_cli_version() == older_cli_version
-    assert get_cli_version() == "v0.0.0"
+    assert get_cli_version() == "v0.6.3"
 
     post_create_script_path = os.path.join(
         os.getcwd(),
