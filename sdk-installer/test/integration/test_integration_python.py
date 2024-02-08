@@ -48,7 +48,7 @@ def test_no_sdk_reference_found__latest_version_installed():
     with open("./app/requirements-velocitas.txt", mode="w") as conanfile:
         conanfile.write(requirements_contents)
 
-    subprocess.check_call(["velocitas", "init", "-f", "-v"], stdin=subprocess.PIPE)
+    subprocess.check_output(["velocitas", "init", "-f", "-v"], stdin=subprocess.PIPE)
     assert is_package_installed("velocitas-sdk")
     assert can_import_and_use_vehicleapp()
 
@@ -60,6 +60,7 @@ velocitas-sdk==0.12.0
     with open("./app/requirements-velocitas.txt", mode="w") as conanfile:
         conanfile.write(requirements_contents)
 
-    subprocess.check_call(["velocitas", "init", "-f", "-v"], stdin=subprocess.PIPE)
+    subprocess.check_output(["velocitas", "init", "-f", "-v"], stdin=subprocess.PIPE)
+
     assert is_package_installed("velocitas-sdk")
     assert can_import_and_use_vehicleapp()
