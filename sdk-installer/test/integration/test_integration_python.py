@@ -62,9 +62,16 @@ velocitas-sdk==0.12.0
     with open("./app/requirements-velocitas.txt", mode="w") as conanfile:
         conanfile.write(requirements_contents)
 
-    subprocess.check_output(
-        ["velocitas", "init", "-f", "-v"], stdin=subprocess.PIPE, shell=True
+    print("START RUN VELOCITAS INIT")
+
+    subprocess.check_call(
+        ["velocitas", "init", "-f", "-v"],
+        shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
     )
+
+    print("STOP RUN VELOCITAS INIT")
 
     assert is_package_installed("velocitas-sdk")
     assert can_import_and_use_vehicleapp()
