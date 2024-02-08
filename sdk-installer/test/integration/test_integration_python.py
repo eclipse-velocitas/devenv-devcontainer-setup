@@ -67,8 +67,8 @@ velocitas-sdk==0.12.0
     subprocess.check_call(
         ["velocitas", "init", "-f", "-v"],
         shell=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        stdout=subprocess.STDOUT,
+        stderr=subprocess.STDOUT,
     )
 
     print("STOP RUN VELOCITAS INIT")
