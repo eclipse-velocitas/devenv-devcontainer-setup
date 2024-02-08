@@ -124,19 +124,19 @@ def main(verbose: bool):
 
     subprocess.check_call(
         ["git", "config", "--global", "--add", "safe.directory", sdk_install_path],
-        stdout=subprocess.DEVNULL if not True else None,
+        stdout=subprocess.STDOUT,
     )
 
     if lang == "cpp":
         subprocess.check_call(
             ["conan", "export", "."],
-            stdout=subprocess.DEVNULL if not True else None,
+            stdout=subprocess.DEVNULL if not verbose else None,
             cwd=sdk_install_path,
         )
     elif lang == "python":
         subprocess.check_call(
             ["python", "-m", "pip", "install", "."],
-            stdout=subprocess.DEVNULL if not True else None,
+            stdout=subprocess.STDOUT,
             cwd=sdk_install_path,
         )
 
