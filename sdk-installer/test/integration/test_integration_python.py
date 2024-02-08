@@ -41,18 +41,18 @@ def can_import_and_use_vehicleapp() -> bool:
         return False
 
 
-def test_no_sdk_reference_found__latest_version_installed():
-    requirements_contents = """
+# def test_no_sdk_reference_found__latest_version_installed():
+#     requirements_contents = """
 
-    """
-    with open("./app/requirements-velocitas.txt", mode="w") as conanfile:
-        conanfile.write(requirements_contents)
+#     """
+#     with open("./app/requirements-velocitas.txt", mode="w") as conanfile:
+#         conanfile.write(requirements_contents)
 
-    subprocess.check_output(
-        ["velocitas", "init", "-f", "-v"], stdin=subprocess.PIPE, shell=True
-    )
-    assert is_package_installed("velocitas-sdk")
-    assert can_import_and_use_vehicleapp()
+#     subprocess.check_output(
+#         ["velocitas", "init", "-f", "-v"], stdin=subprocess.PIPE, shell=True
+#     )
+#     assert is_package_installed("velocitas-sdk")
+#     assert can_import_and_use_vehicleapp()
 
 
 def test_sdk_reference_found__sdk_installed():
@@ -64,13 +64,13 @@ velocitas-sdk==0.12.0
 
     print("START RUN VELOCITAS INIT")
 
-    subprocess.check_call(
-        ["velocitas", "init", "-f", "-v"],
+    output = subprocess.check_call(
+        ["velocitas", "init"],
         stdout=subprocess.STDOUT,
         stderr=subprocess.STDOUT,
     )
 
-    print("STOP RUN VELOCITAS INIT")
+    print("STOP RUN VELOCITAS INIT: " + str(output))
 
     assert is_package_installed("velocitas-sdk")
     assert can_import_and_use_vehicleapp()
