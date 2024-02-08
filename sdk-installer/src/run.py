@@ -58,7 +58,7 @@ def get_required_sdk_version_python() -> str:
     if os.path.exists(requirements_path):
         with open(requirements_path, encoding="utf-8") as requirements_file:
             for line in requirements_file:
-                if line.startswith("velocitas-sdk"):
+                if line.startswith("velocitas_sdk"):
                     sdk_version = line.split("==")[1].strip()
 
     return sdk_version

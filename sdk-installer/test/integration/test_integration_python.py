@@ -55,7 +55,7 @@ def test_no_sdk_reference_found__latest_version_installed():
 
 def test_sdk_reference_found__sdk_installed():
     requirements_contents = """
-velocitas-sdk==0.13.0
+velocitas_sdk==0.13.0
     """
     with open("./app/requirements-velocitas.txt", mode="w") as requirements:
         requirements.write(requirements_contents)
