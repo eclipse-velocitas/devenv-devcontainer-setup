@@ -49,7 +49,7 @@ def test_no_sdk_reference_found__latest_version_installed():
         requirements.write(requirements_contents)
 
     subprocess.check_call(["velocitas", "init", "-f", "-v"], stdin=subprocess.PIPE)
-    assert is_package_installed("velocitas-sdk")
+    assert is_package_installed("velocitas_sdk")
     assert can_import_and_use_vehicleapp()
 
 
@@ -61,5 +61,5 @@ velocitas-sdk==0.13.0
         requirements.write(requirements_contents)
 
     subprocess.check_call(["velocitas", "init", "-f", "-v"], stdin=subprocess.PIPE)
-    assert is_package_installed("velocitas-sdk")
+    assert is_package_installed("velocitas_sdk")
     assert can_import_and_use_vehicleapp()
