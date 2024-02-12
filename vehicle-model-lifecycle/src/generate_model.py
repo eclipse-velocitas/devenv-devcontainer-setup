@@ -14,44 +14,31 @@
 
 """Provides methods and functions to generate a vehicle model."""
 
-import json
 import os
 import shutil
 import subprocess
 import sys
 from pathlib import Path
 
+from shared_utils.conan_helper import export_conan_project
 from velocitas.model_generator import generate_model
+from velocitas_lib import (
+    get_cache_data,
+    get_programming_language,
+    get_project_cache_dir,
+    get_workspace_dir,
+    require_env,
+)
 
-
-def require_env(name: str) -> str:
-    """Require and return an environment variable.
-
-    Args:
-        name (str): The name of the variable.
-
-    Raises:
-        ValueError: In case the environment variable is not set.
-
-    Returns:
-        str: The value of the variable.
-    """
-    var = os.getenv(name)
-    if not var:
-        raise ValueError(f"Environment variable {name!r} not set!")
-    return var
-
-
-def get_workspace_dir() -> str:
-    """Return the workspace directory path."""
-    return require_env("VELOCITAS_WORKSPACE_DIR")
+CACHE_KEY = "vspec_file_path"
+GENERATION_PATH_AUTO_DETECTION_KEY = "auto"
 
 
 def get_model_output_dir() -> str:
     """Return the absolute path to the model output directory."""
-    generation_path = os.path.join(require_env("VELOCITAS_CACHE_DIR"), "vehicle_model")
+    generation_path = os.path.join(get_project_cache_dir(), "vehicle_model")
     generation_path_override = require_env("generatedModelPath")
-    if generation_path_override != "auto":
+    if generation_path_override != GENERATION_PATH_AUTO_DETECTION_KEY:
         generation_path = generation_path_override
 
     if not generation_path.startswith("/"):
@@ -95,18 +82,23 @@ def install_model_if_required(language: str, model_path: str) -> None:
     """
     if language == "python":
         subprocess.check_call([sys.executable, "-m", "pip", "install", model_path])
+    elif language == "cpp":
+        export_conan_project(model_path)
+    else:
+        raise KeyError(f"{language!r} not supported!")
 
 
 def main() -> None:
     """Main entry point for generation of vehicle models."""
-    cache_data = json.loads(require_env("VELOCITAS_CACHE_DATA"))
+    cache_data = get_cache_data()
 
-    if "vspec_file_path" not in cache_data:
+    if CACHE_KEY not in cache_data:
         return
 
-    model_src_file = cache_data["vspec_file_path"]
-    model_language = require_env("language")
+    model_src_file = cache_data[CACHE_KEY]
+    model_language = get_programming_language()
     model_output_dir = get_model_output_dir()
+
     os.makedirs(model_output_dir, exist_ok=True)
 
     remove_old_model(model_output_dir)

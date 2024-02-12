@@ -19,9 +19,9 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-import conan_helper
 from generator import GrpcInterfaceGenerator
 from proto import ProtoFileHandle
+from shared_utils import conan_helper
 from velocitas_lib import get_package_path
 
 CONAN_PROFILE_NAME = "host"

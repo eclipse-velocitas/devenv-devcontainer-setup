@@ -50,7 +50,7 @@ jobs:
     container: ghcr.io/eclipse-velocitas/devcontainer-base-images/python:v0.2
     strategy:
       matrix:
-        component: ["setup", "grpc-interface-support", "vehicle-model-lifecycle", "sdk-installer"]
+        component: ["_shared", "setup", "grpc-interface-support", "vehicle-model-lifecycle", "sdk-installer"]
       fail-fast: false
 
     steps:
@@ -104,6 +104,7 @@ jobs:
         language: ["python", "cpp"]
         component: ["setup", "grpc-interface-support", "vehicle-model-lifecycle", "sdk-installer"]
       fail-fast: false
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

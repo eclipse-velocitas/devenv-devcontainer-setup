@@ -21,7 +21,7 @@ import proto
 from cpp import CppGrpcInterfaceGenerator
 from generator import GrpcInterfaceGenerator
 from python import PythonGrpcInterfaceGenerator
-from util import create_truncated_string
+from shared_utils import create_truncated_string
 from velocitas_lib import download_file, get_programming_language, get_project_cache_dir
 from velocitas_lib.functional_interface import get_interfaces_for_type
 

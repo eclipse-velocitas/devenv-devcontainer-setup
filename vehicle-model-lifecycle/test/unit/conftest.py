@@ -12,8 +12,12 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+import json
 import os
-import subprocess
+import sys
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "..", "src"))
+from install_deps import install_model_generator  # noqa
 
 
 def pytest_sessionstart(session):
@@ -22,13 +26,13 @@ def pytest_sessionstart(session):
     before performing collection and entering the run test loop.
     """
 
-    os.chdir(os.environ["VELOCITAS_TEST_ROOT"])
-
-    # FIXME: The C++ base image does not install conan globally
-    # but just for the vscode user, hence we have to download
-    # conan manually here. Can be removed once conan is installed
-    # globally.
-    if os.environ["VELOCITAS_TEST_LANGUAGE"] == "cpp":
-        subprocess.check_call(["python", "-m", "pip", "install", "conan==1.62.0"])
-
-    subprocess.check_call(["velocitas", "init", "-f", "-v"], stdin=subprocess.PIPE)
+    # crude way of installing the model generator in the correct version
+    # due to the version coming from the component manifest
+    manifest_file_path = os.path.join(
+        os.path.dirname(__file__), "..", "..", "..", "manifest.json"
+    )
+    manifest_dict = json.load(open(manifest_file_path))
+    component_dict = manifest_dict["components"][1]
+    os.environ["modelGeneratorGitRepo"] = component_dict["variables"][2]["default"]
+    os.environ["modelGeneratorGitRef"] = component_dict["variables"][3]["default"]
+    install_model_generator()

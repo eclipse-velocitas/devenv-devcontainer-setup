@@ -20,7 +20,7 @@ from pyfakefs.fake_filesystem import FakeFilesystem
 from velocitas_lib import get_workspace_dir
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "..", "src"))
-from conan_helper import add_dependency_to_conanfile  # noqa
+from shared_utils.conan_helper import add_dependency_to_conanfile  # noqa
 
 
 @pytest.fixture

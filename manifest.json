@@ -97,7 +97,7 @@
                 {
                     "name": "modelGeneratorGitRef",
                     "type": "string",
-                    "default": "v0.5.0",
+                    "default": "feature/conan-pkg",
                     "description": "Git ref of the model generator repo. Can be a tag, branch or SHA"
                 }
             ]
