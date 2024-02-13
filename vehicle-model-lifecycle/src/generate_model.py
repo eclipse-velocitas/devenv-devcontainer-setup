@@ -20,7 +20,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from shared_utils.conan_helper import export_conan_project
+from shared_utils.conan_helper import add_dependency_to_conanfile, export_conan_project
 from velocitas.model_generator import generate_model
 from velocitas_lib import (
     get_cache_data,
@@ -88,6 +88,11 @@ def install_model_if_required(language: str, model_path: str) -> None:
         raise KeyError(f"{language!r} not supported!")
 
 
+def add_model_dependency_if_required(language: str) -> None:
+    if language == "cpp":
+        add_dependency_to_conanfile("vehicle-model", "generated")
+
+
 def main() -> None:
     """Main entry point for generation of vehicle models."""
     cache_data = get_cache_data()
@@ -104,6 +109,7 @@ def main() -> None:
     remove_old_model(model_output_dir)
     invoke_generator(model_src_file, model_language, model_output_dir)
     install_model_if_required(model_language, model_output_dir)
+    add_model_dependency_if_required(model_language)
 
 
 if __name__ == "__main__":
