@@ -139,4 +139,4 @@ jobs:
 
           python -m pip install -r ./${{ matrix.component }}/test/requirements.txt
           python -m pip install -r ./${{ matrix.component }}/requirements.txt
-          pytest ./${{ matrix.component }}/test/integration
+          pytest -s ./${{ matrix.component }}/test/integration
