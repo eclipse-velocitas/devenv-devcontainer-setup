@@ -12,56 +12,109 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+from abc import ABC, abstractmethod
 import argparse
 import os
 import re
 import shutil
 import subprocess
-from typing import Optional
+import json
+from typing import Dict, Optional
 
 from velocitas_lib import (
     get_programming_language,
     get_project_cache_dir,
     get_workspace_dir,
+    require_env
 )
+
+from velocitas_lib.variables import ProjectVariables
 
 SUPPORTED_LANGUAGES = ["cpp", "python"]
 
+class PackageManager(ABC):
 
-def get_required_sdk_version_cpp() -> str:
-    """Return the required version of the C++ SDK.
+    @abstractmethod
+    def is_package_installed(self, package_name: str, package_version: Optional[str] = None) -> bool:
+        ...
 
-    Returns:
-        str: The required version.
-    """
-    sdk_version: str = "0.4.1"
-    with open(
-        os.path.join(get_workspace_dir(), "conanfile.txt"), encoding="utf-8"
-    ) as conanfile:
-        for line in conanfile:
-            if line.startswith("vehicle-app-sdk/"):
-                sdk_version = line.split("/", maxsplit=1)[1].split("@")[0].strip()
+    @abstractmethod
+    def get_required_package_version(self, package_name: str) -> int:
+        ...
 
-    return sdk_version
+    @abstractmethod
+    def install_local_package(self, path: str) -> None:
+        ...
 
 
-def get_required_sdk_version_python() -> str:
-    """Return the required version of the Python SDK.
+class Conan(PackageManager):
+    def __init__(self, verbose_logging: bool):
+        self._verbose_logging = verbose_logging
 
-    Returns:
-        str: The required version.
-    """
-    sdk_version: str = "0.13.0"
-    requirements_path = os.path.join(
-        get_workspace_dir(), "app", "requirements-velocitas.txt"
-    )
-    if os.path.exists(requirements_path):
-        with open(requirements_path, encoding="utf-8") as requirements_file:
-            for line in requirements_file:
-                if line.startswith("velocitas_sdk") or line.startswith("velocitas-sdk"):
-                    sdk_version = line.split("==")[1].strip()
+    def is_package_installed(self, package_name: str, package_version: Optional[str] = None) -> bool:
+        search_pattern = package_name
+        if package_version is not None:
+            search_pattern = f"{search_pattern}@{package_version}"
 
-    return sdk_version
+        output = subprocess.check_output(["conan", "search", package_name], encoding="utf-8")
+        return output.find("Existing package recipes:") != -1
+
+    def get_required_package_version(self, package_name: str) -> str:
+        """Return the required version of the C++ SDK.
+
+        Returns:
+            str: The required version.
+        """
+        sdk_version: str = "0.4.1"
+        with open(
+            os.path.join(get_workspace_dir(), "conanfile.txt"), encoding="utf-8"
+        ) as conanfile:
+            for line in conanfile:
+                if line.startswith(f"{package_name}/"):
+                    sdk_version = line.split("/", maxsplit=1)[1].split("@")[0].strip()
+
+        return sdk_version
+
+    def install_local_package(self, path: str) -> None:
+        subprocess.check_call(
+            ["conan", "export", "."],
+            stdout=subprocess.DEVNULL if not self._verbose_logging else None,
+            cwd=path,
+        )
+
+
+class Pip(PackageManager):
+    def __init__(self, verbose_logging: bool):
+        self._verbose_logging = verbose_logging
+
+    def is_package_installed(self, package_name: str) -> bool:
+        output = subprocess.check_output(["conan", "search", package_name], encoding="utf-8")
+        return output.find("Existing package recipies:") != -1
+
+    def get_required_package_version(self, package_name: str) -> str:
+        """Return the required version of the Python SDK.
+
+        Returns:
+            str: The required version.
+        """
+        sdk_version: str = "0.13.0"
+        requirements_path = os.path.join(
+            get_workspace_dir(), "app", "requirements-velocitas.txt"
+        )
+        if os.path.exists(requirements_path):
+            with open(requirements_path, encoding="utf-8") as requirements_file:
+                for line in requirements_file:
+                    if line.replace("-", "_").startswith(package_name.replace("-","_")):
+                        sdk_version = line.split("==")[1].strip()
+
+        return sdk_version
+
+    def install_local_package(self, path: str) -> None:
+        subprocess.check_call(
+            ["python", "-m", "pip", "install", "."],
+            stdout=subprocess.DEVNULL if not self._verbose_logging else None,
+            cwd=path,
+        )
 
 
 def get_tag_or_branch_name(tag_or_branch_name: str) -> str:
@@ -80,34 +133,18 @@ def get_tag_or_branch_name(tag_or_branch_name: str) -> str:
     return tag_or_branch_name
 
 
-def main(verbose: bool):
-    """Installs the SDKs of the supported languages.
+def get_package_manager(programming_language: str, verbose_logging: bool) -> PackageManager:
+    if programming_language == "cpp":
+        return Conan(verbose_logging)
+    elif programming_language == "python":
+        return Pip(verbose_logging)
 
-    Args:
-        verbose (bool): Enable verbose logging.
-    """
-    lang = get_programming_language()
-    if lang not in SUPPORTED_LANGUAGES:
-        print("gRPC interface not yet supported for programming language " f"{lang!r}")
-        return
+    raise RuntimeError(f"No package manager available for {programming_language!r}!")
 
-    required_sdk_version: Optional[str] = None
-    sdk_install_path = os.path.join(get_project_cache_dir(), f"vehicle-app-{lang}-sdk")
-    git_url = f"https://github.com/eclipse-velocitas/vehicle-app-{lang}-sdk.git"  # noqa: E231
 
-    if lang == "cpp":
-        required_sdk_version = get_required_sdk_version_cpp()
-    elif lang == "python":
-        required_sdk_version = get_required_sdk_version_python()
-
-    if required_sdk_version is None:
-        print("No SDK dependency detected -> Skipping installation.")
-        return
-
-    print(f"Installing version {required_sdk_version!r}...")
-
-    if os.path.exists(sdk_install_path):
-        shutil.rmtree(sdk_install_path)
+def force_clone_repo(git_url: str, git_ref: str, output_dir: str, verbose_logging: bool) -> None:
+    if os.path.exists(output_dir):
+        shutil.rmtree(output_dir)
 
     subprocess.check_call(
         [
@@ -116,33 +153,76 @@ def main(verbose: bool):
             "--depth",
             "1",
             "-b",
-            get_tag_or_branch_name(required_sdk_version),
+            git_ref,
             git_url,
+            output_dir
         ],
-        cwd=get_project_cache_dir(),
+        stdout=subprocess.DEVNULL if not verbose_logging else None,
     )
 
     subprocess.check_call(
-        ["git", "config", "--global", "--add", "safe.directory", sdk_install_path],
-        stdout=subprocess.DEVNULL if not verbose else None,
+        ["git", "config", "--global", "--add", "safe.directory", output_dir],
+        stdout=subprocess.DEVNULL if not verbose_logging else None,
     )
 
-    if lang == "cpp":
-        subprocess.check_call(
-            ["conan", "export", "."],
-            stdout=subprocess.DEVNULL if not verbose else None,
-            cwd=sdk_install_path,
-        )
-    elif lang == "python":
-        subprocess.check_call(
-            ["python", "-m", "pip", "install", "."],
-            stdout=subprocess.DEVNULL if not verbose else None,
-            cwd=sdk_install_path,
-        )
+
+def install_packge_if_required(package_dict: Dict[str, str], lang: str, verbose_logging: bool):
+    required_sdk_version: Optional[str] = None
+    package_clone_path = os.path.join(get_project_cache_dir(), f"{package_dict['id']}-{lang}")
+
+    package_manager = get_package_manager(lang, verbose_logging)
+    required_sdk_version = package_manager.get_required_package_version(package_dict['id'])
+
+    if required_sdk_version is None:
+        print("No SDK dependency detected -> Skipping installation.")
+        return
+
+
+    if package_manager.is_package_installed(package_dict['id'], required_sdk_version):
+        print("Correct version of SDK already installed!")
+        return
+
+    # clone git repository which contains SDK package
+    git_url = package_dict['gitRepo']
+    project_variables = ProjectVariables(os.environ)
+    git_url = project_variables.replace_occurrences(git_url)
+    git_ref = package_dict['gitRef']
+    if git_ref == "auto":
+        git_ref = get_tag_or_branch_name(required_sdk_version)
+
+    force_clone_repo(git_url, git_ref, package_clone_path, verbose_logging)
+
+    # install SDK
+    print(f"Installing SDK version {required_sdk_version!r} from {git_url!r}...")
+    package_path = os.path.join(package_clone_path, package_dict['packageSubdirectory'])
+    package_manager.install_local_package(package_path)
+
+
+def main(verbose: bool):
+    """Installs the SDKs of the supported languages.
+
+    Args:
+        verbose (bool): Enable verbose logging.
+    """
+    lang = get_programming_language()
+    if lang not in SUPPORTED_LANGUAGES:
+        print("No core SDK available yet for programming language " f"{lang!r}")
+        return
+
+    install_packge_if_required({
+        "id": "vehicle-app-sdk",
+        "gitRepo": require_env("sdkGitRepo"),
+        "gitRef": require_env("sdkGitRef"),
+        "packageSubdirectory": require_env("sdkPackageSubdirectory")}, lang, verbose)
+
+    additional_packages = json.loads(require_env("additionalPackages"))
+    for package in additional_packages:
+        install_packge_if_required(package, lang, verbose)
 
 
 if __name__ == "__main__":
     argument_parser = argparse.ArgumentParser("generate-sdk")
     argument_parser.add_argument("-v", "--verbose", action="store_true")
     args = argument_parser.parse_args()
+
     main(args.verbose)
