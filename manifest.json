@@ -198,6 +198,27 @@
                     ]
                 }
             ]
+        },
+        {
+            "id": "build-system",
+            "programs": [
+                {
+                    "id": "install",
+                    "description": "Installs all necessary dependencies / packages for the application",
+                    "executable": "python",
+                    "args": [
+                        "./build-system/cpp-cmake-conan/install_deps.py"
+                    ]
+                },
+                {
+                    "id": "build",
+                    "description": "Builds the application",
+                    "executable": "python",
+                    "args": [
+                        "./build-system/cpp-cmake-conan/build.sh"
+                    ]
+                }
+            ]
         }
     ]
 }
