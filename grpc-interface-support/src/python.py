@@ -20,8 +20,8 @@ from pathlib import Path
 
 import proto
 from generator import GrpcInterfaceGenerator
-from util import replace_in_file, to_camel_case
-from util.templates import CopySpec, copy_templates
+from shared_utils import replace_in_file, to_camel_case
+from shared_utils.templates import CopySpec, copy_templates
 from velocitas_lib import get_package_path, get_workspace_dir
 
 

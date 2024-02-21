@@ -14,12 +14,31 @@
 
 import json
 import os
+import shutil
+import subprocess
+from pathlib import Path
+
+
+def copy_test_files() -> None:
+    src = Path(__file__).parent.joinpath("data").joinpath("cpp_project")
+    dst = "."
+    shutil.copytree(src, dst, dirs_exist_ok=True)
 
 
 def test_model_is_generated() -> None:
-    generated_model_path = json.load(open(".velocitas.json"))["variables"][
-        "generatedModelPath"
-    ]
+    generated_model_path = json.load(open(".velocitas.json", encoding="utf-8"))[
+        "variables"
+    ]["generatedModelPath"]
 
     assert os.path.exists(generated_model_path)
     assert os.path.isdir(generated_model_path)
+
+
+def test_package_can_be_used_by_project() -> None:
+    if os.environ["VELOCITAS_TEST_LANGUAGE"] != "cpp":
+        return
+
+    copy_test_files()
+
+    subprocess.check_call(["./install_dependencies.sh"])
+    subprocess.check_call(["./build.sh"])

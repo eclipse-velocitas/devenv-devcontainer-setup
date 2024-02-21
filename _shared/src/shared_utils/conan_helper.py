@@ -18,9 +18,10 @@ import shutil
 import subprocess
 from typing import List, Optional, Tuple
 
-from util import to_camel_case
-from util.templates import CopySpec, copy_templates
 from velocitas_lib import get_package_path, get_workspace_dir
+
+from shared_utils import to_camel_case
+from shared_utils.templates import CopySpec, copy_templates
 
 
 def get_required_sdk_version() -> Optional[str]:
