@@ -3,3 +3,7 @@ pytest-ordering==0.6
 pytest-asyncio==0.20.3
 pytest-cov==4.0.0
 types-mock
+# FIXME: The C++ base image does not install conan globally
+# but just for the vscode user, hence we have to install here.
+# Can be removed once conan is installed globally.
+conan==1.62.0
