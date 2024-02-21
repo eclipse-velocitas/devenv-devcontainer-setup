@@ -82,14 +82,14 @@ def install_model_if_required(language: str, model_path: str) -> None:
     """
     if language == "python":
         subprocess.check_call([sys.executable, "-m", "pip", "install", model_path])
-    elif language == "cpp":
+    elif language == "cpp" and os.path.isfile(os.path.join(model_path, "conanfile.py")):
         export_conan_project(model_path)
     else:
         raise KeyError(f"{language!r} not supported!")
 
 
-def add_model_dependency_if_required(language: str) -> None:
-    if language == "cpp":
+def add_model_dependency_if_required(language: str, model_path: str) -> None:
+    if language == "cpp" and os.path.isfile(os.path.join(model_path, "conanfile.py")):
         add_dependency_to_conanfile("vehicle-model", "generated")
 
 
@@ -109,7 +109,7 @@ def main() -> None:
     remove_old_model(model_output_dir)
     invoke_generator(model_src_file, model_language, model_output_dir)
     install_model_if_required(model_language, model_output_dir)
-    add_model_dependency_if_required(model_language)
+    add_model_dependency_if_required(model_language, model_output_dir)
 
 
 if __name__ == "__main__":
