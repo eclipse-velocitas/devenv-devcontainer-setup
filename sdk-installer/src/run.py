@@ -19,7 +19,7 @@ import re
 import shutil
 import subprocess
 from abc import ABC, abstractmethod
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 from velocitas_lib import (
     get_programming_language,
@@ -96,12 +96,18 @@ class Pip(PackageManager):
         self, package_name: str, package_version: Optional[str] = None
     ) -> bool:
         output = subprocess.check_output(
-            ["conan", "search", package_name], encoding="utf-8"
+            ["pip", "list", package_name], encoding="utf-8"
         )
-        package_found = output.find("Existing package recipies:") != -1
 
-        if package_found and package_version is not None:
-            package_found = output.find(package_version)
+        package_found = False
+
+        output_lines: List[str] = output.splitlines()
+        for line in output_lines:
+            package_data = line.strip().split(" ")
+            if package_data[0].startswith(package_name):
+                package_found = True
+                if package_version is not None:
+                    package_found = package_data[1] == package_version
 
         return package_found
 
