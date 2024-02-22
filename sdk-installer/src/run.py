@@ -12,13 +12,13 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-from abc import ABC, abstractmethod
 import argparse
+import json
 import os
 import re
 import shutil
 import subprocess
-import json
+from abc import ABC, abstractmethod
 from typing import Dict, Optional
 
 from velocitas_lib import (
@@ -27,7 +27,6 @@ from velocitas_lib import (
     get_workspace_dir,
     require_env,
 )
-
 from velocitas_lib.variables import ProjectVariables
 
 SUPPORTED_LANGUAGES = ["cpp", "python"]
@@ -93,11 +92,18 @@ class Pip(PackageManager):
     def __init__(self, verbose_logging: bool):
         self._verbose_logging = verbose_logging
 
-    def is_package_installed(self, package_name: str) -> bool:
+    def is_package_installed(
+        self, package_name: str, package_version: Optional[str] = None
+    ) -> bool:
         output = subprocess.check_output(
             ["conan", "search", package_name], encoding="utf-8"
         )
-        return output.find("Existing package recipies:") != -1
+        package_found = output.find("Existing package recipies:") != -1
+
+        if package_found and package_version is not None:
+            package_found = output.find(package_version)
+
+        return package_found
 
     def get_required_package_version(self, package_name: str) -> str:
         """Return the required version of the Python SDK.
