@@ -40,7 +40,7 @@ class PackageManager(ABC):
         ...
 
     @abstractmethod
-    def get_required_package_version(self, package_name: str) -> int:
+    def get_required_package_version(self, package_name: str) -> Optional[str]:
         ...
 
     @abstractmethod
@@ -57,28 +57,31 @@ class Conan(PackageManager):
     ) -> bool:
         search_pattern = package_name
         if package_version is not None:
-            search_pattern = f"{search_pattern}@{package_version}"
+            search_pattern = f"{package_name}@{package_version}"
 
         output = subprocess.check_output(
-            ["conan", "search", package_name], encoding="utf-8"
+            ["conan", "search", search_pattern], encoding="utf-8"
         )
         return output.find("Existing package recipes:") != -1
 
-    def get_required_package_version(self, package_name: str) -> str:
-        """Return the required version of the C++ SDK.
+    def get_required_package_version(self, package_name: str) -> Optional[str]:
+        """Return the required version of the given package from the
+        requirements file.
 
         Returns:
             str: The required version.
         """
-        sdk_version: str = "0.4.1"
+        package_version: Optional[str] = None
         with open(
             os.path.join(get_workspace_dir(), "conanfile.txt"), encoding="utf-8"
         ) as conanfile:
             for line in conanfile:
                 if line.startswith(f"{package_name}/"):
-                    sdk_version = line.split("/", maxsplit=1)[1].split("@")[0].strip()
+                    package_version = (
+                        line.split("/", maxsplit=1)[1].split("@")[0].strip()
+                    )
 
-        return sdk_version
+        return package_version
 
     def install_local_package(self, path: str) -> None:
         subprocess.check_call(
@@ -111,13 +114,14 @@ class Pip(PackageManager):
 
         return package_found
 
-    def get_required_package_version(self, package_name: str) -> str:
-        """Return the required version of the Python SDK.
+    def get_required_package_version(self, package_name: str) -> Optional[str]:
+        """Return the required version of the given package from the
+        requirements file.
 
         Returns:
             str: The required version.
         """
-        sdk_version: str = "0.13.0"
+        package_version: Optional[str] = None
         requirements_path = os.path.join(
             get_workspace_dir(), "app", "requirements-velocitas.txt"
         )
@@ -127,9 +131,9 @@ class Pip(PackageManager):
                     if line.replace("-", "_").startswith(
                         package_name.replace("-", "_")
                     ):
-                        sdk_version = line.split("==")[1].strip()
+                        package_version = line.split("==")[1].strip()
 
-        return sdk_version
+        return package_version
 
     def install_local_package(self, path: str) -> None:
         subprocess.check_call(
@@ -169,6 +173,17 @@ def get_package_manager(
 def force_clone_repo(
     git_url: str, git_ref: str, output_dir: str, verbose_logging: bool
 ) -> None:
+    """Clones the given git repository, forcefully removing any previously
+    existing directory structure at the given output directory.
+
+    Args:
+        git_url (str): The URL of the git repo to clone.
+        git_ref (str): The git ref (branch, tag, SHA) to clone.
+        output_dir (str): The output directory to which to output the cloned
+            repository.
+        verbose_logging (bool): Enable verbose logging.
+    """
+
     if os.path.exists(output_dir):
         shutil.rmtree(output_dir)
 
@@ -186,22 +201,26 @@ def force_clone_repo(
 def install_packge_if_required(
     package_dict: Dict[str, str], lang: str, verbose_logging: bool
 ):
-    required_sdk_version: Optional[str] = None
+    required_package_version: Optional[str] = None
     package_clone_path = os.path.join(
         get_project_cache_dir(), f"{package_dict['id']}-{lang}"
     )
 
     package_manager = get_package_manager(lang, verbose_logging)
-    required_sdk_version = package_manager.get_required_package_version(
+    required_package_version = package_manager.get_required_package_version(
         package_dict["id"]
     )
 
-    if required_sdk_version is None:
-        print("No SDK dependency detected -> Skipping installation.")
+    if required_package_version is None:
+        print(
+            f"No dependency on {package_dict['id']!r} detected -> Skipping installation."
+        )
         return
 
-    if package_manager.is_package_installed(package_dict["id"], required_sdk_version):
-        print("Correct version of SDK already installed!")
+    if package_manager.is_package_installed(
+        package_dict["id"], required_package_version
+    ):
+        print(f"Correct version of {package_dict['id']!r} already installed!")
         return
 
     # clone git repository which contains SDK package
@@ -210,12 +229,14 @@ def install_packge_if_required(
     git_url = project_variables.replace_occurrences(git_url)
     git_ref = package_dict["gitRef"]
     if git_ref == "auto":
-        git_ref = get_tag_or_branch_name(required_sdk_version)
+        git_ref = get_tag_or_branch_name(required_package_version)
 
     force_clone_repo(git_url, git_ref, package_clone_path, verbose_logging)
 
     # install SDK
-    print(f"Installing SDK version {required_sdk_version!r} from {git_url!r}...")
+    print(
+        f"Installing package version {required_package_version!r} from {git_url!r}..."
+    )
     package_path = os.path.join(package_clone_path, package_dict["packageSubdirectory"])
     package_manager.install_local_package(package_path)
 
