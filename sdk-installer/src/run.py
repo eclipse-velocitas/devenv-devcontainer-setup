@@ -254,7 +254,7 @@ def main(verbose: bool):
 
     install_packge_if_required(
         {
-            "id": "vehicle-app-sdk",
+            "id": "vehicle-app-sdk" if lang == "cpp" else "velocitas_sdk",
             "gitRepo": require_env("sdkGitRepo"),
             "gitRef": require_env("sdkGitRef"),
             "packageSubdirectory": require_env("sdkPackageSubdirectory"),
