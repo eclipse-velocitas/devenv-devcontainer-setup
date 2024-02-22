@@ -28,7 +28,7 @@ def is_package_installed(package_name: str) -> bool:
     return output.find("Existing package recipes:") != -1
 
 
-def test_no_sdk_reference_found__latest_installed():
+def test_no_sdk_reference_found__nothing_installed():
     conanfile_contents = """
 [requires]
 
@@ -37,7 +37,7 @@ def test_no_sdk_reference_found__latest_installed():
         conanfile.write(conanfile_contents)
 
     subprocess.check_call(["velocitas", "init", "-f", "-v"], stdin=subprocess.PIPE)
-    assert is_package_installed("vehicle-app-sdk")
+    assert not is_package_installed("vehicle-app-sdk")
 
 
 def test_sdk_reference_found__sdk_installed():

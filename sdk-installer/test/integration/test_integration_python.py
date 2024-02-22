@@ -41,15 +41,17 @@ def can_import_and_use_vehicleapp() -> bool:
         return False
 
 
-def test_no_sdk_reference_found__latest_version_installed():
+def test_no_sdk_reference_found__nothing_installed():
     requirements_contents = """
 
     """
-    with open("./app/requirements-velocitas.txt", mode="w") as requirements:
+    with open(
+        "./app/requirements-velocitas.txt", mode="w", encoding="utf-8"
+    ) as requirements:
         requirements.write(requirements_contents)
 
     subprocess.check_call(["velocitas", "init", "-f", "-v"], stdin=subprocess.PIPE)
-    assert is_package_installed("velocitas_sdk") or is_package_installed(
+    assert not is_package_installed("velocitas_sdk") and not is_package_installed(
         "velocitas-sdk"
     )
     assert can_import_and_use_vehicleapp()
