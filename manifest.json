@@ -215,7 +215,7 @@
                     "description": "Builds the application",
                     "executable": "python",
                     "args": [
-                        "./build-system/cpp-cmake-conan/build.sh"
+                        "./build-system/cpp-cmake-conan/build.py"
                     ]
                 }
             ]

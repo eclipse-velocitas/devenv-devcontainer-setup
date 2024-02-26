@@ -12,29 +12,65 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+import subprocess
 from argparse import ArgumentParser
 from pathlib import Path
-from velocitas_lib import get_workspace_dir
-import subprocess
 
-def install_deps_via_conan(build_arch: str, is_debug: bool = False, build_all_deps: bool = False) -> None:
+from velocitas_lib import get_workspace_dir
+
+
+def install_deps_via_conan(
+    build_arch: str, is_debug: bool = False, build_all_deps: bool = False
+) -> None:
     build_variant = "debug" if is_debug else "release"
     profile_filename = f"linux_{build_arch}_{build_variant}"
-    profile_host_path = Path(__file__).parent.joinpath(".conan").joinpath("profiles").joinpath(profile_filename)
+    profile_host_path = (
+        Path(__file__)
+        .absolute()
+        .parent.joinpath(".conan", "profiles", profile_filename)
+    )
     deps_to_build = "missing" if not build_all_deps else "*"
-    subprocess.check_call(["conan", "install", "-pr:h", profile_host_path, "--build", deps_to_build, get_workspace_dir()])
+    subprocess.check_call(
+        [
+            "conan",
+            "install",
+            "-pr:h",
+            profile_host_path,
+            "--build",
+            deps_to_build,
+            get_workspace_dir(),
+        ]
+    )
 
 
 def cli() -> None:
     argument_parser = ArgumentParser(description="Installs dependencies")
-    argument_parser.add_argument("-d","--debug", action="store_true", help="Installs all dependencies in debug mode.")
-    argument_parser.add_argument("-r","--release", action="store_true", help="Installs all dependencies in release mode.")
-    argument_parser.add_argument("-ba","--build-all-deps", action="store_true", help="Forces all dependencies to be rebuild from source.")
+    argument_parser.add_argument(
+        "-d",
+        "--debug",
+        action="store_true",
+        help="Installs all dependencies in debug mode.",
+    )
+    argument_parser.add_argument(
+        "-r",
+        "--release",
+        action="store_true",
+        help="Installs all dependencies in release mode.",
+    )
+    argument_parser.add_argument(
+        "-ba",
+        "--build-all-deps",
+        action="store_true",
+        help="Forces all dependencies to be rebuild from source.",
+    )
     args = argument_parser.parse_args()
-    
+
     host_arch = subprocess.check_output(["arch"], encoding="utf-8").strip()
-    
-    install_deps_via_conan(host_arch, args.debug or not args.release, args.build_all_deps)
+
+    install_deps_via_conan(
+        host_arch, args.debug or not args.release, args.build_all_deps
+    )
+
 
 if __name__ == "__main__":
     cli()
