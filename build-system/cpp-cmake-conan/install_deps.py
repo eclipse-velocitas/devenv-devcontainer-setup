@@ -13,6 +13,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import subprocess
+import os
 from argparse import ArgumentParser
 from pathlib import Path
 
@@ -29,6 +30,7 @@ def install_deps_via_conan(
         .absolute()
         .parent.joinpath(".conan", "profiles", profile_filename)
     )
+    build_folder = os.path.join(get_workspace_dir(), "build")
     deps_to_build = "missing" if not build_all_deps else "*"
     subprocess.check_call(
         [
@@ -38,8 +40,9 @@ def install_deps_via_conan(
             profile_host_path,
             "--build",
             deps_to_build,
-            get_workspace_dir(),
-        ]
+            "..",
+        ],
+        cwd=build_folder,
     )
 
 

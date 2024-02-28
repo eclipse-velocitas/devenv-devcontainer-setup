@@ -15,6 +15,7 @@
 import os
 import subprocess
 from argparse import ArgumentParser
+from velocitas_lib import get_workspace_dir
 
 CMAKE_EXECUTABLE = "cmake"
 CONAN_EXECUTABLE = "conan"
@@ -46,13 +47,13 @@ def print_build_info(
     print(f"Static build       {'yes' if is_static_build else 'no'}")
 
 
-def build(build_variant: str, build_target: str, static_build: bool) -> None:
+def build(build_variant: str, build_arch: str, build_target: str, static_build: bool) -> None:
     CMAKE_CXX_FLAGS = "--coverage -g -O0"
-
+    build_folder = os.path.join(get_workspace_dir(), "build")
     if build_variant == "release":
         CMAKE_CXX_FLAGS = "--coverage -s -g -O3"
 
-    os.makedirs("build")
+    os.makedirs(build_folder, exist_ok=True)
 
     # Expose the PATH of the build-time requirements from Conan to CMake - this is NOT handled by
     # any of Conan's CMake generators at the moment, hence we parse the conanbuildinfo.txt which
@@ -78,8 +79,9 @@ def build(build_variant: str, build_target: str, static_build: bool) -> None:
             "-B../build",
             "-G",
             "Ninja",
-            f'-DCMAKE_CXX_FLAGS="{CMAKE_CXX_FLAGS}"',
-        ]
+            f'-DCMAKE_CXX_FLAGS={CMAKE_CXX_FLAGS}',
+        ],
+        cwd=build_folder,
     )
     subprocess.run(
         [
@@ -90,7 +92,8 @@ def build(build_variant: str, build_target: str, static_build: bool) -> None:
             build_variant,
             "--target",
             build_target,
-        ]
+        ],
+        cwd=build_folder,
     )
 
 
@@ -123,10 +126,13 @@ Builds the targets of the project in different flavors."""
         "-s", "--static", action="store_true", help="Links all dependencies statically."
     )
     args = parser.parse_args()
-
+    if not args.variant:
+        args.variant = "debug"
+    if not args.target:
+        args.target = "all"
     build_arch = subprocess.check_output(["arch"], encoding="utf-8").strip()
-    print_build_info(args.variant, build_arch, args.build_target, args.static)
-    build(args.variant, build_arch, args.static)
+    print_build_info(args.variant, build_arch, args.target, args.static)
+    build(args.variant, build_arch,args.target, args.static)
 
 
 if __name__ == "__main__":
