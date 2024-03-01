@@ -20,6 +20,15 @@ from pathlib import Path
 from velocitas_lib import get_workspace_dir
 
 
+def safe_get_workspace_dir() -> str:
+    """A safe version of get_workspace_dir which defaults to '.'."""
+    try:
+        return get_workspace_dir()
+    except:
+        return "."
+
+
+
 def install_deps_via_conan(
     build_arch: str, is_debug: bool = False, build_all_deps: bool = False
 ) -> None:
@@ -31,7 +40,7 @@ def install_deps_via_conan(
         .parent.joinpath(".conan", "profiles", profile_filename)
     )
 
-    build_folder = os.path.join(get_workspace_dir(), "build")
+    build_folder = os.path.join(safe_get_workspace_dir(), "build")
     os.makedirs(build_folder, exist_ok=True)
 
     deps_to_build = "missing" if not build_all_deps else "*"

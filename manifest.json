@@ -201,6 +201,7 @@
         },
         {
             "id": "build-system",
+            "type": "setup",
             "programs": [
                 {
                     "id": "install",
@@ -217,6 +218,21 @@
                     "args": [
                         "./build-system/cpp-cmake-conan/build.py"
                     ]
+                }
+            ],
+            "files": [
+                {
+                    "src": "build-system/cpp-cmake-conan",
+                    "dst": ".",
+                    "condition": "'${{ language }}' === 'cpp'"
+                }
+            ],
+            "variables": [
+                {
+                    "name": "language",
+                    "type": "string",
+                    "required": true,
+                    "description": "The programming language of the project. Either 'python' or 'cpp'"
                 }
             ]
         }

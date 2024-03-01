@@ -252,7 +252,7 @@ def main(verbose: bool):
     if lang not in SUPPORTED_LANGUAGES:
         print("No core SDK available yet for programming language " f"{lang!r}")
         return
-    
+
     additional_packages = json.loads(require_env("additionalPackages"))
     for package in additional_packages:
         install_packge_if_required(package, lang, verbose)

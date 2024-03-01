@@ -21,6 +21,14 @@ CMAKE_EXECUTABLE = "cmake"
 CONAN_EXECUTABLE = "conan"
 
 
+def safe_get_workspace_dir() -> str:
+    """A safe version of get_workspace_dir which defaults to '.'."""
+    try:
+        return get_workspace_dir()
+    except:
+        return "."
+
+
 def print_build_info(
     build_variant: str, build_arch: str, build_target: str, is_static_build: bool
 ) -> None:
@@ -49,7 +57,7 @@ def print_build_info(
 
 def build(build_variant: str, build_arch: str, build_target: str, static_build: bool) -> None:
     CMAKE_CXX_FLAGS = "--coverage -g -O0"
-    build_folder = os.path.join(get_workspace_dir(), "build")
+    build_folder = os.path.join(safe_get_workspace_dir(), "build")
     if build_variant == "release":
         CMAKE_CXX_FLAGS = "--coverage -s -g -O3"
 
