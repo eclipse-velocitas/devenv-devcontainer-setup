@@ -77,4 +77,5 @@ def install_packages() -> None:
 
 
 if __name__ == "__main__":
+    raise
     install_packages()
