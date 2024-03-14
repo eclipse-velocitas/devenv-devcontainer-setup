@@ -39,7 +39,7 @@
             ]
         },
         {
-            "id": "vehicle-model-lifecycle",
+            "id": "vehicle-signal-interface",
             "type": "setup",
             "onPostInit": [
                 {
