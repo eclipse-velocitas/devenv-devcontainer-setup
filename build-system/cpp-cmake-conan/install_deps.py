@@ -28,16 +28,25 @@ def safe_get_workspace_dir() -> str:
         return "."
 
 
+def get_profile_name(arch: str, variant: str) -> str:
+    return f"linux_{arch}_{variant}"
+
 
 def install_deps_via_conan(
-    build_arch: str, is_debug: bool = False, build_all_deps: bool = False
+    build_arch: str, host_arch: str, is_debug: bool = False, build_all_deps: bool = False
 ) -> None:
     build_variant = "debug" if is_debug else "release"
-    profile_filename = f"linux_{build_arch}_{build_variant}"
+
+    profile_build_path = (
+        Path(__file__)
+        .absolute()
+        .parent.joinpath(".conan", "profiles", get_profile_name(build_arch, build_variant))
+    )
+    
     profile_host_path = (
         Path(__file__)
         .absolute()
-        .parent.joinpath(".conan", "profiles", profile_filename)
+        .parent.joinpath(".conan", "profiles", get_profile_name(host_arch, build_variant))
     )
 
     build_folder = os.path.join(safe_get_workspace_dir(), "build")
@@ -50,6 +59,8 @@ def install_deps_via_conan(
             "install",
             "-pr:h",
             profile_host_path,
+            "-pr:b",
+            profile_build_path,
             "--build",
             deps_to_build,
             "..",
@@ -78,12 +89,22 @@ def cli() -> None:
         action="store_true",
         help="Forces all dependencies to be rebuild from source.",
     )
+    argument_parser.add_argument(
+        "-x",
+        "--cross",
+        action="store",
+        help="Enables cross-compilation to the defined target architecture."
+    )
     args = argument_parser.parse_args()
 
-    host_arch = subprocess.check_output(["arch"], encoding="utf-8").strip()
+    build_arch = subprocess.check_output(["arch"], encoding="utf-8").strip()
+    host_arch = args.cross
+    
+    if host_arch is None:
+        host_arch = build_arch
 
     install_deps_via_conan(
-        host_arch, args.debug or not args.release, args.build_all_deps
+        build_arch, host_arch, args.debug or not args.release, args.build_all_deps
     )
 
 
