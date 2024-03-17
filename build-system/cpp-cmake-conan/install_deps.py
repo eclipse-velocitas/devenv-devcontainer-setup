@@ -42,7 +42,7 @@ def install_deps_via_conan(
         .absolute()
         .parent.joinpath(".conan", "profiles", get_profile_name(build_arch, build_variant))
     )
-    
+
     profile_host_path = (
         Path(__file__)
         .absolute()
@@ -53,6 +53,17 @@ def install_deps_via_conan(
     os.makedirs(build_folder, exist_ok=True)
 
     deps_to_build = "missing" if not build_all_deps else "*"
+
+    toolchain=f"/usr/bin/{host_arch}-linux-gnu"
+    build_host=f"{host_arch}-linux-gnu"
+    cc_compiler="gcc"
+    cxx_compiler="g++"
+
+    os.environ["CONAN_CMAKE_FIND_ROOT_PATH"] = toolchain
+    os.environ["CONAN_CMAKE_SYSROOT"] = toolchain
+    os.environ["CC"] = f"{build_host}-{cc_compiler}"
+    os.environ["CXX"] = f"{build_host}-{cxx_compiler}"
+
     subprocess.check_call(
         [
             "conan",
@@ -65,6 +76,7 @@ def install_deps_via_conan(
             deps_to_build,
             "..",
         ],
+        env=os.environ,
         cwd=build_folder,
     )
 
@@ -99,7 +111,7 @@ def cli() -> None:
 
     build_arch = subprocess.check_output(["arch"], encoding="utf-8").strip()
     host_arch = args.cross
-    
+
     if host_arch is None:
         host_arch = build_arch
 
