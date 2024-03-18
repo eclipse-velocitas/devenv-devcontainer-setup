@@ -208,7 +208,7 @@
                     "description": "Installs all necessary dependencies / packages for the application",
                     "executable": "python",
                     "args": [
-                        "./build-system/cpp-cmake-conan/install_deps.py"
+                        "./build-system/cpp-cmake-conan/src/install_deps.py"
                     ]
                 },
                 {
@@ -216,13 +216,13 @@
                     "description": "Builds the application",
                     "executable": "python",
                     "args": [
-                        "./build-system/cpp-cmake-conan/build.py"
+                        "./build-system/cpp-cmake-conan/src/build.py"
                     ]
                 }
             ],
             "files": [
                 {
-                    "src": "build-system/cpp-cmake-conan",
+                    "src": "build-system/cpp-cmake-conan/src",
                     "dst": ".",
                     "condition": "'${{ language }}' === 'cpp'"
                 }

@@ -6,4 +6,4 @@ types-mock
 # FIXME: The C++ base image does not install conan globally
 # but just for the vscode user, hence we have to install here.
 # Can be removed once conan is installed globally.
-conan==1.62.0
+conan==1.63.0
