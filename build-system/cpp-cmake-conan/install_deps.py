@@ -12,6 +12,11 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+"""
+Install all software depenencies of the given Velocitas project via a
+simple command line interface.
+"""
+
 import subprocess
 import os
 from argparse import ArgumentParser
@@ -28,8 +33,18 @@ def safe_get_workspace_dir() -> str:
         return "."
 
 
-def get_profile_name(arch: str, variant: str) -> str:
-    return f"linux_{arch}_{variant}"
+def get_profile_name(arch: str, build_variant: str) -> str:
+    """Return the Conan profile name for the given `arch` and
+    `build_variant`.
+
+    Args:
+        arch (str): The architecture of the profile.
+        build_variant (str): The build variant (debug or release).
+
+    Returns:
+        str: The Conan profile name.
+    """
+    return f"linux_{arch}_{build_variant}"
 
 
 def install_deps_via_conan(
