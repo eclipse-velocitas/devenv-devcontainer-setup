@@ -38,10 +38,6 @@
 					},
 					"editor.defaultFormatter": "charliermarsh.ruff"
 				},
-				"vs-kubernetes": {
-					"vscode-kubernetes.kubectl-path.linux": "/usr/local/bin/kubectl",
-					"vscode-kubernetes.helm-path.linux": "/usr/local/bin/helm"
-				},
 				"terminal.integrated.defaultProfile.linux": "zsh",
 				"terminal.integrated.profiles.linux": {
 					"zsh": {
@@ -60,13 +56,11 @@
 			// Add the IDs of extensions you want installed when the container is created.
 			"extensions": [
 				"dbaeumer.vscode-eslint",
-				"ms-azuretools.vscode-dapr",
 				"ms-azuretools.vscode-docker",
 				"ms-python.python",
 				"cschleiden.vscode-github-actions",
 				"rpdswtk.vsmqtt",
 				"dotjoshjohnson.xml",
-				"ms-kubernetes-tools.vscode-kubernetes-tools",
 				"matangover.mypy",
 				"augustocdias.tasks-shell-input",
 				"ms-python.mypy-type-checker",

@@ -107,9 +107,7 @@
 			"extensions": [
 				"ms-vscode.cpptools",
 				"ms-vscode.cmake-tools",
-				"ms-azuretools.vscode-dapr",
 				"rpdswtk.vsmqtt",
-				"ms-kubernetes-tools.vscode-kubernetes-tools",
 				"bierner.markdown-mermaid",
 				"cschlosser.doxdocgen",
 				"xaver.clang-format",
