@@ -39,7 +39,6 @@ def is_uri(path: str) -> bool:
     """
     return re.match(r"(\w+)\:\/\/(\w+)", path) is not None
 
-
 def download_unit_file(uri: str, local_file_path: str) -> None:
     print(f"Downloading default units file to {local_file_path} ...")
     with requests.get(uri) as infile:
@@ -127,7 +126,9 @@ def get_vehicle_signal_interfaces(
     return interfaces
 
 
-def get_vehicle_signal_interface_src(interface: Dict[str, Any]) -> Tuple[str, str]:
+def get_vehicle_signal_interface_src(
+    interface: Dict[str, Any],
+) -> Tuple[str, List[str]]:
     """Return the URI of the source for the Vehicle Signal Interface.
 
     Args:
@@ -137,13 +138,13 @@ def get_vehicle_signal_interface_src(interface: Dict[str, Any]) -> Tuple[str, st
         str: The URI of the source for the Vehicle Signal Interface.
     """
     src = ""
-    unit_src = ""
+    unit_src_list = []
     if "config" in interface:
         if "src" in interface["config"]:
             src = str(interface["config"]["src"])
         if "unit_src" in interface["config"]:
-            unit_src = str(interface["config"]["unit_src"])
-    return src, unit_src
+            unit_src_list = interface["config"]["unit_src"]
+    return src, unit_src_list
 
 
 def main(app_manifest_dict: Dict[str, Any]) -> None:
@@ -168,38 +169,46 @@ def main(app_manifest_dict: Dict[str, Any]) -> None:
                 f"Only up to one {FUNCTIONAL_INTERFACE_TYPE_KEY!r} supported!"
             )
         elif len(interfaces) == 1:
-            vspec_src, unit_src = get_vehicle_signal_interface_src(interfaces[0])
+            vspec_src, unit_src_list = get_vehicle_signal_interface_src(interfaces[0])
             if vspec_src == "":
                 vspec_src = "https://github.com/COVESA/vehicle_signal_specification/releases/download/v3.0/vss_rel_3.0.json"
-            if unit_src == "":
-                unit_src = "https://github.com/COVESA/vehicle_signal_specification/blob/v4.0/spec/units.yaml"
+            if not unit_src_list:
+                unit_src_list = [
+                    "https://github.com/COVESA/vehicle_signal_specification/blob/v4.0/spec/units.yaml",
+                ]
         else:
             # FIXME: Fallback solution in case an app does not provide a VSS
             #        file. Code path can be removed once we have a dependency
             #        resolver for our runtimes.
             vspec_src = "https://github.com/COVESA/vehicle_signal_specification/releases/download/v3.0/vss_rel_3.0.json"
-            unit_src = "https://github.com/COVESA/vehicle_signal_specification/blob/v4.0/spec/units.yaml"
+            unit_src_list = [
+                "https://github.com/COVESA/vehicle_signal_specification/blob/v4.0/spec/units.yaml",
+            ]
 
     local_vspec_path = os.path.join(get_workspace_dir(), os.path.normpath(vspec_src))
-    local_unit_path = os.path.join(get_workspace_dir(), os.path.normpath(unit_src))
 
     if is_uri(vspec_src):
         local_vspec_path = os.path.join(get_project_cache_dir(), "vspec.json")
         download_file(vspec_src, local_vspec_path)
 
-    if is_uri(unit_src):
-        local_unit_path = os.path.join(get_project_cache_dir(), "units.yaml")
-        # since there is no release for units file 4.0 we need to download from blob and this is different than downloading from release
-        if unit_src.find("blob") != -1:
-            download_unit_file(unit_src, local_unit_path)
-        else:
-            download_file(unit_src, local_unit_path)
+    id = 0
+    list = []
+    for unit_src in unit_src_list:
+        if is_uri(unit_src):
+            local_unit_path = os.path.join(get_project_cache_dir(), f"units_{id}.yaml")
+            # since there is no release for units file 4.0 we need to download from blob and this is different than downloading from release
+            if unit_src.find("blob") != -1:
+                download_unit_file(unit_src, local_unit_path)
+            else:
+                download_file(unit_src, local_unit_path)
+            list.append(local_unit_path)
+            id += 1
 
     vspec_src = local_vspec_path
-    unit_src = local_unit_path
-
+    if list:
+        unit_src_list = list
     print(f"vspec_file_path={vspec_src!r} >> VELOCITAS_CACHE")
-    print(f"unit_file_path={unit_src!r} >> VELOCITAS_CACHE")
+    print(f"unit_file_path_list={unit_src_list!r} >> VELOCITAS_CACHE")
 
 
 if __name__ == "__main__":
