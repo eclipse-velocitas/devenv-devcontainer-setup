@@ -31,6 +31,7 @@ from velocitas_lib import (
 )
 
 CACHE_KEY = "vspec_file_path"
+CACHE_UNIT_KEY = "unit_file_path"
 GENERATION_PATH_AUTO_DETECTION_KEY = "auto"
 
 
@@ -56,7 +57,7 @@ def remove_old_model(old_model_path: str) -> None:
 
 
 def invoke_generator(
-    vspec_file_path: str, output_language: str, output_path: str
+    vspec_file_path: str, unit_file_path: str, output_language: str, output_path: str
 ) -> None:
     """Invoke the model generator and produce a generated model in the cache
        directory.
@@ -69,8 +70,9 @@ def invoke_generator(
     print(
         f"Invoking model generator for language {output_language} and file "
         f"{vspec_file_path!r}"
+        f" with units from {unit_file_path}"
     )
-    generate_model(vspec_file_path, output_language, output_path)
+    generate_model(vspec_file_path, unit_file_path, output_language, output_path)
 
 
 def install_model_if_required(language: str, model_path: str) -> None:
@@ -99,15 +101,19 @@ def main() -> None:
 
     if CACHE_KEY not in cache_data:
         return
+    if CACHE_UNIT_KEY not in cache_data:
+        return
 
     model_src_file = cache_data[CACHE_KEY]
+    model_unit_file = cache_data[CACHE_UNIT_KEY]
     model_language = get_programming_language()
+
     model_output_dir = get_model_output_dir()
 
     os.makedirs(model_output_dir, exist_ok=True)
 
     remove_old_model(model_output_dir)
-    invoke_generator(model_src_file, model_language, model_output_dir)
+    invoke_generator(model_src_file, model_unit_file, model_language, model_output_dir)
     install_model_if_required(model_language, model_output_dir)
     add_model_dependency_if_required(model_language, model_output_dir)
 

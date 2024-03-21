@@ -16,12 +16,11 @@
 
 import os
 import re
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 
 import requests
 from velocitas_lib import (
     get_app_manifest,
-    get_package_path,
     get_project_cache_dir,
     get_workspace_dir,
 )
@@ -39,6 +38,15 @@ def is_uri(path: str) -> bool:
         bool: True if the path is a URI. False otherwise.
     """
     return re.match(r"(\w+)\:\/\/(\w+)", path) is not None
+
+
+def download_unit_file(uri: str, local_file_path: str) -> None:
+    print(f"Downloading default units file to {local_file_path} ...")
+    with requests.get(uri) as infile:
+        os.makedirs(os.path.split(local_file_path)[0], exist_ok=True)
+        with open(local_file_path, "w") as outfile:
+            for item in infile.json()["payload"]["blob"]["rawLines"]:
+                outfile.write(f"{item} \n")
 
 
 def download_file(uri: str, local_file_path: str) -> None:
@@ -119,7 +127,7 @@ def get_vehicle_signal_interfaces(
     return interfaces
 
 
-def get_vehicle_signal_interface_src(interface: Dict[str, Any]) -> str:
+def get_vehicle_signal_interface_src(interface: Dict[str, Any]) -> Tuple[str, str]:
     """Return the URI of the source for the Vehicle Signal Interface.
 
     Args:
@@ -128,7 +136,14 @@ def get_vehicle_signal_interface_src(interface: Dict[str, Any]) -> str:
     Returns:
         str: The URI of the source for the Vehicle Signal Interface.
     """
-    return str(interface["config"]["src"])
+    src = ""
+    unit_src = ""
+    if "config" in interface:
+        if "src" in interface["config"]:
+            src = str(interface["config"]["src"])
+        if "unit_src" in interface["config"]:
+            unit_src = str(interface["config"]["unit_src"])
+    return src, unit_src
 
 
 def main(app_manifest_dict: Dict[str, Any]) -> None:
@@ -142,6 +157,8 @@ def main(app_manifest_dict: Dict[str, Any]) -> None:
         KeyError: If there are multiple vehicle signal interfaces defined
             in the app manifest.
     """
+    # use default unit and qunatities files if not specified different. If we do not need a units <VSS4.0 or qunatities file <VSS4.1 they get ignored when generating
+
     if is_legacy_app_manifest(app_manifest_dict):
         vspec_src = get_legacy_model_src(app_manifest_dict)
     else:
@@ -151,24 +168,38 @@ def main(app_manifest_dict: Dict[str, Any]) -> None:
                 f"Only up to one {FUNCTIONAL_INTERFACE_TYPE_KEY!r} supported!"
             )
         elif len(interfaces) == 1:
-            vspec_src = get_vehicle_signal_interface_src(interfaces[0])
+            vspec_src, unit_src = get_vehicle_signal_interface_src(interfaces[0])
+            if vspec_src == "":
+                vspec_src = "https://github.com/COVESA/vehicle_signal_specification/releases/download/v3.0/vss_rel_3.0.json"
+            if unit_src == "":
+                unit_src = "https://github.com/COVESA/vehicle_signal_specification/blob/v4.0/spec/units.yaml"
         else:
             # FIXME: Fallback solution in case an app does not provide a VSS
             #        file. Code path can be removed once we have a dependency
             #        resolver for our runtimes.
-            vspec_src = os.path.join(
-                get_package_path(), "vehicle-model-lifecycle", "vspec.json"
-            )
+            vspec_src = "https://github.com/COVESA/vehicle_signal_specification/releases/download/v3.0/vss_rel_3.0.json"
+            unit_src = "https://github.com/COVESA/vehicle_signal_specification/blob/v4.0/spec/units.yaml"
 
     local_vspec_path = os.path.join(get_workspace_dir(), os.path.normpath(vspec_src))
+    local_unit_path = os.path.join(get_workspace_dir(), os.path.normpath(unit_src))
 
     if is_uri(vspec_src):
         local_vspec_path = os.path.join(get_project_cache_dir(), "vspec.json")
         download_file(vspec_src, local_vspec_path)
 
+    if is_uri(unit_src):
+        local_unit_path = os.path.join(get_project_cache_dir(), "units.yaml")
+        # since there is no release for units file 4.0 we need to download from blob and this is different than downloading from release
+        if unit_src.find("blob") != -1:
+            download_unit_file(unit_src, local_unit_path)
+        else:
+            download_file(unit_src, local_unit_path)
+
     vspec_src = local_vspec_path
+    unit_src = local_unit_path
 
     print(f"vspec_file_path={vspec_src!r} >> VELOCITAS_CACHE")
+    print(f"unit_file_path={unit_src!r} >> VELOCITAS_CACHE")
 
 
 if __name__ == "__main__":
