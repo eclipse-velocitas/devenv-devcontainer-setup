@@ -46,7 +46,7 @@
 				},
 				"vsmqtt.brokerProfiles": [
 					{
-						"name": "mosquitto (local+Kanto)",
+						"name": "mosquitto",
 						"host": "localhost",
 						"port": 1883,
 						"clientId": "vsmqtt_client"
