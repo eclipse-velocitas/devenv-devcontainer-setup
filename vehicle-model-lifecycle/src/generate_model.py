@@ -89,7 +89,7 @@ def install_model_if_required(language: str, model_path: str) -> None:
 
 
 def add_model_dependency_if_required(language: str, model_path: str) -> None:
-    if language == "cpp" and os.path.isfile(os.path.join(model_path, "conanfile.py")):
+    if language == "cpp" and os.path.isfile(os.path.join(model_path, "conanfile.txt")):
         add_dependency_to_conanfile("vehicle-model", "generated")
 
 
