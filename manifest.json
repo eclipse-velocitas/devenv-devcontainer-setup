@@ -99,6 +99,18 @@
                     "type": "string",
                     "default": "v0.6.0",
                     "description": "Git ref of the model generator repo. Can be a tag, branch or SHA"
+                }, 
+                {
+                    "name": "vssSrc",
+                    "type": "string",
+                    "default": "https://github.com/COVESA/vehicle_signal_specification/releases/download/v3.0/vss_rel_3.0.json",
+                    "description": "This defines the source of the VSS file that should be used for model generation."
+                },
+                {
+                    "name": "vssUnitSrc",
+                    "type": "string",
+                    "default": ["./vehicle-model-lifecycle/src//units.yaml"],
+                    "description": "This defines the source of the units file that should be used for model generation."
                 }
             ]
         },
