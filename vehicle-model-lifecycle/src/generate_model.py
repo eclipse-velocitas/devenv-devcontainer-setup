@@ -31,8 +31,8 @@ from velocitas_lib import (
     require_env,
 )
 
-CACHE_KEY = "vspec_file_path"
-CACHE_KEY_UNIT = "unit_file_path_list"
+CACHE_KEY_VSS_FILE = "vspec_file_path"
+CACHE_KEY_UNITS_LIST = "unit_file_path_list"
 GENERATION_PATH_AUTO_DETECTION_KEY = "auto"
 
 
@@ -103,14 +103,14 @@ def main() -> None:
     """Main entry point for generation of vehicle models."""
     cache_data = get_cache_data()
 
-    if CACHE_KEY not in cache_data:
+    if CACHE_KEY_VSS_FILE not in cache_data:
         return
 
-    if CACHE_KEY_UNIT not in cache_data:
+    if CACHE_KEY_UNITS_LIST not in cache_data:
         return
 
-    model_src_file = cache_data[CACHE_KEY]
-    model_unit_file_list = cache_data[CACHE_KEY_UNIT]
+    model_src_file = cache_data[CACHE_KEY_VSS_FILE]
+    model_unit_file_list = cache_data[CACHE_KEY_UNITS_LIST]
     model_language = get_programming_language()
     model_output_dir = get_model_output_dir()
 
