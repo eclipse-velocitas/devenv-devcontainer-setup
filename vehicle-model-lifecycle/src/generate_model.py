@@ -68,6 +68,7 @@ def invoke_generator(
 
     Args:
         vspec_file_path (str): The path to the vspec file.
+        unit_file_path_list List[str]: A list with paths to the unit file(s) for the vspec file.
         output_language (str): The programming language of the generated model.
         output_path (str): The path where the generated model is stored.
     """

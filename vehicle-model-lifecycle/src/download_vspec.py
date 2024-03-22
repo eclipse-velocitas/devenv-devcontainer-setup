@@ -108,13 +108,13 @@ def get_vehicle_signal_interfaces(
 def get_vehicle_signal_interface_src(
     interface: Dict[str, Any],
 ) -> Tuple[str, List[str]]:
-    """Return the URI of the source for the Vehicle Signal Interface.
+    """Return the URI of the source for the Vehicle Signal Interface and the matching unit file(s).
 
     Args:
         interface (Dict[str, Any]): The interface.
 
     Returns:
-        str: The URI of the source for the Vehicle Signal Interface.
+        Tuple[str, List[str]]: The URI of the source for the Vehicle Signal Interface and a list of the matching unit file(s)
     """
     if "config" in interface:
         if "src" in interface["config"]:
@@ -131,17 +131,22 @@ def get_vehicle_signal_interface_src(
 
 
 def get_vehicle_signal_interface_unit_files(unit_src_list: List[str]) -> List[str]:
+    """Return a list of paths to unit files.
+
+    Args:
+        unit_src_list List[str]: List with uri's or a mixture of local paths and uri's.
+
+    Returns:
+        List[str]]: List with local paths to the unit file(s).
+    """
     id = 0
     list = []
     for unit_src in unit_src_list:
         if is_uri(unit_src):
             local_unit_path = os.path.join(get_project_cache_dir(), f"units_{id}.yaml")
             # since there is no release for units file 4.0 we need to download from blob and this is different than downloading from release
-            if unit_src.find("blob") != -1:
-                download_unit_file(unit_src, local_unit_path)
-            else:
-                print(f"Downloading file from {unit_src!r} to {local_unit_path!r}")
-                download_file(unit_src, local_unit_path)
+            print(f"Downloading file from {unit_src!r} to {local_unit_path!r}")
+            download_file(unit_src, local_unit_path)
             list.append(local_unit_path)
             id += 1
         else:
