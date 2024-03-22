@@ -99,7 +99,7 @@
                     "type": "string",
                     "default": "v0.6.0",
                     "description": "Git ref of the model generator repo. Can be a tag, branch or SHA"
-                }, 
+                },
                 {
                     "name": "vssSrc",
                     "type": "string",
@@ -109,7 +109,7 @@
                 {
                     "name": "vssUnitSrc",
                     "type": "string",
-                    "default": ["./vehicle-model-lifecycle/src//units.yaml"],
+                    "default": "./vehicle-model-lifecycle/src/units.yaml",
                     "description": "This defines the source of the units file that should be used for model generation."
                 }
             ]

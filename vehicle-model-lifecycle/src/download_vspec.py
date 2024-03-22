@@ -18,13 +18,12 @@ import os
 import re
 from typing import Any, Dict, List, Tuple
 
-import requests
 from velocitas_lib import (
+    download_file,
     get_app_manifest,
     get_project_cache_dir,
     get_workspace_dir,
     require_env,
-    download_file,
 )
 
 FUNCTIONAL_INTERFACE_TYPE_KEY = "vehicle-signal-interface"
@@ -123,10 +122,12 @@ def get_vehicle_signal_interface_src(
             src = require_env("vssSrc")
         if "unit_src" in interface["config"]:
             unit_src_list = interface["config"]["unit_src"]
-            if not isinstance(unit_src_list, List[str]):
-                raise Exception("No list specified, please do ['src1', ...]")
+            if not isinstance(unit_src_list, list) or not all(
+                isinstance(item, str) for item in unit_src_list
+            ):
+                raise Exception("No list of strings specified, please do ['src1', ...]")
         else:
-            unit_src_list = require_env("vssUnitSrc")
+            unit_src_list = [require_env("vssUnitSrc")]
     return src, unit_src_list
 
 
@@ -181,7 +182,7 @@ def main(app_manifest_dict: Dict[str, Any]) -> None:
             #        file. Code path can be removed once we have a dependency
             #        resolver for our runtimes.
             vspec_src = require_env("vssSrc")
-            unit_src_list = require_env("vssUnitSrc")
+            unit_src_list = [require_env("vssUnitSrc")]
 
     local_vspec_path = os.path.join(get_workspace_dir(), os.path.normpath(vspec_src))
 
