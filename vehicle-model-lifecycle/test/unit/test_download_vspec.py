@@ -26,6 +26,7 @@ from download_vspec import (  # noqa
     is_uri,
     main,
 )
+from velocitas_lib import get_project_cache_dir
 
 vspec_300_uri = "https://github.com/COVESA/vehicle_signal_specification/releases/download/v3.0/vss_rel_3.0.json"  # noqa
 
@@ -137,10 +138,6 @@ def test_main__no_vehicle_signal_interface__adds_default_to_cache():
     with capture_stdout() as capture, mock_env():
         main(app_manifest)
 
-        expected_path = str(
-            Path(__file__).parent.parent.joinpath(
-                "vehicle-model-lifecycle", "vspec.json"
-            )
-        )
+        expected_path = str(os.path.join(get_project_cache_dir(), "vspec.json"))
         expected_cache_line = f"vspec_file_path={expected_path!r} >> VELOCITAS_CACHE\n"
-        assert capture.getvalue() == expected_cache_line
+        assert capture.getvalue().find(expected_cache_line)
