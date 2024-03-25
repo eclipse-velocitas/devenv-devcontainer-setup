@@ -128,10 +128,10 @@ def get_vehicle_signal_interface_src(
             ):
                 raise Exception("No list of strings specified, please do ['src1', ...]")
         else:
-            unit_src_list = [require_env("vssUnitSrc")]
+            unit_src_list = require_env("vssUnitSrc")
     else:
         src = require_env("vssSrc")
-        unit_src_list = [require_env("vssUnitSrc")]
+        unit_src_list = require_env("vssUnitSrc")
 
     return src, unit_src_list
 
@@ -174,7 +174,7 @@ def main(app_manifest_dict: Dict[str, Any]) -> None:
     """
     if is_legacy_app_manifest(app_manifest_dict):
         vspec_src = get_legacy_model_src(app_manifest_dict)
-        unit_src_list = [require_env("vssUnitSrc")]
+        unit_src_list = require_env("vssUnitSrc")
     else:
         interfaces = get_vehicle_signal_interfaces(app_manifest_dict)
         if len(interfaces) > 1:
@@ -188,7 +188,7 @@ def main(app_manifest_dict: Dict[str, Any]) -> None:
             #        file. Code path can be removed once we have a dependency
             #        resolver for our runtimes.
             vspec_src = require_env("vssSrc")
-            unit_src_list = [require_env("vssUnitSrc")]
+            unit_src_list = require_env("vssUnitSrc")
 
     local_vspec_path = os.path.join(get_workspace_dir(), os.path.normpath(vspec_src))
 
