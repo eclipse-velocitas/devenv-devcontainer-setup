@@ -16,14 +16,14 @@
 
 import os
 import re
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 
-import requests
 from velocitas_lib import (
+    download_file,
     get_app_manifest,
-    get_package_path,
     get_project_cache_dir,
     get_workspace_dir,
+    require_env,
 )
 
 FUNCTIONAL_INTERFACE_TYPE_KEY = "vehicle-signal-interface"
@@ -39,21 +39,6 @@ def is_uri(path: str) -> bool:
         bool: True if the path is a URI. False otherwise.
     """
     return re.match(r"(\w+)\:\/\/(\w+)", path) is not None
-
-
-def download_file(uri: str, local_file_path: str) -> None:
-    """Download vspec file from the given URI to the project cache.
-
-    Args:
-        uri (str): URI from which to download the file.
-        local_file_path (str): The local path where to write file to
-    """
-    print(f"Downloading file from {uri!r} to {local_file_path!r}")
-    with requests.get(uri) as infile:
-        os.makedirs(os.path.split(local_file_path)[0], exist_ok=True)
-        with open(local_file_path, "wb") as outfile:
-            for chunk in infile.iter_content(chunk_size=8192):
-                outfile.write(chunk)
 
 
 def is_legacy_app_manifest(app_manifest_dict: Dict[str, Any]) -> bool:
@@ -119,16 +104,61 @@ def get_vehicle_signal_interfaces(
     return interfaces
 
 
-def get_vehicle_signal_interface_src(interface: Dict[str, Any]) -> str:
-    """Return the URI of the source for the Vehicle Signal Interface.
+def get_vehicle_signal_interface_src(
+    interface: Dict[str, Any],
+) -> Tuple[str, List[str]]:
+    """Return the URI of the source for the Vehicle Signal Interface and the matching unit file(s).
 
     Args:
         interface (Dict[str, Any]): The interface.
 
     Returns:
-        str: The URI of the source for the Vehicle Signal Interface.
+        Tuple[str, List[str]]: The URI of the source for the Vehicle Signal Interface and a list of the matching unit file(s)
     """
-    return str(interface["config"]["src"])
+    if "config" in interface:
+        if "src" in interface["config"]:
+            src = str(interface["config"]["src"])
+        else:
+            src = require_env("vssSrc")
+
+        if "unit_src" in interface["config"]:
+            unit_src_list = interface["config"]["unit_src"]
+            if not isinstance(unit_src_list, list) or not all(
+                isinstance(item, str) for item in unit_src_list
+            ):
+                raise Exception("No list of strings specified, please do ['src1', ...]")
+        else:
+            unit_src_list = require_env("vssUnitSrc")
+    else:
+        src = require_env("vssSrc")
+        unit_src_list = require_env("vssUnitSrc")
+
+    return src, unit_src_list
+
+
+def get_vehicle_signal_interface_unit_files(unit_src_list: List[str]) -> List[str]:
+    """Return a list of paths to unit files.
+
+    Args:
+        unit_src_list List[str]: List with uri's or a mixture of local paths and uri's.
+
+    Returns:
+        List[str]]: List with local paths to the unit file(s).
+    """
+    id = 0
+    list = []
+    for unit_src in unit_src_list:
+        if is_uri(unit_src):
+            local_unit_path = os.path.join(get_project_cache_dir(), f"units_{id}.yaml")
+            # since there is no release for units file 4.0 we need to download from blob and this is different than downloading from release
+            print(f"Downloading file from {unit_src!r} to {local_unit_path!r}")
+            download_file(unit_src, local_unit_path)
+            list.append(local_unit_path)
+            id += 1
+        else:
+            list.append(unit_src)
+
+    return list
 
 
 def main(app_manifest_dict: Dict[str, Any]) -> None:
@@ -144,6 +174,7 @@ def main(app_manifest_dict: Dict[str, Any]) -> None:
     """
     if is_legacy_app_manifest(app_manifest_dict):
         vspec_src = get_legacy_model_src(app_manifest_dict)
+        unit_src_list = require_env("vssUnitSrc")
     else:
         interfaces = get_vehicle_signal_interfaces(app_manifest_dict)
         if len(interfaces) > 1:
@@ -151,24 +182,27 @@ def main(app_manifest_dict: Dict[str, Any]) -> None:
                 f"Only up to one {FUNCTIONAL_INTERFACE_TYPE_KEY!r} supported!"
             )
         elif len(interfaces) == 1:
-            vspec_src = get_vehicle_signal_interface_src(interfaces[0])
+            vspec_src, unit_src_list = get_vehicle_signal_interface_src(interfaces[0])
         else:
             # FIXME: Fallback solution in case an app does not provide a VSS
             #        file. Code path can be removed once we have a dependency
             #        resolver for our runtimes.
-            vspec_src = os.path.join(
-                get_package_path(), "vehicle-model-lifecycle", "vspec.json"
-            )
+            vspec_src = require_env("vssSrc")
+            unit_src_list = require_env("vssUnitSrc")
 
     local_vspec_path = os.path.join(get_workspace_dir(), os.path.normpath(vspec_src))
 
     if is_uri(vspec_src):
         local_vspec_path = os.path.join(get_project_cache_dir(), "vspec.json")
+        print(f"Downloading file from {vspec_src!r} to {local_vspec_path!r}")
         download_file(vspec_src, local_vspec_path)
+
+    unit_src_list = get_vehicle_signal_interface_unit_files(unit_src_list)
 
     vspec_src = local_vspec_path
 
     print(f"vspec_file_path={vspec_src!r} >> VELOCITAS_CACHE")
+    print(f"unit_file_path_list={unit_src_list!r} >> VELOCITAS_CACHE")
 
 
 if __name__ == "__main__":
