@@ -14,10 +14,10 @@
 
 import os
 import sys
-from pathlib import Path
 
 import pytest
 from test_lib import capture_stdout, mock_env
+from velocitas_lib import get_project_cache_dir
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "..", "src"))
 from download_vspec import (  # noqa
@@ -26,7 +26,6 @@ from download_vspec import (  # noqa
     is_uri,
     main,
 )
-from velocitas_lib import get_project_cache_dir
 
 vspec_300_uri = "https://github.com/COVESA/vehicle_signal_specification/releases/download/v3.0/vss_rel_3.0.json"  # noqa
 

@@ -200,8 +200,7 @@ def main(app_manifest_dict: Dict[str, Any]) -> None:
     unit_src_list = get_vehicle_signal_interface_unit_files(unit_src_list)
 
     vspec_src = local_vspec_path
-    if list:
-        unit_src_list = list
+
     print(f"vspec_file_path={vspec_src!r} >> VELOCITAS_CACHE")
     print(f"unit_file_path_list={unit_src_list!r} >> VELOCITAS_CACHE")
 

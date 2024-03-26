@@ -109,7 +109,7 @@
                 {
                     "name": "vssUnitSrc",
                     "type": "object",
-                    "default": ["./vehicle-model-lifecycle/src/units.yaml"], 
+                    "default": ["./vehicle-model-lifecycle/src/units.yaml"],
                     "description": "This defines the source of the units file that should be used for model generation."
                 }
             ]
