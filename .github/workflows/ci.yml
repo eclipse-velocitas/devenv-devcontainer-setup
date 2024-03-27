@@ -50,7 +50,7 @@ jobs:
     container: ghcr.io/eclipse-velocitas/devcontainer-base-images/python:v0.3
     strategy:
       matrix:
-        component: ["_shared", "setup", "grpc-interface-support", "vehicle-model-lifecycle", "sdk-installer"]
+        component: ["_shared", "setup", "grpc-interface-support", "vehicle-model-lifecycle", "sdk-installer", "build-system/cpp-cmake-conan"]
       fail-fast: false
 
     steps:
@@ -102,7 +102,7 @@ jobs:
     strategy:
       matrix:
         language: ["python", "cpp"]
-        component: ["setup", "grpc-interface-support", "vehicle-model-lifecycle", "sdk-installer"]
+        component: ["setup", "grpc-interface-support", "vehicle-model-lifecycle", "sdk-installer", "build-system/cpp-cmake-conan"]
       fail-fast: false
 
     steps:
