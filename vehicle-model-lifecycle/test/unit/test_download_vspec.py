@@ -138,5 +138,10 @@ def test_main__no_vehicle_signal_interface__adds_default_to_cache():
         main(app_manifest)
 
         expected_path = str(os.path.join(get_project_cache_dir(), "vspec.json"))
+        expected_unit_path = str(os.path.join(get_project_cache_dir(), "units.yaml"))
         expected_cache_line = f"vspec_file_path={expected_path!r} >> VELOCITAS_CACHE\n"
+        expected_unit_cache_line = (
+            f"unit_file_list={expected_unit_path!r} >> VELOCITAS_CACHE\n"
+        )
         assert capture.getvalue().find(expected_cache_line)
+        assert capture.getvalue().find(expected_unit_cache_line)
