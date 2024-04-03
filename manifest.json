@@ -97,7 +97,7 @@
                 {
                     "name": "modelGeneratorGitRef",
                     "type": "string",
-                    "default": "v0.6.0",
+                    "default": "v0.7.0",
                     "description": "Git ref of the model generator repo. Can be a tag, branch or SHA"
                 },
                 {
