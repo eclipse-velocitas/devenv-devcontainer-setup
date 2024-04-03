@@ -14,6 +14,7 @@
 
 """Provides methods and functions to download vehicle model source files."""
 
+import json
 import os
 import re
 from typing import Any, Dict, List, Tuple
@@ -21,6 +22,7 @@ from typing import Any, Dict, List, Tuple
 from velocitas_lib import (
     download_file,
     get_app_manifest,
+    get_package_path,
     get_project_cache_dir,
     get_workspace_dir,
     require_env,
@@ -104,6 +106,19 @@ def get_vehicle_signal_interfaces(
     return interfaces
 
 
+def get_default_unit_src_list() -> List[str]:
+    """Return default unit sources list.
+
+    Returns:
+        List[str]: List containing default unit sources
+    """
+    source = require_env("vssUnitSrc")
+    if isinstance(source, str):
+        return source.split(",")
+    else:
+        return []
+
+
 def get_vehicle_signal_interface_src(
     interface: Dict[str, Any],
 ) -> Tuple[str, List[str]]:
@@ -128,10 +143,10 @@ def get_vehicle_signal_interface_src(
             ):
                 raise Exception("No list of strings specified, please do ['src1', ...]")
         else:
-            unit_src_list = require_env("vssUnitSrc")
+            unit_src_list = get_default_unit_src_list()
     else:
         src = require_env("vssSrc")
-        unit_src_list = require_env("vssUnitSrc")
+        unit_src_list = get_default_unit_src_list()
 
     return src, unit_src_list
 
@@ -156,7 +171,7 @@ def get_vehicle_signal_interface_unit_files(unit_src_list: List[str]) -> List[st
             list.append(local_unit_path)
             id += 1
         else:
-            list.append(unit_src)
+            list.append(os.path.join(get_package_path(), os.path.normpath(unit_src)))
 
     return list
 
@@ -174,7 +189,7 @@ def main(app_manifest_dict: Dict[str, Any]) -> None:
     """
     if is_legacy_app_manifest(app_manifest_dict):
         vspec_src = get_legacy_model_src(app_manifest_dict)
-        unit_src_list = require_env("vssUnitSrc")
+        unit_src_list = get_default_unit_src_list()
     else:
         interfaces = get_vehicle_signal_interfaces(app_manifest_dict)
         if len(interfaces) > 1:
@@ -188,7 +203,7 @@ def main(app_manifest_dict: Dict[str, Any]) -> None:
             #        file. Code path can be removed once we have a dependency
             #        resolver for our runtimes.
             vspec_src = require_env("vssSrc")
-            unit_src_list = require_env("vssUnitSrc")
+            unit_src_list = get_default_unit_src_list()
 
     local_vspec_path = os.path.join(get_workspace_dir(), os.path.normpath(vspec_src))
 
@@ -202,7 +217,8 @@ def main(app_manifest_dict: Dict[str, Any]) -> None:
     vspec_src = local_vspec_path
 
     print(f"vspec_file_path={vspec_src!r} >> VELOCITAS_CACHE")
-    print(f"unit_file_path_list={unit_src_list!r} >> VELOCITAS_CACHE")
+    cache_unit_src_list = f"'{json.dumps(unit_src_list)}'"
+    print(f"unit_file_path_list={cache_unit_src_list} >> VELOCITAS_CACHE")
 
 
 if __name__ == "__main__":

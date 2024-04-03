@@ -111,7 +111,7 @@ def main() -> None:
         return
 
     model_src_file = cache_data[CACHE_KEY_VSS_FILE]
-    model_unit_file_list = cache_data[CACHE_KEY_UNITS_LIST]
+    model_unit_file_list = cache_data[CACHE_KEY_UNITS_LIST][1:-1].split(", ")
     model_language = get_programming_language()
     model_output_dir = get_model_output_dir()
 
