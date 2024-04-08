@@ -103,6 +103,22 @@
             ]
         },
         {
+            "id": "conan-setup",
+            "description": "Sets up the conan client to connect to different remotes with credentials.",
+            "programs": [
+                {
+                    "id": "run",
+                    "executable": "python3",
+                    "args": [ "./components/conan-setup/src/run.py" ]
+                }
+            ],
+            "onPostInit": [
+                {
+                    "ref": "run"
+                }
+            ]
+        },
+        {
             "id": "sdk-installer",
             "type": "setup",
             "onPostInit": [
@@ -233,22 +249,6 @@
                     "type": "string",
                     "required": true,
                     "description": "The programming language of the project. Either 'python' or 'cpp'"
-                }
-            ]
-        },
-        {
-            "id": "conan-setup",
-            "description": "Sets up the conan client to connect to different remotes with credentials.",
-            "programs": [
-                {
-                    "id": "run",
-                    "executable": "python3",
-                    "args": [ "./components/conan-setup/src/run.py" ]
-                }
-            ],
-            "onPostInit": [
-                {
-                    "ref": "run"
                 }
             ]
         }
