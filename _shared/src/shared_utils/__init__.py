@@ -58,3 +58,20 @@ def replace_in_file(file_path: str, text: str, replacement: str) -> None:
     with open(file_path, mode="w") as file:
         for line in buffer:
             file.write(line)
+
+
+def get_valid_arch(arch: str) -> str:
+    """Return a known architecture for the given `arch`.
+
+    Args:
+        arch (str): The architecture of the profile.
+
+    Returns:
+        str: valid architecture.
+    """
+    if "x86_64" in arch or "amd64" in arch:
+        return "x86_64"
+    elif "aarch64" in arch or "arm64" in arch:
+        return "aarch64"
+
+    raise ValueError(f"Unknown architecture: {arch}")
