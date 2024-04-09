@@ -112,11 +112,7 @@ def get_default_unit_src_list() -> List[str]:
     Returns:
         List[str]: List containing default unit sources
     """
-    source = require_env("vssUnitSrc")
-    if isinstance(source, str):
-        return source.split(",")
-    else:
-        return []
+    return json.loads(require_env("vssUnitSrc"))
 
 
 def get_vehicle_signal_interface_src(
@@ -217,8 +213,7 @@ def main(app_manifest_dict: Dict[str, Any]) -> None:
     vspec_src = local_vspec_path
 
     print(f"vspec_file_path={vspec_src!r} >> VELOCITAS_CACHE")
-    cache_unit_src_list = f"'{json.dumps(unit_src_list)}'"
-    print(f"unit_file_path_list={cache_unit_src_list} >> VELOCITAS_CACHE")
+    print(f"unit_file_path_list={json.dumps(unit_src_list)} >> VELOCITAS_CACHE")
 
 
 if __name__ == "__main__":
