@@ -112,7 +112,10 @@ def get_default_unit_src_list() -> List[str]:
     Returns:
         List[str]: List containing default unit sources
     """
-    return json.loads(require_env("vssUnitSrc"))
+    unit_src_list = json.loads(require_env("vssUnitSrc"))
+    for item in unit_src_list:
+        item = os.path.join(get_package_path(), os.path.normpath(item))
+    return unit_src_list
 
 
 def get_vehicle_signal_interface_src(
@@ -167,7 +170,7 @@ def get_vehicle_signal_interface_unit_files(unit_src_list: List[str]) -> List[st
             list.append(local_unit_path)
             id += 1
         else:
-            list.append(os.path.join(get_package_path(), os.path.normpath(unit_src)))
+            list.append(unit_src)
 
     return list
 
