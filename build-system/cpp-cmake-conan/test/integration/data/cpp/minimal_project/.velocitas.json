@@ -1,0 +1,16 @@
+{
+    "packages": [
+        {
+            "name": "devenv-devcontainer-setup",
+            "version": "hash_id"
+        }
+    ],
+    "components": [
+        { "id": "build-system" }
+    ],
+    "variables": {
+        "language": "cpp",
+        "repoType": "app"
+    },
+    "cliVersion": "v0.7.0"
+}

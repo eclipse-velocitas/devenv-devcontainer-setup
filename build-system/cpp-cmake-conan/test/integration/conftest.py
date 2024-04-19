@@ -22,7 +22,16 @@ def pytest_sessionstart(session):
     before performing collection and entering the run test loop.
     """
 
-    os.chdir(os.environ["VELOCITAS_TEST_ROOT"])
+    os.chdir(
+        os.path.join(
+            os.environ["VELOCITAS_COMPONENT_PATH"],
+            "test",
+            "integration",
+            "data",
+            os.environ["VELOCITAS_TEST_LANGUAGE"],
+            "minimal_project",
+        )
+    )
 
     if os.environ["VELOCITAS_TEST_LANGUAGE"] == "cpp":
         # FIXME: The C++ base image does not install conan globally

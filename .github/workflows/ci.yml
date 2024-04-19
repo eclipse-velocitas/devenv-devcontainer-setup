@@ -136,6 +136,7 @@ jobs:
           export THIS_REPO_PATH=$(pwd)
           export VELOCITAS_TEST_LANGUAGE=${{ matrix.language }}
           export VELOCITAS_TEST_ROOT=test/${{ matrix.language }}/repo
+          export VELOCITAS_COMPONENT_PATH=${{ matrix.component }}
 
           python -m pip install -r ./${{ matrix.component }}/test/requirements.txt
           python -m pip install -r ./${{ matrix.component }}/requirements.txt
