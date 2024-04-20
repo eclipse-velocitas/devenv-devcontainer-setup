@@ -56,8 +56,8 @@ def move_generated_sources(
 
     Returns:
         Tuple[List[str], List[str]]: A tuple containing
-            [0] = a list of all headers
-            [1] = a list of all sources
+            [0] = a list of the paths to all headers
+            [1] = a list of the paths to all sources
     """
 
     headers = glob.glob(os.path.join(generated_source_dir, "*.h"))

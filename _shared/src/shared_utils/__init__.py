@@ -55,7 +55,7 @@ def replace_in_file(file_path: str, text: str, replacement: str) -> None:
     for line in open(file_path, encoding="utf-8"):
         buffer.append(line.replace(text, replacement))
 
-    with open(file_path, mode="w") as file:
+    with open(file_path, mode="w", encoding="utf-8") as file:
         for line in buffer:
             file.write(line)
 
