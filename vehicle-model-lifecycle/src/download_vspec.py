@@ -133,11 +133,11 @@ def get_vehicle_signal_interface_src(
     Returns:
         Tuple[str, List[str]]: The URI of the source for the Vehicle Signal Interface and a list of the matching unit file(s)
     """
+    unit_src_list = get_default_unit_src_list()
+    src = require_env("vssSrc")
     if "config" in interface:
         if "src" in interface["config"]:
             src = str(interface["config"]["src"])
-        else:
-            src = require_env("vssSrc")
 
         if "unit_src" in interface["config"]:
             unit_src_list = interface["config"]["unit_src"]
@@ -145,11 +145,6 @@ def get_vehicle_signal_interface_src(
                 isinstance(item, str) for item in unit_src_list
             ):
                 raise Exception("No list of strings specified, please do ['src1', ...]")
-        else:
-            unit_src_list = get_default_unit_src_list()
-    else:
-        src = require_env("vssSrc")
-        unit_src_list = get_default_unit_src_list()
 
     return src, unit_src_list
 
@@ -190,9 +185,14 @@ def main(app_manifest_dict: Dict[str, Any]) -> None:
         KeyError: If there are multiple vehicle signal interfaces defined
             in the app manifest.
     """
+    # FIXME: Fallback solution in case an app does not provide a VSS
+    #        file. Code path can be removed once we have a dependency
+    #        resolver for our runtimes.
+    vspec_src = require_env("vssSrc")
+    unit_src_list = get_default_unit_src_list()
+
     if is_legacy_app_manifest(app_manifest_dict):
         vspec_src = get_legacy_model_src(app_manifest_dict)
-        unit_src_list = get_default_unit_src_list()
     else:
         interfaces = get_vehicle_signal_interfaces(app_manifest_dict)
         if len(interfaces) > 1:
@@ -201,12 +201,6 @@ def main(app_manifest_dict: Dict[str, Any]) -> None:
             )
         elif len(interfaces) == 1:
             vspec_src, unit_src_list = get_vehicle_signal_interface_src(interfaces[0])
-        else:
-            # FIXME: Fallback solution in case an app does not provide a VSS
-            #        file. Code path can be removed once we have a dependency
-            #        resolver for our runtimes.
-            vspec_src = require_env("vssSrc")
-            unit_src_list = get_default_unit_src_list()
 
     local_vspec_path = os.path.join(get_workspace_dir(), os.path.normpath(vspec_src))
 
