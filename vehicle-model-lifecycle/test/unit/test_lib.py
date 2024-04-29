@@ -51,7 +51,7 @@ class MockEnv:
         os.environ["VELOCITAS_WORKSPACE_DIR"] = self.workspace_dir
         os.environ["VELOCITAS_APP_MANIFEST"] = json.dumps(self.app_manifest)
         os.environ["VELOCITAS_PACKAGE_DIR"] = str(Path(__file__).parent.parent)
-        os.environ["vssUnitSrc"] = "../../src/units.yaml"
+        os.environ["vssUnitSrc"] = '["units.yaml"]'
         os.environ[
             "vssSrc"
         ] = "https://github.com/COVESA/vehicle_signal_specification/releases/download/v3.0/vss_rel_3.0.json"

@@ -113,9 +113,13 @@ def get_default_unit_src_list() -> List[str]:
         List[str]: List containing default unit sources
     """
     unit_src_list = json.loads(require_env("vssUnitSrc"))
-    for item in unit_src_list:
-        item = os.path.join(get_package_path(), os.path.normpath(item))
-    return unit_src_list
+    unit_list = []
+    if isinstance(unit_src_list, list):
+        for item in unit_src_list:
+            unit_list.append(os.path.join(get_package_path(), os.path.normpath(item)))
+    else:
+        raise Exception("No list of strings specified, please do ['src1', ...]")
+    return unit_list
 
 
 def get_vehicle_signal_interface_src(

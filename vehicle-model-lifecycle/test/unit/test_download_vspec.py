@@ -12,8 +12,10 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+import json
 import os
 import sys
+from typing import List
 
 import pytest
 from test_lib import capture_stdout, mock_env
@@ -22,6 +24,7 @@ from velocitas_lib import get_project_cache_dir
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "..", "src"))
 from download_vspec import (  # noqa
     get_legacy_model_src,
+    get_package_path,
     is_proper_interface_type,
     is_uri,
     main,
@@ -138,10 +141,10 @@ def test_main__no_vehicle_signal_interface__adds_default_to_cache():
         main(app_manifest)
 
         expected_path = str(os.path.join(get_project_cache_dir(), "vspec.json"))
-        expected_unit_path = str(os.path.join(get_project_cache_dir(), "units.yaml"))
+        expected_unit_path: List[str] = [os.path.join(get_package_path(), "units.yaml")]
         expected_cache_line = f"vspec_file_path={expected_path!r} >> VELOCITAS_CACHE\n"
         expected_unit_cache_line = (
-            f"unit_file_list={expected_unit_path!r} >> VELOCITAS_CACHE\n"
+            f"unit_file_path_list={json.dumps(expected_unit_path)} >> VELOCITAS_CACHE\n"
         )
-        assert capture.getvalue().find(expected_cache_line)
-        assert capture.getvalue().find(expected_unit_cache_line)
+        assert capture.getvalue().find(expected_cache_line) != -1
+        assert capture.getvalue().find(expected_unit_cache_line) != -1
