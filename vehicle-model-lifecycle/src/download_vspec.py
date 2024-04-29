@@ -17,7 +17,7 @@
 import json
 import os
 import re
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from velocitas_lib import (
     download_file,
@@ -124,7 +124,7 @@ def get_default_unit_src_list() -> List[str]:
 
 def get_vehicle_signal_interface_src(
     interface: Dict[str, Any],
-) -> Tuple[str, List[str]]:
+) -> Tuple[Optional[str], Optional[List[str]]]:
     """Return the URI of the source for the Vehicle Signal Interface and the matching unit file(s).
 
     Args:
@@ -133,8 +133,8 @@ def get_vehicle_signal_interface_src(
     Returns:
         Tuple[str, List[str]]: The URI of the source for the Vehicle Signal Interface and a list of the matching unit file(s)
     """
-    unit_src_list = get_default_unit_src_list()
-    src = require_env("vssSrc")
+    unit_src_list = None
+    src = None
     if "config" in interface:
         if "src" in interface["config"]:
             src = str(interface["config"]["src"])
@@ -200,7 +200,13 @@ def main(app_manifest_dict: Dict[str, Any]) -> None:
                 f"Only up to one {FUNCTIONAL_INTERFACE_TYPE_KEY!r} supported!"
             )
         elif len(interfaces) == 1:
-            vspec_src, unit_src_list = get_vehicle_signal_interface_src(interfaces[0])
+            opt_vspec_src, opt_unit_src_list = get_vehicle_signal_interface_src(
+                interfaces[0]
+            )
+            if opt_vspec_src is not None:
+                vspec_src = opt_vspec_src
+            if opt_unit_src_list is not None:
+                unit_src_list = opt_unit_src_list
 
     local_vspec_path = os.path.join(get_workspace_dir(), os.path.normpath(vspec_src))
 
