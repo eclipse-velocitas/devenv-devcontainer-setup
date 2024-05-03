@@ -185,9 +185,6 @@ def main(app_manifest_dict: Dict[str, Any]) -> None:
         KeyError: If there are multiple vehicle signal interfaces defined
             in the app manifest.
     """
-    # FIXME: Fallback solution in case an app does not provide a VSS
-    #        file. Code path can be removed once we have a dependency
-    #        resolver for our runtimes.
     vspec_src = require_env("vssSrc")
     unit_src_list = get_default_unit_src_list()
 
