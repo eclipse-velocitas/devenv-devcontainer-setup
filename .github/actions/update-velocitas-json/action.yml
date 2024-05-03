@@ -28,11 +28,12 @@ runs:
       shell: bash
       env:
         BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+        BRANCH_NAME_PREFIX: "@"
       run: |
         if [ "${{ inputs.template_path }}" != "None" ]; then
           echo "Copying template file..."
           cp -f ${{ inputs.template_path }} ${{ inputs.project_path }}/.velocitas.json
         fi
 
-        NEW_CONFIG="$(jq --arg BRANCH "$BRANCH_NAME" '.packages[0].version |= $BRANCH'  ${{ inputs.project_path }}/.velocitas.json)"
+        NEW_CONFIG="$(jq --arg BRANCH "$BRANCH_NAME_PREFIX$BRANCH_NAME" '.packages[0].version |= $BRANCH'  ${{ inputs.project_path }}/.velocitas.json)"
         echo "${NEW_CONFIG}" > ${{ inputs.project_path }}/.velocitas.json
