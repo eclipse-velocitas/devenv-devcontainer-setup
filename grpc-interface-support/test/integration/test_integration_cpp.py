@@ -31,17 +31,7 @@ def get_project_cache_dir() -> str:
     return get_subdirs(project_caches)[0]
 
 
-def test_grpc_package_is_generated():
-    service_path = os.path.join(get_project_cache_dir(), "services", "seats")
-
-    assert os.path.isdir(service_path)
-    assert os.path.isfile(os.path.join(service_path, "CMakeLists.txt"))
-    assert os.path.isfile(os.path.join(service_path, "conanfile.py"))
-    assert os.path.isdir(os.path.join(service_path, "include"))
-    assert os.path.isdir(os.path.join(service_path, "src"))
-
-
-def test_project_depends_on_grpc_package():
+def get_dependency_count() -> int:
     # Use a number rather than a bool to ensure
     # the generator has added the dependency only
     # once.
@@ -55,10 +45,49 @@ def test_project_depends_on_grpc_package():
 
         if in_requires_section and line.strip() == "seats-service-sdk/generated":
             dependency_count = dependency_count + 1
+    return dependency_count
 
-    assert dependency_count == 1
+
+def ensure_package_is_generated():
+    service_path = os.path.join(get_project_cache_dir(), "services", "seats")
+
+    assert os.path.isdir(service_path)
+    assert os.path.isfile(os.path.join(service_path, "CMakeLists.txt"))
+    assert os.path.isfile(os.path.join(service_path, "conanfile.py"))
+    assert os.path.isdir(os.path.join(service_path, "include"))
+    assert os.path.isdir(os.path.join(service_path, "src"))
 
 
-def test_project_is_buildable():
+def ensure_build_successful():
     assert subprocess.check_call(["./install_dependencies.sh"]) == 0
     assert subprocess.check_call(["./build.sh"]) == 0
+
+
+def ensure_app_running() -> subprocess.Popen:
+    return subprocess.Popen(
+        ["./build/bin/app"], env={"SDV_SEATS_ADDRESS": "127.0.0.1:1234"}
+    )
+
+
+def ensure_project_initialized():
+    assert subprocess.check_call(["velocitas", "init", "-v"]) == 0
+
+
+def test__integration():
+    os.chdir(os.environ["SERVICE_SERVER_ROOT"])
+    ensure_project_initialized()
+    ensure_package_is_generated()
+    assert get_dependency_count() == 1
+    ensure_build_successful()
+    server_process = ensure_app_running()
+
+    os.chdir(os.environ["SERVICE_CLIENT_ROOT"])
+    ensure_project_initialized()
+    ensure_package_is_generated()
+    assert get_dependency_count() == 1
+    ensure_build_successful()
+    client_process = ensure_app_running()
+
+    client_code = client_process.wait()
+    server_process.kill()
+    assert client_code == 0

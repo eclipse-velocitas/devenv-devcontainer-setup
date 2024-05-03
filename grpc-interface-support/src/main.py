@@ -20,7 +20,6 @@ from typing import Any, Dict
 import proto
 from cpp import CppGrpcInterfaceGenerator
 from generator import GrpcInterfaceGenerator
-from python import PythonGrpcInterfaceGenerator
 from shared_utils import create_truncated_string
 from velocitas_lib import download_file, get_programming_language, get_project_cache_dir
 from velocitas_lib.functional_interface import get_interfaces_for_type
@@ -80,15 +79,21 @@ def generate_single_service(
         if_config (Dict[str, Any]): The grpc-interface config.
     """
     print(
-        f"Generating service SDK for {create_truncated_string(if_config['src'], 40)!r}"
+        f"Generating service SDK for {create_truncated_string(if_config['src'], 100)!r}"
     )
     proto_file_handle = download_proto(if_config)
     service_sdk_dir = create_service_sdk_dir(proto_file_handle)
 
+    generator.generate_package(service_sdk_dir, proto_file_handle)
+
     if "required" in if_config:
-        generator.generate_service_client_sdk(service_sdk_dir, proto_file_handle)
+        generator.generate_service_client(service_sdk_dir, proto_file_handle)
     if "provided" in if_config:
-        pass
+        generator.generate_service_server(service_sdk_dir, proto_file_handle)
+
+    generator.install_package(service_sdk_dir, proto_file_handle)
+    # generator.update_references(service_sdk_dir, proto_file_handle)
+    # generator.update_auto_generated_code(service_sdk_dir, proto_file_handle)
 
 
 def main(verbose: bool) -> None:
@@ -104,7 +109,7 @@ def main(verbose: bool) -> None:
 
     LANGUAGE_GENERATORS = {
         "cpp": CppGrpcInterfaceGenerator(verbose),
-        "python": PythonGrpcInterfaceGenerator(verbose),
+        #        "python": PythonGrpcInterfaceGenerator(verbose),
     }
 
     if get_programming_language() not in LANGUAGE_GENERATORS:
@@ -121,7 +126,6 @@ def main(verbose: bool) -> None:
 
     for grpc_service in interfaces:
         if_config = grpc_service["config"]
-        print("Generating service SDK...")
         generate_single_service(generator, if_config)
 
 

@@ -3,7 +3,7 @@
 {
 	"name": "C++ vehicle ${{ repoType }}",
 	"build": {
-		"dockerfile": "Dockerfile"
+		"dockerfile": "Dockerfile ${{ country }}"
 	},
 	"runArgs": [
 		"--init",

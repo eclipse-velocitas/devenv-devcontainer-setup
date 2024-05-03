@@ -35,6 +35,12 @@
                     "type": "string",
                     "required": true,
                     "description": "Path of the AppManifest file, relative to the .velocitas.json"
+                },
+                {
+                    "name": "country",
+                    "type": "string",
+                    "default": "europe",
+                    "description": "Path of the AppManifest file, relative to the .velocitas.json"
                 }
             ]
         },

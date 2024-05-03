@@ -18,10 +18,7 @@ import shutil
 import subprocess
 from typing import List, Optional, Tuple
 
-from velocitas_lib import get_package_path, get_workspace_dir
-
-from shared_utils import to_camel_case
-from shared_utils.templates import CopySpec, copy_templates
+from velocitas_lib import get_workspace_dir
 
 
 def get_required_sdk_version() -> Optional[str]:
@@ -78,61 +75,6 @@ def move_generated_sources(
         sources_relative.append(os.path.join(src_dir_rel, rel_path))
 
     return headers_relative, sources_relative
-
-
-def create_conan_project(
-    project_dir: str, interface_namespace: str, service_name: str
-) -> None:
-    """Create a conan project in the given project directory.
-
-    Args:
-        project_dir (str): The directory to create the project in.
-        interface_namespace (str): The namespace of the proto file.
-        service_name (str): The name of the service (from proto file).
-    """
-
-    include_dir = f"include/services/{service_name.lower()}"
-    src_dir = f"src/services/{service_name.lower()}"
-
-    headers_relative, sources_relative = move_generated_sources(
-        project_dir, project_dir, include_dir, src_dir
-    )
-
-    files_to_copy = [
-        CopySpec(source_path="CMakeLists.txt"),
-        CopySpec(source_path="conanfile.py"),
-        CopySpec(
-            "ServiceNameServiceClientFactory.h",
-            f"{include_dir}/{to_camel_case(service_name)}ServiceClientFactory.h",
-        ),
-        CopySpec(
-            "ServiceNameServiceClientFactory.cc",
-            f"{src_dir}/{to_camel_case(service_name)}ServiceClientFactory.cc",
-        ),
-    ]
-
-    headers_relative.append(
-        f"{include_dir}/{to_camel_case(service_name)}ServiceClientFactory.h"
-    )
-    sources_relative.append(
-        f"{src_dir}/{to_camel_case(service_name)}ServiceClientFactory.cc"
-    )
-
-    variables = {
-        "service_name": service_name,
-        "service_name_lower": service_name.lower(),
-        "service_name_camel_case": to_camel_case(service_name),
-        "headers": "\n\t".join(headers_relative),
-        "sources": "\n\t".join(sources_relative),
-        "package_id": interface_namespace.replace(".", "::"),
-        "core_sdk_version": str(get_required_sdk_version()),
-    }
-
-    template_dir = os.path.join(
-        get_package_path(), "grpc-interface-support", "templates", "cpp"
-    )
-
-    copy_templates(template_dir, project_dir, files_to_copy, variables)
 
 
 def export_conan_project(conan_project_path: str) -> None:

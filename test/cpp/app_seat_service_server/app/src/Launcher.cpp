@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Contributors to the Eclipse Foundation
+ * Copyright (c) 2024 Contributors to the Eclipse Foundation
  *
  * This program and the accompanying materials are made available under the
  * terms of the Apache License, Version 2.0 which is available at
@@ -14,24 +14,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef VEHICLE_APP_SDK_EXT_GRPC_SERVICE_CLIENT_H
-#define VEHICLE_APP_SDK_EXT_GRPC_SERVICE_CLIENT_H
-
-#include "sdk/Status.h"
-#include "sdk/VehicleApp.h"
+#include "sdk/middleware/Middleware.h"
+#include "services/seats/SeatsServiceServerFactory.h"
+#include "SeatsServiceServer.h"
 
 #include <memory>
-#include <string>
 
-namespace example {
+using namespace velocitas;
 
-class SampleApp : public velocitas::VehicleApp {
-public:
-    SampleApp();
+int main(int argc, char** argv) {
+    auto seatsImpl = std::make_shared<SeatsService>();
 
-    void onStart() override;
-};
+    auto seatServer =
+        SeatsServiceServerFactory::create(Middleware::getInstance(), seatsImpl);
 
-} // namespace example
-
-#endif // VEHICLE_APP_SDK_EXT_GRPC_SERVICE_CLIENT_H
+    seatServer->Wait();
+    return 0;
+}

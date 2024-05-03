@@ -24,7 +24,13 @@ class GrpcInterfaceGenerator(ABC):
         pass
 
     @abstractmethod
-    def generate_service_client_sdk(
+    def generate_package(
+        self, output_path: str, proto_file_handle: proto.ProtoFileHandle
+    ) -> None:
+        pass
+
+    @abstractmethod
+    def generate_service_client(
         self, output_path: str, proto_file_handle: proto.ProtoFileHandle
     ) -> None:
         """Generate a service client for the given proto file.
@@ -37,7 +43,7 @@ class GrpcInterfaceGenerator(ABC):
         pass
 
     @abstractmethod
-    def generate_service_server_sdk(
+    def generate_service_server(
         self, output_path: str, proto_file_handle: proto.ProtoFileHandle
     ) -> None:
         """Generate a service server for the given proto file.
@@ -47,4 +53,10 @@ class GrpcInterfaceGenerator(ABC):
             proto_file_handle (proto.ProtoFileHandle): A proto file handle
                 which represents the service contract.
         """
+        pass
+
+    @abstractmethod
+    def install_package(
+        self, output_path: str, proto_file_handle: proto.ProtoFileHandle
+    ) -> None:
         pass
