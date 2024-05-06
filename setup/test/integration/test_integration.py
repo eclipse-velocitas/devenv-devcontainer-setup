@@ -99,7 +99,6 @@ def test_files_synced():
         .decode()
         .split("\n")
     )
-    print(changed_files)
     language = os.environ["VELOCITAS_TEST_LANGUAGE"]
 
     changes_in_common = False

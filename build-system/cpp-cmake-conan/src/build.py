@@ -83,12 +83,18 @@ def build(
     host_arch: str,
     build_target: str,
     static_build: bool,
+    coverage: bool = True,
 ) -> None:
     build_folder = os.path.join(safe_get_workspace_dir(), "build")
 
-    cxx_flags = "--coverage -g -O0"
+    cxx_flags = ["-g"]
+    if coverage:
+        cxx_flags.append("--coverage")
+
     if build_variant == "release":
-        cxx_flags = "--coverage -s -g -O3"
+        cxx_flags.append("-O3")
+    else:
+        cxx_flags.append("-O0")
 
     os.makedirs(build_folder, exist_ok=True)
 
@@ -111,10 +117,10 @@ def build(
             f"-DSTATIC_BUILD:BOOL={'TRUE' if static_build else 'FALSE'}",
             xcompile_toolchain_file,
             "-S..",
-            "-B../build",
+            "-B.",
             "-G",
             "Ninja",
-            f"-DCMAKE_CXX_FLAGS={cxx_flags}",
+            f"-DCMAKE_CXX_FLAGS={' '.join(cxx_flags)}",
         ],
         cwd=build_folder,
     )
