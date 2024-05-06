@@ -1,6 +1,6 @@
 {
     "packages": {
-        "package_under_test": "main"
+        "package_under_test": "@main"
     },
     "variables": {
         "language": "python",
