@@ -35,5 +35,5 @@ runs:
           cp -f ${{ inputs.template_path }} ${{ inputs.project_path }}/.velocitas.json
         fi
 
-        NEW_CONFIG="$(jq --arg BRANCH "$BRANCH_NAME_PREFIX$BRANCH_NAME" '.packages[0].version |= $BRANCH'  ${{ inputs.project_path }}/.velocitas.json)"
+        NEW_CONFIG="$(jq --arg BRANCH "$BRANCH_NAME_PREFIX$BRANCH_NAME" '.packages |= . + { (. | keys_unsorted[0]): $BRANCH }'  ${{ inputs.project_path }}/.velocitas.json)"
         echo "${NEW_CONFIG}" > ${{ inputs.project_path }}/.velocitas.json
