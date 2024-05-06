@@ -1,7 +1,7 @@
 {
     "packages": [
         {
-            "name": "thispackage",
+            "name": "package_under_test",
             "version": "main"
         }
     ],

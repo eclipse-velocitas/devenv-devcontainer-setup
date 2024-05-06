@@ -135,7 +135,7 @@ jobs:
       - name: Setup local package version
         shell: bash
         run: |
-          export PACKAGE_PATH=~/.velocitas/packages/thispackage/main
+          export PACKAGE_PATH=~/.velocitas/packages/package_under_test/main
           mkdir -p $PACKAGE_PATH
           cp -r * $PACKAGE_PATH
           ls -al $PACKAGE_PATH
