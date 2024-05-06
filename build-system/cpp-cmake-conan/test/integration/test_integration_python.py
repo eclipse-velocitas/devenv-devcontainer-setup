@@ -1,4 +1,4 @@
-# Copyright (c) 2023-2024 Contributors to the Eclipse Foundation
+# Copyright (c) 2024 Contributors to the Eclipse Foundation
 #
 # This program and the accompanying materials are made available under the
 # terms of the Apache License, Version 2.0 which is available at
@@ -13,15 +13,12 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import os
-import subprocess
+
+import pytest
+
+if not os.environ["VELOCITAS_TEST_LANGUAGE"] == "python":
+    pytest.skip("skipping python only tests", allow_module_level=True)
 
 
-def pytest_sessionstart(session):
-    """
-    Called after the Session object has been created and
-    before performing collection and entering the run test loop.
-    """
-
-    os.chdir(os.environ["VELOCITAS_TEST_ROOT"])
-
-    subprocess.check_call(["velocitas", "init", "-v"], stdin=subprocess.PIPE)
+def test_dummy():
+    pass

@@ -36,7 +36,7 @@ def test_no_sdk_reference_found__latest_installed():
     with open("./conanfile.txt", mode="w", encoding="utf-8") as conanfile:
         conanfile.write(conanfile_contents)
 
-    subprocess.check_call(["velocitas", "init", "-f", "-v"], stdin=subprocess.PIPE)
+    subprocess.check_call(["velocitas", "init", "-v"], stdin=subprocess.PIPE)
     assert is_package_installed("vehicle-app-sdk")
 
 
@@ -48,5 +48,5 @@ vehicle-app-sdk/0.3.3
     with open("./conanfile.txt", mode="w", encoding="utf-8") as conanfile:
         conanfile.write(conanfile_contents)
 
-    subprocess.check_call(["velocitas", "init", "-f", "-v"], stdin=subprocess.PIPE)
+    subprocess.check_call(["velocitas", "init", "-v"], stdin=subprocess.PIPE)
     assert is_package_installed("vehicle-app-sdk")

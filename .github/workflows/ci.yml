@@ -50,7 +50,7 @@ jobs:
     container: ghcr.io/eclipse-velocitas/devcontainer-base-images/python:v0.3
     strategy:
       matrix:
-        component: ["_shared", "setup", "grpc-interface-support", "vehicle-model-lifecycle", "sdk-installer"]
+        component: ["_shared", "setup", "grpc-interface-support", "vehicle-model-lifecycle", "sdk-installer", "build-system/cpp-cmake-conan"]
       fail-fast: false
 
     steps:
@@ -105,7 +105,7 @@ jobs:
     strategy:
       matrix:
         language: ["python", "cpp"]
-        component: ["setup", "grpc-interface-support", "vehicle-model-lifecycle", "sdk-installer"]
+        component: ["setup", "grpc-interface-support", "vehicle-model-lifecycle", "sdk-installer", "build-system/cpp-cmake-conan"]
       fail-fast: false
 
     steps:
@@ -124,21 +124,28 @@ jobs:
           repository: eclipse-velocitas/vehicle-app-${{ matrix.language }}-template
           path: test/${{ matrix.language }}/repo
 
+      - name: Replace project config
+        run: |
+          cp -f test/${{ matrix.language }}/.velocitas.json test/${{ matrix.language }}/repo
+
       - name: Add safe directory
         run: |
           git config --global --add safe.directory $(pwd)/test/${{ matrix.language }}/repo
 
-      - name: Update Velocitas JSON with correct version
-        uses: ./.github/actions/update-velocitas-json
-        with:
-          project_path: test/${{ matrix.language }}/repo
-          template_path: test/${{ matrix.language }}/.velocitas.json
+      - name: Setup local package version
+        shell: bash
+        run: |
+          export PACKAGE_PATH=~/.velocitas/packages/package_under_test/@main
+          mkdir -p $PACKAGE_PATH
+          cp -r * $PACKAGE_PATH
+          ls -al $PACKAGE_PATH
 
       - name: Run integration tests
         run: |
           export THIS_REPO_PATH=$(pwd)
           export VELOCITAS_TEST_LANGUAGE=${{ matrix.language }}
           export VELOCITAS_TEST_ROOT=test/${{ matrix.language }}/repo
+          export VELOCITAS_COMPONENT_PATH=${THIS_REPO_PATH}/${{ matrix.component }}
 
           python -m pip install -r ./${{ matrix.component }}/test/requirements.txt
           python -m pip install -r ./${{ matrix.component }}/requirements.txt

@@ -1,6 +1,6 @@
 {
     "packages": {
-        "devenv-devcontainer-setup": "hash_id"
+        "package_under_test": "@main"
     },
     "variables": {
         "language": "python",

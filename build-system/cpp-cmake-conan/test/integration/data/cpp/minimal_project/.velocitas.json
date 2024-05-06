@@ -1,0 +1,13 @@
+{
+    "packages": {
+        "package_under_test": "@main"
+    },
+    "components": [
+        "build-system"
+    ],
+    "variables": {
+        "language": "cpp",
+        "repoType": "app"
+    },
+    "cliVersion": "v0.9.0"
+}

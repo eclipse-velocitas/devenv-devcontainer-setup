@@ -107,7 +107,7 @@ def test_files_synced():
             changed_file.find(f"setup/src/{language}") != -1
         )
 
-    subprocess.check_call(["velocitas", "init", "-f", "-v"], stdin=subprocess.PIPE)
+    subprocess.check_call(["velocitas", "init", "-v"], stdin=subprocess.PIPE)
     subprocess.check_call(["velocitas", "sync"])
 
     git_status_output = subprocess.check_output(

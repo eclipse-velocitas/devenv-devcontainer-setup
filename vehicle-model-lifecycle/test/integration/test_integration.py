@@ -12,7 +12,6 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import json
 import os
 import shutil
 import subprocess
@@ -25,13 +24,15 @@ def copy_test_files() -> None:
     shutil.copytree(src, dst, dirs_exist_ok=True)
 
 
-def test_model_is_generated() -> None:
-    generated_model_path = json.load(open(".velocitas.json", encoding="utf-8"))[
-        "variables"
-    ]["generatedModelPath"]
+def test_is_model_installed_cpp() -> None:
+    if os.environ["VELOCITAS_TEST_LANGUAGE"] != "cpp":
+        return
 
-    assert os.path.exists(generated_model_path)
-    assert os.path.isdir(generated_model_path)
+    output = subprocess.check_output(
+        ["conan", "search", "vehicle-model"], encoding="utf-8"
+    )
+
+    assert output.find("Existing package recipes:") != -1
 
 
 def test_package_can_be_used_by_project() -> None:

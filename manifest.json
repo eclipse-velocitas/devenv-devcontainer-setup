@@ -178,6 +178,43 @@
                     ]
                 }
             ]
+        },
+        {
+            "id": "build-system",
+            "type": "setup",
+            "programs": [
+                {
+                    "id": "install",
+                    "description": "Installs all necessary dependencies / packages for the application",
+                    "executable": "python",
+                    "args": [
+                        "./build-system/cpp-cmake-conan/src/install_deps.py"
+                    ]
+                },
+                {
+                    "id": "build",
+                    "description": "Builds the application",
+                    "executable": "python",
+                    "args": [
+                        "./build-system/cpp-cmake-conan/src/build.py"
+                    ]
+                }
+            ],
+            "files": [
+                {
+                    "src": "build-system/cpp-cmake-conan/src",
+                    "dst": ".",
+                    "condition": "'${{ language }}' === 'cpp'"
+                }
+            ],
+            "variables": [
+                {
+                    "name": "language",
+                    "type": "string",
+                    "required": true,
+                    "description": "The programming language of the project. Either 'python' or 'cpp'"
+                }
+            ]
         }
     ]
 }
