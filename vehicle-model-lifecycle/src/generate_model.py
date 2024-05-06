@@ -19,6 +19,7 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
+from typing import List
 
 from shared_utils.conan_helper import add_dependency_to_conanfile, export_conan_project
 from velocitas.model_generator import generate_model
@@ -30,7 +31,8 @@ from velocitas_lib import (
     require_env,
 )
 
-CACHE_KEY = "vspec_file_path"
+CACHE_KEY_VSS_FILE = "vspec_file_path"
+CACHE_KEY_UNITS_LIST = "unit_file_path_list"
 GENERATION_PATH_AUTO_DETECTION_KEY = "auto"
 
 
@@ -56,21 +58,26 @@ def remove_old_model(old_model_path: str) -> None:
 
 
 def invoke_generator(
-    vspec_file_path: str, output_language: str, output_path: str
+    vspec_file_path: str,
+    unit_file_path_list: List[str],
+    output_language: str,
+    output_path: str,
 ) -> None:
     """Invoke the model generator and produce a generated model in the cache
        directory.
 
     Args:
         vspec_file_path (str): The path to the vspec file.
+        unit_file_path_list List[str]: A list with paths to the unit file(s) for the vspec file.
         output_language (str): The programming language of the generated model.
         output_path (str): The path where the generated model is stored.
     """
     print(
         f"Invoking model generator for language {output_language} and file "
         f"{vspec_file_path!r}"
+        f" with units from {unit_file_path_list}"
     )
-    generate_model(vspec_file_path, output_language, output_path)
+    generate_model(vspec_file_path, unit_file_path_list, output_language, output_path)
 
 
 def install_model_if_required(language: str, model_path: str) -> None:
@@ -97,17 +104,23 @@ def main() -> None:
     """Main entry point for generation of vehicle models."""
     cache_data = get_cache_data()
 
-    if CACHE_KEY not in cache_data:
+    if CACHE_KEY_VSS_FILE not in cache_data:
         return
 
-    model_src_file = cache_data[CACHE_KEY]
+    if CACHE_KEY_UNITS_LIST not in cache_data:
+        return
+
+    model_src_file = cache_data[CACHE_KEY_VSS_FILE]
+    model_unit_file_list = cache_data[CACHE_KEY_UNITS_LIST]
     model_language = get_programming_language()
     model_output_dir = get_model_output_dir()
 
     os.makedirs(model_output_dir, exist_ok=True)
 
     remove_old_model(model_output_dir)
-    invoke_generator(model_src_file, model_language, model_output_dir)
+    invoke_generator(
+        model_src_file, model_unit_file_list, model_language, model_output_dir
+    )
     install_model_if_required(model_language, model_output_dir)
     add_model_dependency_if_required(model_language, model_output_dir)
 
