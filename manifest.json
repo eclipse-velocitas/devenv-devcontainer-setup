@@ -35,12 +35,6 @@
                     "type": "string",
                     "required": true,
                     "description": "Path of the AppManifest file, relative to the .velocitas.json"
-                },
-                {
-                    "name": "country",
-                    "type": "string",
-                    "default": "europe",
-                    "description": "Path of the AppManifest file, relative to the .velocitas.json"
                 }
             ]
         },
@@ -115,7 +109,7 @@
                 {
                     "name": "vssUnitSrc",
                     "type": "array",
-                    "default": ["./vehicle-model-lifecycle/units.yaml"],
+                    "default": [ "./vehicle-model-lifecycle/units.yaml" ],
                     "description": "This defines the source of the units file that should be used for model generation."
                 }
             ]
