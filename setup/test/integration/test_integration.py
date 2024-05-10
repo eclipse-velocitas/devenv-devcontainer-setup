@@ -19,7 +19,7 @@ import subprocess
 from re import Pattern, compile, search
 from subprocess import PIPE, Popen, check_output
 
-older_cli_version = "v0.5.4"
+older_cli_version = "v0.8.0"
 
 
 def get_cli_asset_name() -> str:
@@ -63,11 +63,7 @@ def get_cli_version():
 
 def test_post_start_auto_upgrade_cli():
     download_older_cli_version()
-    # This should be the right check
-    # But since we do not have a proper version output
-    # on previous CLI releases we need to have a workaround
-    # assert get_cli_version() == older_cli_version
-    assert get_cli_version() == "v0.0.0"
+    assert get_cli_version() == older_cli_version
 
     post_create_script_path = os.path.join(
         os.getcwd(),
@@ -111,7 +107,7 @@ def test_files_synced():
             changed_file.find(f"setup/src/{language}") != -1
         )
 
-    subprocess.check_call(["velocitas", "init", "-f", "-v"], stdin=subprocess.PIPE)
+    subprocess.check_call(["velocitas", "init", "-v"], stdin=subprocess.PIPE)
     subprocess.check_call(["velocitas", "sync"])
 
     git_status_output = subprocess.check_output(

@@ -30,7 +30,7 @@ def safe_get_workspace_dir() -> str:
     """A safe version of get_workspace_dir which defaults to '.'."""
     try:
         return get_workspace_dir()
-    except:
+    except Exception:
         return "."
 
 

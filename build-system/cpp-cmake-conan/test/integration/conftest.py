@@ -13,7 +13,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import os
-import shutil
 import subprocess
 
 
@@ -23,7 +22,16 @@ def pytest_sessionstart(session):
     before performing collection and entering the run test loop.
     """
 
-    os.chdir(os.environ["VELOCITAS_TEST_ROOT"])
+    os.chdir(
+        os.path.join(
+            os.environ["VELOCITAS_COMPONENT_PATH"],
+            "test",
+            "integration",
+            "data",
+            os.environ["VELOCITAS_TEST_LANGUAGE"],
+            "minimal_project",
+        )
+    )
 
     if os.environ["VELOCITAS_TEST_LANGUAGE"] == "cpp":
         # FIXME: The C++ base image does not install conan globally
@@ -32,4 +40,4 @@ def pytest_sessionstart(session):
         # globally.
         subprocess.check_call(["python", "-m", "pip", "install", "conan==1.63.0"])
 
-    subprocess.check_call(["velocitas", "init", "-f", "-v"], stdin=subprocess.PIPE)
+    subprocess.check_call(["velocitas", "init", "-v"], stdin=subprocess.PIPE)

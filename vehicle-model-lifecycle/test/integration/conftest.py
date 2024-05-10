@@ -24,4 +24,4 @@ def pytest_sessionstart(session):
 
     os.chdir(os.environ["VELOCITAS_TEST_ROOT"])
 
-    subprocess.check_call(["velocitas", "init", "-f", "-v"], stdin=subprocess.PIPE)
+    subprocess.check_call(["velocitas", "init", "-v"], stdin=subprocess.PIPE)

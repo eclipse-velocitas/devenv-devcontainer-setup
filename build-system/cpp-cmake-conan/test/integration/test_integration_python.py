@@ -12,6 +12,13 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+import os
 
-def test_fillme():
+import pytest
+
+if not os.environ["VELOCITAS_TEST_LANGUAGE"] == "python":
+    pytest.skip("skipping python only tests", allow_module_level=True)
+
+
+def test_dummy():
     pass

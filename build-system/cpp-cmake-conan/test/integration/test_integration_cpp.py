@@ -14,17 +14,38 @@
 
 import os
 import subprocess
-from typing import List
 
 import pytest
 
 if not os.environ["VELOCITAS_TEST_LANGUAGE"] == "cpp":
     pytest.skip("skipping C++ only tests", allow_module_level=True)
 
+
 def test_normal_build_successful():
-    subprocess.check_call(["velocitas", "exec", "build-system", "install"], stdin=subprocess.PIPE)
-    subprocess.check_call(["velocitas", "exec", "build-system", "build"], stdin=subprocess.PIPE)
+    subprocess.check_call(
+        ["velocitas", "exec", "build-system", "install"], stdin=subprocess.PIPE
+    )
+    subprocess.check_call(
+        ["velocitas", "exec", "build-system", "build"], stdin=subprocess.PIPE
+    )
+
 
 def test_cross_build_successful():
-    subprocess.check_call(["velocitas", "exec", "build-system", "install", "-x", "aarch64"], stdin=subprocess.PIPE)
-    subprocess.check_call(["velocitas", "exec", "build-system", "build", "-x", "aarch64"], stdin=subprocess.PIPE)
+    subprocess.check_call(
+        ["apt", "update"],
+        stdin=subprocess.PIPE,
+    )
+
+    subprocess.check_call(
+        ["apt", "install", "-y", "gcc-aarch64-linux-gnu", "g++-aarch64-linux-gnu"],
+        stdin=subprocess.PIPE,
+    )
+
+    subprocess.check_call(
+        ["velocitas", "exec", "build-system", "install", "-x", "aarch64"],
+        stdin=subprocess.PIPE,
+    )
+    subprocess.check_call(
+        ["velocitas", "exec", "build-system", "build", "-x", "aarch64"],
+        stdin=subprocess.PIPE,
+    )

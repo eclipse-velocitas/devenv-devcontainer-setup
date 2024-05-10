@@ -38,4 +38,4 @@ def pytest_sessionstart(session):
         # globally.
         subprocess.check_call(["python", "-m", "pip", "install", "conan==1.60.2"])
 
-    subprocess.check_call(["velocitas", "init", "-f", "-v"], stdin=subprocess.PIPE)
+    subprocess.check_call(["velocitas", "init", "-v"], stdin=subprocess.PIPE)

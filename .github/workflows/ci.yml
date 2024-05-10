@@ -86,14 +86,17 @@ jobs:
           update_check: true
           annotate_only: true
 
-      - uses: 5monkeys/cobertura-action@master
+      - uses: irongut/CodeCoverageSummary@v1.3.0
         with:
-          path: results/CodeCoverage/${{ matrix.component }}/cobertura-coverage.xml
-          minimum_coverage: 80
-          show_line: true
-          show_branch: true
-          fail_below_threshold: false
-          report_name: "Coverage: ${{ matrix.component }}"
+          filename: results/CodeCoverage/${{ matrix.component }}/cobertura-coverage.xml
+          badge: true
+          format: markdown
+          hide_complexity: true
+          indicators: true
+          output: both
+
+      - run: |
+          cat code-coverage-results.md >> $GITHUB_STEP_SUMMARY
 
   run-integration-tests:
     name: Run Integration Test
@@ -121,21 +124,28 @@ jobs:
           repository: eclipse-velocitas/vehicle-app-${{ matrix.language }}-template
           path: test/${{ matrix.language }}/repo
 
+      - name: Replace project config
+        run: |
+          cp -f test/${{ matrix.language }}/.velocitas.json test/${{ matrix.language }}/repo
+
       - name: Add safe directory
         run: |
           git config --global --add safe.directory $(pwd)/test/${{ matrix.language }}/repo
 
-      - name: Update Velocitas JSON with correct version
-        uses: ./.github/actions/update-velocitas-json
-        with:
-          project_path: test/${{ matrix.language }}/repo
-          template_path: test/${{ matrix.language }}/.velocitas.json
+      - name: Setup local package version
+        shell: bash
+        run: |
+          export PACKAGE_PATH=~/.velocitas/packages/package_under_test/@main
+          mkdir -p $PACKAGE_PATH
+          cp -r * $PACKAGE_PATH
+          ls -al $PACKAGE_PATH
 
       - name: Run integration tests
         run: |
           export THIS_REPO_PATH=$(pwd)
           export VELOCITAS_TEST_LANGUAGE=${{ matrix.language }}
           export VELOCITAS_TEST_ROOT=test/${{ matrix.language }}/repo
+          export VELOCITAS_COMPONENT_PATH=${THIS_REPO_PATH}/${{ matrix.component }}
 
           python -m pip install -r ./${{ matrix.component }}/test/requirements.txt
           python -m pip install -r ./${{ matrix.component }}/requirements.txt

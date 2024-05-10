@@ -12,27 +12,39 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+import json
 import os
 import sys
-from pathlib import Path
+from typing import List
 
 import pytest
 from test_lib import capture_stdout, mock_env
+from velocitas_lib import get_project_cache_dir
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "..", "src"))
 from download_vspec import (  # noqa
     get_legacy_model_src,
+    get_package_path,
     is_proper_interface_type,
     is_uri,
     main,
 )
 
 vspec_300_uri = "https://github.com/COVESA/vehicle_signal_specification/releases/download/v3.0/vss_rel_3.0.json"  # noqa
+vspec_400_uri = "https://github.com/COVESA/vehicle_signal_specification/releases/download/v4.0/vss_rel_4.0.json"  # noqa
 
 
 def get_vspec_file_path_value(capturedOutput: str) -> str:
     return (
         capturedOutput.split("vspec_file_path=")[1]
+        .split(" >> VELOCITAS_CACHE")[0]
+        .replace("'", "")
+    )
+
+
+def get_unit_file_path_list_value(capturedOutput: str) -> str:
+    return (
+        capturedOutput.split("unit_file_path_list=")[1]
         .split(" >> VELOCITAS_CACHE")[0]
         .replace("'", "")
     )
@@ -80,11 +92,18 @@ def test_proper_interface_type__correct_type():
             "interfaces": [
                 {
                     "type": "vehicle-signal-interface",
-                    "config": {"src": "./app/vspec.json"},
+                    "config": {
+                        "src": "./app/vspec.json",
+                        "unit_src": ["./app/units.yaml"],
+                    },
                 }
             ],
         },
-        {"VehicleModel": {"src": "./app/vspec.json"}},
+        {
+            "VehicleModel": {
+                "src": "./app/vspec.json",
+            }
+        },
     ],
 )
 def test_main__relative_src__converted_to_absolute(app_manifest):
@@ -94,6 +113,12 @@ def test_main__relative_src__converted_to_absolute(app_manifest):
         vspec_file_path = get_vspec_file_path_value(capture.getvalue())
         assert os.path.isabs(vspec_file_path)
         assert vspec_file_path == "/workspaces/my_vehicle_app/app/vspec.json"
+        unit_file_path_list = get_unit_file_path_list_value(capture.getvalue())
+        assert unit_file_path_list == json.dumps(
+            ["./app/units.yaml"]
+        ) or unit_file_path_list == json.dumps(
+            [os.path.join(get_package_path(), "units.yaml")]
+        )
 
 
 @pytest.mark.parametrize(
@@ -103,6 +128,12 @@ def test_main__relative_src__converted_to_absolute(app_manifest):
             "manifestVersion": "v3",
             "interfaces": [
                 {"type": "vehicle-signal-interface", "config": {"src": vspec_300_uri}}
+            ],
+        },
+        {
+            "manifestVersion": "v3",
+            "interfaces": [
+                {"type": "vehicle-signal-interface", "config": {"src": vspec_400_uri}}
             ],
         },
         {"VehicleModel": {"src": vspec_300_uri}},
@@ -115,6 +146,10 @@ def test_main__valid_app_manifest__uri_src_downloaded_and_stored_in_cache(app_ma
         vspec_file_path = get_vspec_file_path_value(capture.getvalue())
         assert os.path.isabs(vspec_file_path)
         assert vspec_file_path == "/tmp/velocitas/vspec.json"
+        unit_file_path_list = get_unit_file_path_list_value(capture.getvalue())
+        assert unit_file_path_list == json.dumps(
+            [os.path.join(get_package_path(), "units.yaml")]
+        )
 
 
 def test_main__duplicate_vehicle_signal_interface__raises_error():
@@ -137,10 +172,10 @@ def test_main__no_vehicle_signal_interface__adds_default_to_cache():
     with capture_stdout() as capture, mock_env():
         main(app_manifest)
 
-        expected_path = str(
-            Path(__file__).parent.parent.joinpath(
-                "vehicle-model-lifecycle", "vspec.json"
-            )
-        )
-        expected_cache_line = f"vspec_file_path={expected_path!r} >> VELOCITAS_CACHE\n"
-        assert capture.getvalue() == expected_cache_line
+        expected_path = str(os.path.join(get_project_cache_dir(), "vspec.json"))
+        expected_unit_path: List[str] = [os.path.join(get_package_path(), "units.yaml")]
+        vspec_file_path = get_vspec_file_path_value(capture.getvalue())
+        assert os.path.isabs(vspec_file_path)
+        assert vspec_file_path == expected_path
+        unit_file_path_list = get_unit_file_path_list_value(capture.getvalue())
+        assert unit_file_path_list == json.dumps(expected_unit_path)
