@@ -115,6 +115,22 @@
             ]
         },
         {
+            "id": "conan-setup",
+            "description": "Sets up the conan client to connect to different remotes with credentials.",
+            "programs": [
+                {
+                    "id": "run",
+                    "executable": "python3",
+                    "args": [ "./conan-setup/src/run.py" ]
+                }
+            ],
+            "onPostInit": [
+                {
+                    "ref": "run"
+                }
+            ]
+        },
+        {
             "id": "sdk-installer",
             "type": "setup",
             "onPostInit": [

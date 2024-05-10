@@ -31,4 +31,4 @@ def pytest_sessionstart(session):
     # conan manually here. Can be removed once conan is installed
     # globally.
     if os.environ["VELOCITAS_TEST_LANGUAGE"] == "cpp":
-        subprocess.check_call(["python", "-m", "pip", "install", "conan==1.60.2"])
+        subprocess.check_call(["python", "-m", "pip", "install", "conan==1.63.0"])
