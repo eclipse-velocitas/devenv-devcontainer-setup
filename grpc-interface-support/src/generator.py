@@ -17,46 +17,56 @@ from abc import ABC, abstractmethod
 import proto
 
 
-class GrpcInterfaceGenerator(ABC):
+class GrpcServiceSdkGenerator(ABC):
+    """Generator base class for service SDKs"""
+
+    @abstractmethod
+    def generate_package(self, client_required: bool, server_required: bool) -> None:
+        """Generate the SDK package.
+
+        Args:
+            client_required (bool): Indicates whether a client factory shall be created.
+            server_required (bool): Indicates whether a server factory shall be created.
+        """
+        pass
+
+    @abstractmethod
+    def install_package(self) -> None:
+        """Install the generated package."""
+        pass
+
+    @abstractmethod
+    def update_package_references(self) -> None:
+        """Update all references to the generated package within the Velocitas workspace."""
+        pass
+
+    @abstractmethod
+    def update_auto_generated_code(self) -> None:
+        """Update auto-generated code within the Velocitas workspace."""
+        pass
+
+
+class GrpcServiceSdkGeneratorFactory(ABC):
+    """Factory for creating service generators."""
+
     @abstractmethod
     def install_tooling(self) -> None:
-        """Install required tooling for the generator."""
+        """Install required tooling for all created generators."""
         pass
 
     @abstractmethod
-    def generate_package(
+    def create_service_generator(
         self, output_path: str, proto_file_handle: proto.ProtoFileHandle
-    ) -> None:
-        pass
-
-    @abstractmethod
-    def generate_service_client(
-        self, output_path: str, proto_file_handle: proto.ProtoFileHandle
-    ) -> None:
-        """Generate a service client for the given proto file.
+    ) -> GrpcServiceSdkGenerator:
+        """Create a new service SDK generator for a specific service.
 
         Args:
-            output_path (str): The path at which to output the client SDK.
-            proto_file_handle (proto.ProtoFileHandle): A proto file handle
-                which represents the service contract.
+            output_path (str): Path where the SDK shall be generated at.
+            proto_file_handle (proto.ProtoFileHandle): The proto file which serves
+                as the input for the generator.
+
+        Returns:
+            GrpcServiceSdkGenerator: A new GrpcServiceSdkGenerator which can
+                generate a service SDK for the provided proto file.
         """
-        pass
-
-    @abstractmethod
-    def generate_service_server(
-        self, output_path: str, proto_file_handle: proto.ProtoFileHandle
-    ) -> None:
-        """Generate a service server for the given proto file.
-
-        Args:
-            output_path (str): The path at which to output the server SDK.
-            proto_file_handle (proto.ProtoFileHandle): A proto file handle
-                which represents the service contract.
-        """
-        pass
-
-    @abstractmethod
-    def install_package(
-        self, output_path: str, proto_file_handle: proto.ProtoFileHandle
-    ) -> None:
         pass

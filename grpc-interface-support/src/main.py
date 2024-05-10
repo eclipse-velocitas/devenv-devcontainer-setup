@@ -18,8 +18,8 @@ import shutil
 from typing import Any, Dict
 
 import proto
-from cpp import CppGrpcInterfaceGenerator
-from generator import GrpcInterfaceGenerator
+from cpp import CppGrpcServiceSdkGeneratorFactory
+from generator import GrpcServiceSdkGeneratorFactory
 from shared_utils import create_truncated_string
 from velocitas_lib import download_file, get_programming_language, get_project_cache_dir
 from velocitas_lib.functional_interface import get_interfaces_for_type
@@ -69,13 +69,13 @@ def create_service_sdk_dir(proto_file_handle: proto.ProtoFileHandle) -> str:
 
 
 def generate_single_service(
-    generator: GrpcInterfaceGenerator, if_config: Dict[str, Any]
+    factory: GrpcServiceSdkGeneratorFactory, if_config: Dict[str, Any]
 ) -> None:
     """Generate an SDK for a single service.
 
     Args:
-        generator (GrpcInterfaceGenerator):
-            The generator to invoke for generating the SDK.
+        factory (GrpcPackageGeneratorFactory):
+            The factory from which to generate an SDK generator for a single service.
         if_config (Dict[str, Any]): The grpc-interface config.
     """
     print(
@@ -84,16 +84,11 @@ def generate_single_service(
     proto_file_handle = download_proto(if_config)
     service_sdk_dir = create_service_sdk_dir(proto_file_handle)
 
-    generator.generate_package(service_sdk_dir, proto_file_handle)
-
-    if "required" in if_config:
-        generator.generate_service_client(service_sdk_dir, proto_file_handle)
-    if "provided" in if_config:
-        generator.generate_service_server(service_sdk_dir, proto_file_handle)
-
-    generator.install_package(service_sdk_dir, proto_file_handle)
-    # generator.update_references(service_sdk_dir, proto_file_handle)
-    # generator.update_auto_generated_code(service_sdk_dir, proto_file_handle)
+    generator = factory.create_service_generator(service_sdk_dir, proto_file_handle)
+    generator.generate_package("required" in if_config, "provided" in if_config)
+    generator.install_package()
+    generator.update_package_references()
+    generator.update_auto_generated_code()
 
 
 def main(verbose: bool) -> None:
@@ -107,26 +102,26 @@ def main(verbose: bool) -> None:
     if len(interfaces) <= 0:
         return
 
-    LANGUAGE_GENERATORS = {
-        "cpp": CppGrpcInterfaceGenerator(verbose),
-        #        "python": PythonGrpcInterfaceGenerator(verbose),
+    LANGUAGE_FACTORIES = {
+        "cpp": CppGrpcServiceSdkGeneratorFactory(verbose),
+        # "python": PythonGrpcInterfaceGenerator(verbose),
     }
 
-    if get_programming_language() not in LANGUAGE_GENERATORS:
+    if get_programming_language() not in LANGUAGE_FACTORIES:
         print(
             "gRPC interface not yet supported for programming language "
             f"{get_programming_language()!r}"
         )
         return
 
-    generator = LANGUAGE_GENERATORS[get_programming_language()]
+    factory = LANGUAGE_FACTORIES[get_programming_language()]
 
     print("Installing tooling...")
-    generator.install_tooling()
+    factory.install_tooling()
 
     for grpc_service in interfaces:
         if_config = grpc_service["config"]
-        generate_single_service(generator, if_config)
+        generate_single_service(factory, if_config)
 
 
 if __name__ == "__main__":

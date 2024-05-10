@@ -19,7 +19,7 @@ import subprocess
 from pathlib import Path
 
 import proto
-from generator import GrpcInterfaceGenerator
+from generator import GrpcServiceSdkGeneratorFactory
 from shared_utils import replace_in_file, to_camel_case
 from shared_utils.templates import CopySpec, copy_templates
 from velocitas_lib import get_package_path, get_workspace_dir
@@ -37,7 +37,7 @@ def get_required_sdk_version_python() -> str:
     return sdk_version
 
 
-class PythonGrpcInterfaceGenerator(GrpcInterfaceGenerator):  # type: ignore
+class PythonGrpcInterfaceGenerator(GrpcServiceSdkGeneratorFactory):  # type: ignore
     def __init__(self, verbose: bool):
         self._verbose = verbose
 
