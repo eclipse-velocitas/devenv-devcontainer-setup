@@ -58,15 +58,15 @@ class GrpcCodeExtractor:
     Provides methods for extracing code from generated gRPC c++ files.
     """
 
-    def __init__(self, service_name: str, base_path: str):
-        self.__service_name = service_name
+    def __init__(self, proto_file: ProtoFileHandle, base_path: str):
+        self.__proto_file = proto_file
         self.__base_path = base_path
 
     def get_header_stub_code(self, include_path: str = ".") -> List[str]:
         grpc_header_path = os.path.join(
             self.__base_path,
             include_path,
-            f"{self.__service_name.lower()}.grpc.pb.h",
+            f"{self.__proto_file.get_service_name().lower()}.grpc.pb.h",
         )
 
         header_content = capture_textfile_area(
@@ -80,15 +80,17 @@ class GrpcCodeExtractor:
         grpc_source_path = os.path.join(
             self.__base_path,
             source_path,
-            f"{self.__service_name.lower()}.grpc.pb.cc",
+            f"{self.__proto_file.get_service_name().lower()}.grpc.pb.cc",
         )
 
-        service_name = shared_utils.to_camel_case(self.__service_name)
+        service_name = shared_utils.to_camel_case(self.__proto_file.get_service_name())
+        
+        package_pieces = self.__proto_file.get_package().split(".")
 
         source_content = capture_textfile_area(
             open(grpc_source_path, encoding="utf-8"),
             f"{service_name}::Service::~Service() {{",
-            "}  // namespace",
+            f"}}  // namespace {package_pieces[0]}",
         )
 
         return source_content[2 : len(source_content) - 2]
@@ -271,7 +273,7 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
 
     def __create_or_update_service_header(self) -> None:
         header_stub_code = GrpcCodeExtractor(
-            self.__proto_file_handle.get_service_name(), self.__package_directory_path
+            self.__proto_file_handle, self.__package_directory_path
         ).get_header_stub_code(self.__get_include_dir())
 
         self.__transform_header_stub_code(header_stub_code)
@@ -313,7 +315,7 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
 
     def __create_service_source(self) -> None:
         source_code = GrpcCodeExtractor(
-            self.__proto_file_handle.get_service_name(), self.__package_directory_path
+            self.__proto_file_handle, self.__package_directory_path
         ).get_source_stub_code(self.__get_source_dir())
 
         app_source_dir = os.path.join(get_workspace_dir(), "app", "src")
