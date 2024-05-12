@@ -19,7 +19,7 @@ import subprocess
 from pathlib import Path
 
 import proto
-from generator import GrpcServiceSdkGeneratorFactory
+from generator import GrpcServiceSdkGenerator, GrpcServiceSdkGeneratorFactory
 from shared_utils import replace_in_file, to_camel_case
 from shared_utils.templates import CopySpec, copy_templates
 from velocitas_lib import get_package_path, get_workspace_dir
@@ -37,37 +37,46 @@ def get_required_sdk_version_python() -> str:
     return sdk_version
 
 
-class PythonGrpcInterfaceGenerator(GrpcServiceSdkGeneratorFactory):  # type: ignore
-    def __init__(self, verbose: bool):
-        self._verbose = verbose
+class PythonGrpcInterfaceGenerator(GrpcServiceSdkGenerator):  # type: ignore
+    def __init__(
+        self,
+        package_directory_path: str,
+        proto_file_handle: proto.ProtoFileHandle,
+        verbose: bool,
+    ):
+        self.__package_directory_path = package_directory_path
+        self.__proto_file_handle = proto_file_handle
+        self.__verbose = verbose
 
-    def install_tooling(self) -> None:
-        subprocess.check_call(["pip", "install", "grpcio-tools"])
-
-    def __invoke_code_generator(
-        self, proto_file_handle: proto.ProtoFileHandle, output_path: str
-    ) -> None:
+    def __invoke_code_generator(self) -> None:
         subprocess.check_call(
             [
                 "python",
                 "-m",
                 "grpc_tools.protoc",
-                f"-I{Path(proto_file_handle.file_path).parent}",
-                f"--python_out={output_path}",
-                f"--pyi_out={output_path}",
-                f"--grpc_python_out={output_path}",
-                proto_file_handle.file_path,
+                f"-I{Path(self.__proto_file_handle.file_path).parent}",
+                f"--python_out={self.__package_directory_path}",
+                f"--pyi_out={self.__package_directory_path}",
+                f"--grpc_python_out={self.__package_directory_path}",
+                self.__proto_file_handle.file_path,
             ]
         )
 
-    def __copy_code_and_templates(self, output_path: str, service_name: str) -> None:
+    def __copy_code_and_templates(self) -> None:
+        service_name = self.__proto_file_handle.get_service_name()
         module_name = f"{service_name.lower()}_service_sdk"
-        source_path = os.path.join(output_path, module_name)
-        os.makedirs(os.path.join(output_path, source_path), exist_ok=True)
+        source_path = os.path.join(self.__package_directory_path, module_name)
+        os.makedirs(
+            os.path.join(self.__package_directory_path, source_path), exist_ok=True
+        )
 
-        generated_sources = glob.glob(os.path.join(output_path, "*.py*"))
+        generated_sources = glob.glob(
+            os.path.join(self.__package_directory_path, "*.py*")
+        )
         replace_in_file(
-            os.path.join(output_path, f"{service_name.lower()}_pb2_grpc.py"),
+            os.path.join(
+                self.__package_directory_path, f"{service_name.lower()}_pb2_grpc.py"
+            ),
             f"import {service_name.lower()}_pb2",
             f"import {module_name}.{service_name.lower()}_pb2",
         )
@@ -99,19 +108,39 @@ class PythonGrpcInterfaceGenerator(GrpcServiceSdkGeneratorFactory):  # type: ign
             "python",
         )
 
-        copy_templates(template_dir, output_path, files_to_copy, variables)
-
-    def __install_module(self, module_path: str) -> None:
-        subprocess.check_call(["pip", "install", module_path])
-
-    def generate_service_client_sdk(
-        self, output_path: str, proto_file_handle: proto.ProtoFileHandle
-    ) -> None:
-        self.__invoke_code_generator(proto_file_handle, output_path)
-        self.__copy_code_and_templates(
-            output_path, proto_file_handle.get_service_name()
+        copy_templates(
+            template_dir, self.__package_directory_path, files_to_copy, variables
         )
-        self.__install_module(output_path)
 
-    def generate_service_server_sdk(self) -> None:
+    def __install_module(self) -> None:
+        subprocess.check_call(["pip", "install", self.__package_directory_path])
+
+    def generate_package(
+        self,
+    ) -> None:
+        self.__invoke_code_generator()
+        self.__copy_code_and_templates()
+
+    def install_package(self) -> None:
+        self.__install_module()
+
+    def update_package_references(self) -> None:
         pass
+
+    def update_auto_generated_code(self) -> None:
+        pass
+
+
+class PythonGrpcServiceSdkGeneratorFactory(GrpcServiceSdkGeneratorFactory):  # type: ignore
+    def __init__(self, verbose: bool):
+        self._verbose = verbose
+
+    def install_tooling(self) -> None:
+        subprocess.check_call(["pip", "install", "grpcio-tools"])
+
+    def create_service_generator(
+        self, output_path: str, proto_file_handle: proto.ProtoFileHandle
+    ) -> PythonGrpcInterfaceGenerator:
+        return PythonGrpcInterfaceGenerator(
+            output_path, proto_file_handle, self._verbose
+        )

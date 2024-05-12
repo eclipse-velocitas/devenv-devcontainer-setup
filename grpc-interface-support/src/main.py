@@ -20,6 +20,7 @@ from typing import Any, Dict
 import proto
 from cpp import CppGrpcServiceSdkGeneratorFactory
 from generator import GrpcServiceSdkGeneratorFactory
+from python import PythonGrpcServiceSdkGeneratorFactory
 from shared_utils import create_truncated_string
 from velocitas_lib import download_file, get_programming_language, get_project_cache_dir
 from velocitas_lib.functional_interface import get_interfaces_for_type
@@ -104,7 +105,7 @@ def main(verbose: bool) -> None:
 
     LANGUAGE_FACTORIES = {
         "cpp": CppGrpcServiceSdkGeneratorFactory(verbose),
-        # "python": PythonGrpcInterfaceGenerator(verbose),
+        "python": PythonGrpcServiceSdkGeneratorFactory(verbose),
     }
 
     if get_programming_language() not in LANGUAGE_FACTORIES:

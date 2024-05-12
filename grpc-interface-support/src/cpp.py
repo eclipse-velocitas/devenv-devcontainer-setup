@@ -84,7 +84,7 @@ class GrpcCodeExtractor:
         )
 
         service_name = shared_utils.to_camel_case(self.__proto_file.get_service_name())
-        
+
         package_pieces = self.__proto_file.get_package().split(".")
 
         source_content = capture_textfile_area(
@@ -94,10 +94,6 @@ class GrpcCodeExtractor:
         )
 
         return source_content[2 : len(source_content) - 2]
-
-
-class TextInjector:
-    pass
 
 
 class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
@@ -257,7 +253,7 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
     def __transform_header_stub_code(self, lines: List[str]) -> List[str]:
         service_name = self.__proto_file_handle.get_service_name()
         service_class_name = shared_utils.to_camel_case(service_name) + "Service"
-        
+
         result: List[str] = []
 
         for line in lines:
@@ -265,18 +261,18 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
             service_class_name = service_name + "Service"
             if line.lstrip().startswith("virtual"):
                 result.append(line.replace("virtual ", "").replace(";", " override;"))
-                
+
         return result
 
     def __transform_source_stub_code(self, lines: List[str]) -> List[str]:
         service_name = self.__proto_file_handle.get_service_name()
         service_class_name = shared_utils.to_camel_case(service_name) + "Service"
-        
+
         result: List[str] = []
 
         for line in lines:
             result.append(line.replace(f"{service_name}::Service", service_class_name))
-        
+
         return result
 
     def __create_or_update_service_header(self) -> None:
@@ -288,7 +284,7 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
 
         app_source_dir = os.path.join(get_workspace_dir(), "app", "src")
         service_header_file_name = (
-            f"{self.__proto_file_handle.get_service_name()}ServiceServer.h"
+            f"{self.__proto_file_handle.get_service_name()}ServiceImpl.h"
         )
         service_header_file_path = os.path.join(
             app_source_dir, service_header_file_name
@@ -324,7 +320,7 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
     def __create_service_source(self) -> None:
         app_source_dir = os.path.join(get_workspace_dir(), "app", "src")
         service_header_file_name = (
-            f"{self.__proto_file_handle.get_service_name()}ServiceServer.cpp"
+            f"{self.__proto_file_handle.get_service_name()}ServiceImpl.cpp"
         )
         service_header_file_path = os.path.join(
             app_source_dir, service_header_file_name

@@ -38,6 +38,6 @@ ${{ service_header_user_code }}
 
 } // namespace velocitas
 
-#include "${{ service_name_camel_case }}ServiceServer.cpp"
+#include "${{ service_name_camel_case }}ServiceImpl.cpp"
 
 #endif // VELOCITAS_SERVICE_IMPL_${{ service_name }}_H
