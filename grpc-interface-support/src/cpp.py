@@ -254,29 +254,37 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
 
         conan_helper.export_conan_project(self.__package_directory_path)
 
-    def __transform_header_stub_code(self, lines: List[str]) -> None:
+    def __transform_header_stub_code(self, lines: List[str]) -> List[str]:
         service_name = self.__proto_file_handle.get_service_name()
         service_class_name = shared_utils.to_camel_case(service_name) + "Service"
+        
+        result: List[str] = []
 
         for line in lines:
             line = line.rstrip().replace("Service", service_class_name)
             service_class_name = service_name + "Service"
             if line.lstrip().startswith("virtual"):
-                line = line.replace("virtual ", "").replace(";", " override;")
+                result.append(line.replace("virtual ", "").replace(";", " override;"))
+                
+        return result
 
-    def __transform_source_stub_code(self, lines: List[str]) -> None:
+    def __transform_source_stub_code(self, lines: List[str]) -> List[str]:
         service_name = self.__proto_file_handle.get_service_name()
         service_class_name = shared_utils.to_camel_case(service_name) + "Service"
+        
+        result: List[str] = []
 
         for line in lines:
-            line = line.replace("Service", service_class_name)
+            result.append(line.replace(f"{service_name}::Service", service_class_name))
+        
+        return result
 
     def __create_or_update_service_header(self) -> None:
         header_stub_code = GrpcCodeExtractor(
             self.__proto_file_handle, self.__package_directory_path
         ).get_header_stub_code(self.__get_include_dir())
 
-        self.__transform_header_stub_code(header_stub_code)
+        header_stub_code = self.__transform_header_stub_code(header_stub_code)
 
         app_source_dir = os.path.join(get_workspace_dir(), "app", "src")
         service_header_file_name = (
@@ -314,10 +322,6 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
         )
 
     def __create_service_source(self) -> None:
-        source_code = GrpcCodeExtractor(
-            self.__proto_file_handle, self.__package_directory_path
-        ).get_source_stub_code(self.__get_source_dir())
-
         app_source_dir = os.path.join(get_workspace_dir(), "app", "src")
         service_header_file_name = (
             f"{self.__proto_file_handle.get_service_name()}ServiceServer.cpp"
@@ -329,7 +333,11 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
         if os.path.exists(service_header_file_path):
             return
 
-        self.__transform_source_stub_code(source_code)
+        source_code = GrpcCodeExtractor(
+            self.__proto_file_handle, self.__package_directory_path
+        ).get_source_stub_code(self.__get_source_dir())
+
+        source_code = self.__transform_source_stub_code(source_code)
 
         variables = self.__get_template_variables()
         variables["service_source_code"] = "\n".join(source_code)
