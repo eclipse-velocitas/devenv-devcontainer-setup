@@ -117,6 +117,8 @@ class PythonGrpcInterfaceGenerator(GrpcServiceSdkGenerator):  # type: ignore
 
     def generate_package(
         self,
+        client_required: bool,
+        server_required: bool,
     ) -> None:
         self.__invoke_code_generator()
         self.__copy_code_and_templates()
