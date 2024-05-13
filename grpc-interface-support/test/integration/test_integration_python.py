@@ -13,6 +13,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import os
+import subprocess
 from typing import List, Optional
 
 import pytest
@@ -31,6 +32,8 @@ def get_project_cache_dir() -> str:
 
 
 def test_python_package_is_generated():
+    assert subprocess.check_call(["velocitas", "init", "-v"]) == 0
+
     service_path = os.path.join(get_project_cache_dir(), "services", "seats")
     assert os.path.isdir(service_path)
     assert os.path.isfile(os.path.join(service_path, "pyproject.toml"))
@@ -43,6 +46,8 @@ def test_python_package_is_generated():
 
 
 def test_pip_package_is_usable():
+    assert subprocess.check_call(["velocitas", "init", "-v"]) == 0
+
     from seats_service_sdk.SeatsServiceClientFactory import SeatsServiceClientFactory
     from velocitas_sdk.base import Middleware, ServiceLocator
 
