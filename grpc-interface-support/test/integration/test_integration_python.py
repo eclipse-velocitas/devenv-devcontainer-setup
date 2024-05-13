@@ -32,6 +32,7 @@ def get_project_cache_dir() -> str:
 
 
 def test_python_package_is_generated():
+    os.chdir(os.environ["SERVICE_CLIENT_ROOT"])
     assert subprocess.check_call(["velocitas", "init", "-v"]) == 0
 
     service_path = os.path.join(get_project_cache_dir(), "services", "seats")
@@ -46,6 +47,7 @@ def test_python_package_is_generated():
 
 
 def test_pip_package_is_usable():
+    os.chdir(os.environ["SERVICE_CLIENT_ROOT"])
     assert subprocess.check_call(["velocitas", "init", "-v"]) == 0
 
     from seats_service_sdk.SeatsServiceClientFactory import SeatsServiceClientFactory
