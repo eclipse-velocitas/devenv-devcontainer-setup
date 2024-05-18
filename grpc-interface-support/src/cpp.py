@@ -17,40 +17,15 @@ import re
 import shutil
 import subprocess
 import tempfile
-from io import TextIOWrapper
 from pathlib import Path
-from typing import Callable, Dict, List, Optional
+from typing import Dict, List
 
-import shared_utils
 from generator import GrpcServiceSdkGenerator, GrpcServiceSdkGeneratorFactory
 from proto import ProtoFileHandle
-from shared_utils import conan_helper, templates
+from shared_utils import capture_textfile_area, conan_helper, templates, to_camel_case
 from velocitas_lib import get_package_path, get_workspace_dir
 
 CONAN_PROFILE_NAME = "host"
-
-
-def capture_textfile_area(
-    file: TextIOWrapper,
-    start_line: str,
-    end_line: str,
-    map_fn: Optional[Callable[[str], str]] = None,
-) -> List[str]:
-    area_content: List[str] = []
-    is_capturing = False
-    for line in file:
-        if line.strip() == start_line:
-            is_capturing = True
-        elif line.strip() == end_line:
-            is_capturing = False
-        elif is_capturing:
-            line = line.rstrip()
-
-            if map_fn:
-                line = map_fn(line)
-
-            area_content.append(line)
-    return area_content
 
 
 class GrpcCodeExtractor:
@@ -83,7 +58,7 @@ class GrpcCodeExtractor:
             f"{self.__proto_file.get_service_name().lower()}.grpc.pb.cc",
         )
 
-        service_name = shared_utils.to_camel_case(self.__proto_file.get_service_name())
+        service_name = to_camel_case(self.__proto_file.get_service_name())
 
         package_pieces = self.__proto_file.get_package().split(".")
 
@@ -93,6 +68,7 @@ class GrpcCodeExtractor:
             f"}}  // namespace {package_pieces[0]}",
         )
 
+        # skin initial 2 lines b/c they are always empty
         return source_content[2 : len(source_content) - 2]
 
 
@@ -136,11 +112,22 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
             self.__package_directory_path,
         )
 
+        service_name = self.__proto_file_handle.get_service_name()
+
+        files_to_copy: List[templates.CopySpec] = []
+
         if client_required:
-            self.__generate_service_client()
+            files_to_copy.extend(self.__get_service_client_files(service_name))
 
         if server_required:
-            self.__generate_service_server()
+            files_to_copy.extend(self.__get_service_server_files(service_name))
+
+        templates.copy_templates(
+            self.__get_template_dir(),
+            self.__package_directory_path,
+            files_to_copy,
+            self.__get_template_variables(),
+        )
 
     def __get_template_variables(self) -> Dict[str, str]:
         service_name = self.__proto_file_handle.get_service_name()
@@ -148,7 +135,7 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
         return {
             "service_name": service_name,
             "service_name_lower": service_name.lower(),
-            "service_name_camel_case": shared_utils.to_camel_case(service_name),
+            "service_name_camel_case": to_camel_case(service_name),
             "package_id": self.__proto_file_handle.get_package().replace(".", "::"),
             "core_sdk_version": str(conan_helper.get_required_sdk_version()),
         }
@@ -158,56 +145,38 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
             get_package_path(), "grpc-interface-support", "templates", "cpp"
         )
 
-    def __get_relative_include_dir(self) -> str:
+    def __get_relative_file_dir(self) -> str:
         return f"services/{self.__proto_file_handle.get_service_name().lower()}"
 
     def __get_include_dir(self) -> str:
-        return f"include/{self.__get_relative_include_dir()}"
+        return f"include/{self.__get_relative_file_dir()}"
 
     def __get_source_dir(self) -> str:
-        return f"src/services/{self.__proto_file_handle.get_service_name().lower()}"
+        return f"src/{self.__get_relative_file_dir()}"
 
-    def __generate_service_client(self) -> None:
-        service_name = self.__proto_file_handle.get_service_name()
-
-        files_to_copy = [
+    def __get_service_client_files(self, service_name: str) -> List[templates.CopySpec]:
+        return [
             templates.CopySpec(
                 "ServiceNameServiceClientFactory.h",
-                f"{self.__get_include_dir()}/{shared_utils.to_camel_case(service_name)}ServiceClientFactory.h",
+                f"{self.__get_include_dir()}/{to_camel_case(service_name)}ServiceClientFactory.h",
             ),
             templates.CopySpec(
                 "ServiceNameServiceClientFactory.cc",
-                f"{self.__get_source_dir()}/{shared_utils.to_camel_case(service_name)}ServiceClientFactory.cc",
+                f"{self.__get_source_dir()}/{to_camel_case(service_name)}ServiceClientFactory.cc",
             ),
         ]
 
-        templates.copy_templates(
-            self.__get_template_dir(),
-            self.__package_directory_path,
-            files_to_copy,
-            self.__get_template_variables(),
-        )
-
-    def __generate_service_server(self) -> None:
-        service_name = self.__proto_file_handle.get_service_name()
-
-        files_to_copy = [
+    def __get_service_server_files(self, service_name: str) -> List[templates.CopySpec]:
+        return [
             templates.CopySpec(
                 "ServiceNameServiceServerFactory.h",
-                f"{self.__get_include_dir()}/{shared_utils.to_camel_case(service_name)}ServiceServerFactory.h",
+                f"{self.__get_include_dir()}/{to_camel_case(service_name)}ServiceServerFactory.h",
             ),
             templates.CopySpec(
                 "ServiceNameServiceServerFactory.cc",
-                f"{self.__get_source_dir()}/{shared_utils.to_camel_case(service_name)}ServiceServerFactory.cc",
+                f"{self.__get_source_dir()}/{to_camel_case(service_name)}ServiceServerFactory.cc",
             ),
         ]
-
-        templates.copy_templates(
-            self.__get_template_dir(),
-            self.__package_directory_path,
-            files_to_copy,
-            self.__get_template_variables(),
-        )
 
     def install_package(self) -> None:
         conan_helper.move_generated_sources(
@@ -252,13 +221,12 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
 
     def __transform_header_stub_code(self, lines: List[str]) -> List[str]:
         service_name = self.__proto_file_handle.get_service_name()
-        service_class_name = shared_utils.to_camel_case(service_name) + "Service"
+        service_class_name = to_camel_case(service_name) + "Service"
 
         result: List[str] = []
 
         for line in lines:
             line = line.rstrip().replace("Service", service_class_name)
-            service_class_name = service_name + "Service"
             if line.lstrip().startswith("virtual"):
                 result.append(line.replace("virtual ", "").replace(";", " override;"))
 
@@ -266,7 +234,7 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
 
     def __transform_source_stub_code(self, lines: List[str]) -> List[str]:
         service_name = self.__proto_file_handle.get_service_name()
-        service_class_name = shared_utils.to_camel_case(service_name) + "Service"
+        service_class_name = to_camel_case(service_name) + "Service"
 
         result: List[str] = []
 
@@ -304,12 +272,11 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
         variables = self.__get_template_variables()
         variables["service_header_code"] = "\n".join(header_stub_code)
         variables["grpc_service_header_path"] = os.path.join(
-            self.__get_relative_include_dir(),
+            self.__get_relative_file_dir(),
             f"{self.__proto_file_handle.get_service_name().lower()}.grpc.pb.h",
         )
         variables["service_header_user_code"] = "\n".join(user_defined_code)
 
-        # file does not exist it, copy over the template
         templates.copy_templates(
             self.__get_template_dir(),
             app_source_dir,
@@ -319,14 +286,14 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
 
     def __create_service_source(self) -> None:
         app_source_dir = os.path.join(get_workspace_dir(), "app", "src")
-        service_header_file_name = (
+        service_source_file_name = (
             f"{self.__proto_file_handle.get_service_name()}ServiceImpl.cpp"
         )
-        service_header_file_path = os.path.join(
-            app_source_dir, service_header_file_name
+        service_source_file_path = os.path.join(
+            app_source_dir, service_source_file_name
         )
 
-        if os.path.exists(service_header_file_path):
+        if os.path.exists(service_source_file_path):
             return
 
         source_code = GrpcCodeExtractor(
@@ -341,7 +308,7 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
         templates.copy_templates(
             self.__get_template_dir(),
             app_source_dir,
-            [templates.CopySpec("ServiceImpl.cpp", service_header_file_name)],
+            [templates.CopySpec("ServiceImpl.cpp", service_source_file_path)],
             variables,
         )
 

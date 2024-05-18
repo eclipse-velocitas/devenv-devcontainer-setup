@@ -17,6 +17,7 @@ import os
 import shutil
 import subprocess
 from pathlib import Path
+from typing import List
 
 import proto
 from generator import GrpcServiceSdkGenerator, GrpcServiceSdkGeneratorFactory
@@ -62,7 +63,9 @@ class PythonGrpcInterfaceGenerator(GrpcServiceSdkGenerator):  # type: ignore
             ]
         )
 
-    def __copy_code_and_templates(self) -> None:
+    def __copy_code_and_templates(
+        self, client_required: bool, server_required: bool
+    ) -> None:
         service_name = self.__proto_file_handle.get_service_name()
         module_name = f"{service_name.lower()}_service_sdk"
         source_path = os.path.join(self.__package_directory_path, module_name)
@@ -84,15 +87,23 @@ class PythonGrpcInterfaceGenerator(GrpcServiceSdkGenerator):  # type: ignore
         for file in generated_sources:
             shutil.move(file, source_path)
 
-        files_to_copy = [
-            CopySpec(
-                source_path="ServiceNameServiceClientFactory.py",
-                target_path=os.path.join(
-                    source_path, f"{service_name}ServiceClientFactory.py"
-                ),
-            ),
-            CopySpec(source_path="pyproject.toml"),
-        ]
+        files_to_copy: List[CopySpec] = []
+
+        if client_required:
+            files_to_copy.extend(
+                [
+                    CopySpec(
+                        source_path="ServiceNameServiceClientFactory.py",
+                        target_path=os.path.join(
+                            source_path, f"{service_name}ServiceClientFactory.py"
+                        ),
+                    ),
+                    CopySpec(source_path="pyproject.toml"),
+                ]
+            )
+
+        if server_required:
+            print("WARN: Server generation not supported yet for Python!")
 
         variables = {
             "service_name": service_name,
@@ -121,7 +132,7 @@ class PythonGrpcInterfaceGenerator(GrpcServiceSdkGenerator):  # type: ignore
         server_required: bool,
     ) -> None:
         self.__invoke_code_generator()
-        self.__copy_code_and_templates()
+        self.__copy_code_and_templates(client_required, server_required)
 
     def install_package(self) -> None:
         self.__install_module()

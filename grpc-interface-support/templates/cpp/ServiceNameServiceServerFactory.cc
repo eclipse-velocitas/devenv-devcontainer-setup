@@ -26,7 +26,7 @@ namespace velocitas {
 std::unique_ptr<grpc::Server> ${{ service_name_camel_case }}ServiceServerFactory::create(
     Middleware&                                                      middleware,
     std::shared_ptr<${{ package_id }}::${{ service_name }}::Service>&& service) {
-    const auto serviceLocation = middleware.getServiceLocation("Seats");
+    const auto serviceLocation = middleware.getServiceLocation("${{ service_name }}");
 
     grpc::EnableDefaultHealthCheckService(true);
     grpc::reflection::InitProtoReflectionServerBuilderPlugin();
