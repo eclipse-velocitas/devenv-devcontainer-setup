@@ -33,6 +33,6 @@ def pytest_sessionstart(session):
     )
     manifest_dict = json.load(open(manifest_file_path))
     component_dict = manifest_dict["components"][1]
-    os.environ["modelGeneratorGitRepo"] = component_dict["variables"][2]["default"]
-    os.environ["modelGeneratorGitRef"] = component_dict["variables"][3]["default"]
+    os.environ["modelGeneratorGitRef"] = component_dict["variables"][2]["default"]
+    os.environ["gitLocation"] = component_dict["variables"][3]["default"]
     install_model_generator()

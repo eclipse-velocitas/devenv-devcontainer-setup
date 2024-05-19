@@ -59,10 +59,15 @@ def should_install_model_generator() -> bool:
 
 
 def install_model_generator() -> None:
-    model_gen_repo = require_env("modelGeneratorGitRepo")
+    model_gen_repo = require_env("gitLocation")
     model_gen_version = require_env("modelGeneratorGitRef")
 
-    pip(["install", f"git+{model_gen_repo}@{model_gen_version}"])
+    pip(
+        [
+            "install",
+            f"git+{model_gen_repo}/vehicle-model-generator.git@{model_gen_version}",
+        ]
+    )
 
 
 def install_packages() -> None:

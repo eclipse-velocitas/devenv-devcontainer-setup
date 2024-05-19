@@ -89,16 +89,16 @@
                     "description": "Absolute path where to generate the vehicle model. If set to 'auto' the model will be generated in the project cache."
                 },
                 {
-                    "name": "modelGeneratorGitRepo",
-                    "type": "string",
-                    "default": "https://github.com/eclipse-velocitas/vehicle-model-generator.git",
-                    "description": "Git repository of the model generator."
-                },
-                {
                     "name": "modelGeneratorGitRef",
                     "type": "string",
                     "default": "v0.7.0",
                     "description": "Git ref of the model generator repo. Can be a tag, branch or SHA"
+                },
+                {
+                    "name": "gitLocation",
+                    "type": "string",
+                    "default": "https://github.com/eclipse-velocitas",
+                    "description": "Git location of used repositories"
                 },
                 {
                     "name": "vssSrc",
@@ -159,6 +159,14 @@
                     "args": [
                         "./sdk-installer/src/run.py"
                     ]
+                }
+            ],
+            "variables": [
+                {
+                    "name": "gitLocation",
+                    "type": "string",
+                    "default": "https://github.com/eclipse-velocitas",
+                    "description": "Git location of used repositories"
                 }
             ]
         },
