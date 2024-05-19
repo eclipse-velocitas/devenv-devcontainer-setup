@@ -142,7 +142,7 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
 
     def __get_template_dir(self) -> str:
         return os.path.join(
-            get_package_path(), "grpc-interface-support", "templates", "cpp"
+            get_package_path(), "grpc-interface-support", "data", "templates", "cpp"
         )
 
     def __get_relative_file_dir(self) -> str:
