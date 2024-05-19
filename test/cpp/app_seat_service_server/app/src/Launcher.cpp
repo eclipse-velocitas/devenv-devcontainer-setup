@@ -16,7 +16,7 @@
 
 #include "sdk/middleware/Middleware.h"
 #include "services/seats/SeatsServiceServerFactory.h"
-#include "SeatsServiceServer.h"
+#include "SeatsServiceImpl.h"
 
 #include <memory>
 
