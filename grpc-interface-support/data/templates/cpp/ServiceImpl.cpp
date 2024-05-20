@@ -14,10 +14,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "${{ service_name }}ServiceServer.h"
+#include "${{ service_name }}ServiceImpl.h"
 
 namespace velocitas {
 
-${{ service_source_code }}
+$ {
+    { service_source_code }
+}
 
 } // namespace velocitas
