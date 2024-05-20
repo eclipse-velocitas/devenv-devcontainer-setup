@@ -28,6 +28,11 @@ from velocitas_lib import get_package_path, get_workspace_dir
 CONAN_PROFILE_NAME = "host"
 
 
+def get_template_dir() -> str:
+    return os.path.join(
+        get_package_path(), "grpc-interface-support", "data", "templates", "cpp"
+    )
+
 class GrpcCodeExtractor:
     """
     Provides methods for extracing code from generated gRPC c++ files.
@@ -123,7 +128,7 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
             files_to_copy.extend(self.__get_service_server_files(service_name))
 
         templates.copy_templates(
-            self.__get_template_dir(),
+            get_template_dir(),
             self.__package_directory_path,
             files_to_copy,
             self.__get_template_variables(),
@@ -139,11 +144,6 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
             "package_id": self.__proto_file_handle.get_package().replace(".", "::"),
             "core_sdk_version": str(conan_helper.get_required_sdk_version()),
         }
-
-    def __get_template_dir(self) -> str:
-        return os.path.join(
-            get_package_path(), "grpc-interface-support", "data", "templates", "cpp"
-        )
 
     def __get_relative_file_dir(self) -> str:
         return f"services/{self.__proto_file_handle.get_service_name().lower()}"
@@ -211,7 +211,7 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
         variables["cmake_sources"] = "\n\t".join(cmake_sources)
 
         templates.copy_templates(
-            self.__get_template_dir(),
+            get_template_dir(),
             self.__package_directory_path,
             files_to_copy,
             variables,
@@ -278,7 +278,7 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
         variables["service_header_user_code"] = "\n".join(user_defined_code)
 
         templates.copy_templates(
-            self.__get_template_dir(),
+            get_template_dir(),
             app_source_dir,
             [templates.CopySpec("ServiceImpl.h", service_header_file_name)],
             variables,
@@ -306,7 +306,7 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
         variables["service_source_code"] = "\n".join(source_code)
 
         templates.copy_templates(
-            self.__get_template_dir(),
+            get_template_dir(),
             app_source_dir,
             [templates.CopySpec("ServiceImpl.cpp", service_source_file_path)],
             variables,
@@ -366,10 +366,6 @@ class CppGrpcServiceSdkGeneratorFactory(GrpcServiceSdkGeneratorFactory):  # type
         env = os.environ.copy()
         env["CONAN_REVISIONS_ENABLED"] = "1"
 
-        template_dir = os.path.join(
-            get_package_path(), "grpc-interface-support", "templates", "cpp"
-        )
-
         deps_to_extract = [
             "grpc",
             "c-ares",
@@ -383,7 +379,7 @@ class CppGrpcServiceSdkGeneratorFactory(GrpcServiceSdkGeneratorFactory):  # type
         ]
         deps_results = []
         with open(
-            os.path.join(template_dir, "conanfile.py"), encoding="utf-8"
+            os.path.join(get_template_dir(), "conanfile.py"), encoding="utf-8"
         ) as conanfile:
             for line in conanfile:
                 for pattern in deps_patterns:
