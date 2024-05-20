@@ -18,8 +18,6 @@
 
 namespace velocitas {
 
-$ {
-    { service_source_code }
-}
+${{ service_source_code }}
 
 } // namespace velocitas
