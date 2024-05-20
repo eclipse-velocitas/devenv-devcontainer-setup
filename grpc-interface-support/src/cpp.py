@@ -33,6 +33,7 @@ def get_template_dir() -> str:
         get_package_path(), "grpc-interface-support", "data", "templates", "cpp"
     )
 
+
 class GrpcCodeExtractor:
     """
     Provides methods for extracing code from generated gRPC c++ files.
@@ -49,7 +50,7 @@ class GrpcCodeExtractor:
             f"{self.__proto_file.get_service_name().lower()}.grpc.pb.h",
         )
 
-        header_content = capture_textfile_area(
+        header_content: List[str] = capture_textfile_area(
             open(grpc_header_path, encoding="utf-8"),
             "virtual ~Service();",
             "};",
@@ -67,7 +68,7 @@ class GrpcCodeExtractor:
 
         package_pieces = self.__proto_file.get_package().split(".")
 
-        source_content = capture_textfile_area(
+        source_content: List[str] = capture_textfile_area(
             open(grpc_source_path, encoding="utf-8"),
             f"{service_name}::Service::~Service() {{",
             f"}}  // namespace {package_pieces[0]}",
