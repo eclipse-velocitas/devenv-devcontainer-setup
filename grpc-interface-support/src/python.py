@@ -115,6 +115,7 @@ class PythonGrpcInterfaceGenerator(GrpcServiceSdkGenerator):  # type: ignore
         template_dir = os.path.join(
             get_package_path(),
             "grpc-interface-support",
+            "data",
             "templates",
             "python",
         )
