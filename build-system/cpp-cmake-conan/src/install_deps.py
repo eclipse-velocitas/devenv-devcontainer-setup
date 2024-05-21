@@ -139,7 +139,7 @@ def cli() -> None:
         host_arch = build_arch
 
     install_deps_via_conan(
-        build_arch, host_arch, args.debug or not args.release, args.build_all_deps
+        build_arch, host_arch, args.debug and not args.release, args.build_all_deps
     )
 
 
