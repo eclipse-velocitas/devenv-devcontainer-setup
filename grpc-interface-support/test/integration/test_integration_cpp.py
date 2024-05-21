@@ -59,8 +59,8 @@ def ensure_package_is_generated():
 
 
 def ensure_build_successful():
-    assert subprocess.check_call(["./install_dependencies.sh"]) == 0
-    assert subprocess.check_call(["./build.sh"]) == 0
+    assert subprocess.check_call(["velocitas", "exec", "build-system", "install"]) == 0
+    assert subprocess.check_call(["velocitas", "exec", "build-system", "build"]) == 0
 
 
 def ensure_app_running() -> subprocess.Popen:
@@ -74,6 +74,7 @@ def ensure_project_initialized():
 
 
 def test__integration():
+    print("============= BUILDING SERVER ===================")
     os.chdir(os.environ["SERVICE_SERVER_ROOT"])
     ensure_project_initialized()
     ensure_package_is_generated()
@@ -81,6 +82,7 @@ def test__integration():
     ensure_build_successful()
     server_process = ensure_app_running()
 
+    print("============= BUILDING CLIENT ===================")
     os.chdir(os.environ["SERVICE_CLIENT_ROOT"])
     ensure_project_initialized()
     ensure_package_is_generated()
