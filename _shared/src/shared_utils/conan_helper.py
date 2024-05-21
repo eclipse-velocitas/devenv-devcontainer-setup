@@ -83,12 +83,15 @@ def export_conan_project(conan_project_path: str) -> None:
     Args:
         conan_project_path (str): The path to directory containing the project.
     """
+    env = os.environ.copy()
+    env["CONAN_REVISIONS_ENABLED"] = "1"
     print("Exporting Conan project")
     subprocess.check_call(
         ["conan", "export", "."],
         cwd=conan_project_path,
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
+        env=env,
     )
 
 
