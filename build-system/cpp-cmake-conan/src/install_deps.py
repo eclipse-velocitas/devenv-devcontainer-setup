@@ -138,6 +138,8 @@ def cli() -> None:
     if host_arch is None:
         host_arch = build_arch
 
+    subprocess.check_call(["conan", "config", "set", "general.revisions_enabled=1"])
+
     install_deps_via_conan(
         build_arch, host_arch, args.debug and not args.release, args.build_all_deps
     )
