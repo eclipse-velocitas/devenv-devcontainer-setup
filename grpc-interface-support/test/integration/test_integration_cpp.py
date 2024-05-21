@@ -59,8 +59,8 @@ def ensure_package_is_generated():
 
 
 def ensure_build_successful():
-    assert subprocess.check_call(["./install_dependencies.sh", "-r"]) == 0
-    assert subprocess.check_call(["./build.sh", "-r"]) == 0
+    assert subprocess.check_call(["./install_dependencies.sh"]) == 0
+    assert subprocess.check_call(["./build.sh"]) == 0
 
 
 def ensure_app_running() -> subprocess.Popen:
