@@ -41,5 +41,5 @@ def test_package_can_be_used_by_project() -> None:
 
     copy_test_files()
 
-    subprocess.check_call(["./install_dependencies.sh"])
-    subprocess.check_call(["./build.sh"])
+    subprocess.check_call(["velocitas", "exec", "build-system", "install"])
+    subprocess.check_call(["velocitas", "exec", "build-system", "build"])
