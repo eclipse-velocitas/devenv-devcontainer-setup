@@ -22,8 +22,8 @@ if not os.environ["VELOCITAS_TEST_LANGUAGE"] == "python":
 
 
 def is_package_installed(package_name: str) -> bool:
-    output = subprocess.check_output(["pip", "show", package_name], encoding="utf-8")
-    return output.find(f"Name: {package_name}") != -1
+    return_code = subprocess.call(["pip", "show", package_name])
+    return return_code == 0
 
 
 def can_import_and_use_vehicleapp() -> bool:
@@ -41,28 +41,31 @@ def can_import_and_use_vehicleapp() -> bool:
         return False
 
 
-def test_no_sdk_reference_found__latest_version_installed():
+def test_no_sdk_reference_found__nothing_installed():
     requirements_contents = """
 
     """
-    with open("./app/requirements-velocitas.txt", mode="w") as requirements:
+    with open(
+        "./app/requirements-velocitas.txt", mode="w", encoding="utf-8"
+    ) as requirements:
         requirements.write(requirements_contents)
 
-    subprocess.check_call(["velocitas", "init", "-v"], stdin=subprocess.PIPE)
-    assert is_package_installed("velocitas_sdk") or is_package_installed(
+    subprocess.check_call(["velocitas", "init", "-f", "-v"], stdin=subprocess.PIPE)
+    assert not is_package_installed("velocitas_sdk") and not is_package_installed(
         "velocitas-sdk"
     )
-    assert can_import_and_use_vehicleapp()
 
 
 def test_sdk_reference_found__sdk_installed():
     requirements_contents = """
 velocitas_sdk==0.13.0
     """
-    with open("./app/requirements-velocitas.txt", mode="w") as requirements:
+    with open(
+        "./app/requirements-velocitas.txt", mode="w", encoding="utf-8"
+    ) as requirements:
         requirements.write(requirements_contents)
 
-    subprocess.check_call(["velocitas", "init", "-v"], stdin=subprocess.PIPE)
+    subprocess.check_call(["velocitas", "init", "-f", "-v"], stdin=subprocess.PIPE)
     assert is_package_installed("velocitas_sdk") or is_package_installed(
         "velocitas-sdk"
     )
