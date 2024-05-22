@@ -5,7 +5,7 @@ set(PROJECT_NAME ${{ service_name_lower }}-service-sdk)
 project(${PROJECT_NAME} CXX)
 
 add_library(${PROJECT_NAME}
-    ${{ sources }}
+    ${{ cmake_sources }}
 )
 
 target_include_directories(${PROJECT_NAME}
@@ -18,7 +18,7 @@ include_directories(
 )
 
 set(HEADERS
-    ${{ headers }}
+    ${{ cmake_headers }}
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
