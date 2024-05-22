@@ -91,7 +91,6 @@ class Conan(PackageManager):
         )
 
 
-
 class Pip(PackageManager):
     def __init__(self, verbose_logging: bool):
         self._verbose_logging = verbose_logging
