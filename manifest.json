@@ -109,8 +109,24 @@
                 {
                     "name": "vssUnitSrc",
                     "type": "array",
-                    "default": ["./vehicle-model-lifecycle/units.yaml"],
+                    "default": [ "./vehicle-model-lifecycle/units.yaml" ],
                     "description": "This defines the source of the units file that should be used for model generation."
+                }
+            ]
+        },
+        {
+            "id": "conan-setup",
+            "description": "Sets up the conan client to connect to different remotes with credentials.",
+            "programs": [
+                {
+                    "id": "run",
+                    "executable": "python3",
+                    "args": [ "./conan-setup/src/run.py" ]
+                }
+            ],
+            "onPostInit": [
+                {
+                    "ref": "run"
                 }
             ]
         },

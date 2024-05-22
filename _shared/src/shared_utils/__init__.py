@@ -13,6 +13,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
+from io import TextIOWrapper
+from typing import Callable, List, Optional
+
+
 def to_camel_case(snake_str: str) -> str:
     """Return a camel case version of a snake case string.
 
@@ -75,3 +79,37 @@ def get_valid_arch(arch: str) -> str:
         return "aarch64"
 
     raise ValueError(f"Unknown architecture: {arch}")
+
+
+def capture_textfile_area(
+    file: TextIOWrapper,
+    start_line: str,
+    end_line: str,
+    map_fn: Optional[Callable[[str], str]] = None,
+) -> List[str]:
+    """Capture an area of a textfile between a matching start line (exclusive) and the first line matching end_line (exclusive).
+
+    Args:
+        file (TextIOWrapper): The text file to read from.
+        start_line (str): The line which triggers the capture (will not be part of the output)
+        end_line (str): The line which terminates the capture (will not be bart of the output)
+        map_fn (Optional[Callable[[str], str]], optional): An optional mapping function to transform captured lines. Defaults to None.
+
+    Returns:
+        List[str]: A list of captured lines.
+    """
+    area_content: List[str] = []
+    is_capturing = False
+    for line in file:
+        if line.strip() == start_line:
+            is_capturing = True
+        elif line.strip() == end_line:
+            is_capturing = False
+        elif is_capturing:
+            line = line.rstrip()
+
+            if map_fn:
+                line = map_fn(line)
+
+            area_content.append(line)
+    return area_content
