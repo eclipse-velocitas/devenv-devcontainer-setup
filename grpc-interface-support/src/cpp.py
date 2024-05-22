@@ -74,7 +74,7 @@ class GrpcCodeExtractor:
             f"}}  // namespace {package_pieces[0]}",
         )
 
-        # skin initial 2 lines b/c they are always empty
+        # skip initial 2 lines b/c they are always empty
         return source_content[2 : len(source_content) - 2]
 
 
