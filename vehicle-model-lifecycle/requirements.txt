@@ -1,4 +1,5 @@
-velocitas-lib @ git+https://github.com/eclipse-velocitas/velocitas-lib@v0.0.3
+velocitas-lib==0.0.4
+velocitas-model-generator==0.7.1
 types-requests
 requests
 ./_shared
