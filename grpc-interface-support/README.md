@@ -6,7 +6,7 @@ The component provides CLI exec targets which will generate service client SDKs 
 
 ## Generation
 
-Run the expoed `generate-sdk` program via Velocitas CLI to generate a service SDK for usage within either client or server applications.
+Run the exposed `generate-sdk` program via Velocitas CLI to generate a service SDK for usage within either client or server applications.
 e.g.
 
 ```
