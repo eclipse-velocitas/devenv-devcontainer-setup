@@ -58,27 +58,12 @@ def should_install_model_generator() -> bool:
     return False
 
 
-def install_model_generator() -> None:
-    model_gen_repo = require_env("gitLocation")
-    model_gen_version = require_env("modelGeneratorGitRef")
-
-    pip(
-        [
-            "install",
-            f"git+{model_gen_repo}/vehicle-model-generator.git@{model_gen_version}",
-        ]
-    )
-
-
 def install_packages() -> None:
     """Install all required Python packages for the model generator and
     VSpec download."""
     script_path = get_script_path()
 
     pip(["install", "-r", f"{script_path}/../requirements.txt"])
-
-    if should_install_model_generator():
-        install_model_generator()
 
 
 if __name__ == "__main__":

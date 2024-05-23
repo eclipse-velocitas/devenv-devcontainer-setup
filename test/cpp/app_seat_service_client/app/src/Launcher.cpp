@@ -15,28 +15,30 @@
  */
 
 #include "SampleApp.h"
-#include "sdk/IPubSubClient.h"
-#include "sdk/Logger.h"
-#include "sdk/vdb/IVehicleDataBrokerClient.h"
 
 #include "sdk/middleware/Middleware.h"
 #include "services/seats/SeatsServiceClientFactory.h"
+#include "services/seats/seats.grpc.pb.h"
 
-#include <utility>
+#include <iostream>
 
-namespace example {
+using namespace velocitas;
 
-SampleApp::SampleApp()
-    : VehicleApp(velocitas::IVehicleDataBrokerClient::createInstance("vehicledatabroker"),
-                 velocitas::IPubSubClient::createInstance("SampleApp")) {}
-
-void SampleApp::onStart() {
+int main(int argc, char** argv) {
     auto seatService =
-        velocitas::SeatsServiceClientFactory::create(velocitas::Middleware::getInstance());
+        SeatsServiceClientFactory::create(Middleware::getInstance());
 
-    if (seatService != nullptr) {
-        velocitas::logger().info("Service available!");
+    ::grpc::ClientContext context;
+    ::sdv::edge::comfort::seats::v1::MoveRequest request;
+    ::sdv::edge::comfort::seats::v1::MoveReply response;
+    auto status = seatService->Move(&context, request, &response);
+
+    std::cout << "gRPC Server returned code: " << status.error_code() << std::endl;
+    std::cout << "gRPC error message: " << status.error_message().c_str() << std::endl;
+
+    if (status.error_code () == ::grpc::StatusCode::UNIMPLEMENTED) {
+        return 0;
     }
-}
 
-} // namespace example
+    return 1;
+}

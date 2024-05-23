@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Contributors to the Eclipse Foundation
+ * Copyright (c) 2024 Contributors to the Eclipse Foundation
  *
  * This program and the accompanying materials are made available under the
  * terms of the Apache License, Version 2.0 which is available at
@@ -14,24 +14,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef VEHICLE_APP_SDK_EXT_GRPC_SERVICE_CLIENT_H
-#define VEHICLE_APP_SDK_EXT_GRPC_SERVICE_CLIENT_H
+#include "${{ service_name }}ServiceImpl.h"
 
-#include "sdk/Status.h"
-#include "sdk/VehicleApp.h"
+namespace velocitas {
 
-#include <memory>
-#include <string>
+${{ service_source_code }}
 
-namespace example {
-
-class SampleApp : public velocitas::VehicleApp {
-public:
-    SampleApp();
-
-    void onStart() override;
-};
-
-} // namespace example
-
-#endif // VEHICLE_APP_SDK_EXT_GRPC_SERVICE_CLIENT_H
+} // namespace velocitas
