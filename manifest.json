@@ -106,7 +106,7 @@
                     "id": "run",
                     "executable": "python3",
                     "args": [
-                        "./components/conan-setup/src/run.py"
+                        "./conan-setup/src/run.py"
                     ]
                 }
             ],
