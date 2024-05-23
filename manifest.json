@@ -91,7 +91,9 @@
                 {
                     "name": "vssUnitSrc",
                     "type": "array",
-                    "default": [ "./vehicle-model-lifecycle/units.yaml" ],
+                    "default": [
+                        "./vehicle-model-lifecycle/units.yaml"
+                    ],
                     "description": "This defines the source of the units file that should be used for model generation."
                 }
             ]
@@ -103,7 +105,9 @@
                 {
                     "id": "run",
                     "executable": "python3",
-                    "args": [ "./conan-setup/src/run.py" ]
+                    "args": [
+                        "./conan-setup/src/run.py"
+                    ]
                 }
             ],
             "onPostInit": [
@@ -149,6 +153,36 @@
                     "type": "string",
                     "default": "https://github.com/eclipse-velocitas",
                     "description": "Git location of used repositories"
+                },
+                {
+                    "name": "language",
+                    "type": "string",
+                    "required": true,
+                    "description": "The programming language of the project. Either 'python' or 'cpp'"
+                },
+                {
+                    "name": "sdkGitRepo",
+                    "type": "string",
+                    "default": "${{ gitLocation }}/vehicle-app-${{ language }}-sdk.git",
+                    "description": "Git repository to use for downloading the SDK"
+                },
+                {
+                    "name": "sdkPackageSubdirectory",
+                    "type": "string",
+                    "default": ".",
+                    "description": "Subdirectory within the git repository of the SDK which contains the package to install"
+                },
+                {
+                    "name": "sdkGitRef",
+                    "type": "string",
+                    "default": "auto",
+                    "description": "Git reference for the SDK repository to use. If set to 'auto', it will use the version identifier from the dependency file."
+                },
+                {
+                    "name": "additionalPackages",
+                    "type": "string",
+                    "default": "[]",
+                    "description": "String-escaped JSON array of additional packages to install along with the SDK. Objects inside the array require the following fields: 'id' - package id, 'gitRepo' - URI of the git repo, 'gitRef' - git reference of the git repo to use, 'packageSubdirectory' - directory within the repo which hosts the package definition"
                 }
             ]
         },
