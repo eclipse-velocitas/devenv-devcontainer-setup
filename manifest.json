@@ -243,22 +243,22 @@
             "files": [
                 {
                     "src": "build-system/cpp-cmake-conan/src/build.py",
-                    "dst": ".",
+                    "dst": "build.py",
                     "condition": "'${{ language }}' === 'cpp'"
                 },
                 {
                     "src": "build-system/cpp-cmake-conan/build.sh",
-                    "dst": ".",
+                    "dst": "build.sh",
                     "condition": "'${{ language }}' === 'cpp'"
                 },
                 {
                     "src": "build-system/cpp-cmake-conan/src/install_deps.py",
-                    "dst": ".",
+                    "dst": "install_deps.py",
                     "condition": "'${{ language }}' === 'cpp'"
                 },
                 {
                     "src": "build-system/cpp-cmake-conan/install_dependencies.sh",
-                    "dst": ".",
+                    "dst": "install_dependencies.sh",
                     "condition": "'${{ language }}' === 'cpp'"
                 }
             ],
