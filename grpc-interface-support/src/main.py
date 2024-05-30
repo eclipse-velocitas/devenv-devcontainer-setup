@@ -85,11 +85,15 @@ def generate_single_service(
     proto_file_handle = download_proto(if_config)
     service_sdk_dir = create_service_sdk_dir(proto_file_handle)
 
+    is_client = "required" in if_config
+    is_server = "provided" in if_config
+
     generator = factory.create_service_generator(service_sdk_dir, proto_file_handle)
-    generator.generate_package("required" in if_config, "provided" in if_config)
+    generator.generate_package(is_client, is_server)
     generator.install_package()
     generator.update_package_references()
-    generator.update_auto_generated_code()
+    if is_server:
+        generator.update_auto_generated_code()
 
 
 def main(verbose: bool) -> None:
