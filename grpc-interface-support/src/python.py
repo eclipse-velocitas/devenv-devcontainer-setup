@@ -107,7 +107,17 @@ class PythonGrpcInterfaceGenerator(GrpcServiceSdkGenerator):  # type: ignore
             )
 
         if server_required:
-            print("WARN: Server generation not supported yet for Python!")
+            files_to_copy.extend(
+                [
+                    CopySpec(
+                        source_path="ServiceNameServiceServerFactory.py",
+                        target_path=os.path.join(
+                            source_path, f"{service_name}ServiceServerFactory.py"
+                        ),
+                    ),
+                    CopySpec(source_path="pyproject.toml"),
+                ]
+            )
 
         variables = {
             "service_name": service_name,

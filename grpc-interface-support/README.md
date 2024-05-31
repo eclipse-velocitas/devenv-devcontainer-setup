@@ -25,7 +25,7 @@ For generating a client SDK:
             "type": "grpc-interface",
             "config": {
                 "src": "<uri_to_proto_file>",
-                "required": {},
+                "required": {}
             }
         }
     ]
@@ -42,7 +42,7 @@ For generating a server SDK:
             "type": "grpc-interface",
             "config": {
                 "src": "<uri_to_proto_file>",
-                "provided": {},
+                "provided": {}
             }
         }
     ]
@@ -60,7 +60,7 @@ For generating both:
             "config": {
                 "src": "<uri_to_proto_file>",
                 "required": {},
-                "provided": {},
+                "provided": {}
             }
         }
     ]
@@ -96,10 +96,10 @@ int main(int argc, char** argv) {
 
 When generating a server SDK, in addition to the SDK package, 2 files are auto generated into your application's source directory:
 
-* `<Service>ServerImpl.h` contains class defintion and method declarations for implementing the server. This file is continously auto-generated! To add custom methods place them within the `// <user-defined>` block.
+* `<Service>ServerImpl.h` contains class definition and method declarations for implementing the server. This file is continuously auto-generated! To add custom methods place them within the `// <user-defined>` block.
 * `<Service>ServerImpl.cc` contains method definitions for all server methods, defaulting to `UNIMPLEMENTED`. This file is only generated **once** if it does not exist.
 
-Why is the header continously re-generated and the cpp file is not? - The header always contains up-to-date method declarations reflecting the proto state. If they change, the source code, which most likely has more LoC, needs to be adapted manually.
+Why is the header continuously re-generated and the cpp file is not? - The header always contains up-to-date method declarations reflecting the proto state. If they change, the source code, which most likely has more LoC, needs to be adapted manually.
 
 To instantiate a server with your custom implementation, use the provided factory API to interface with the Velocitas core SDK:
 

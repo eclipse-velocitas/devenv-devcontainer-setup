@@ -43,7 +43,7 @@ def get_template_dir() -> str:
 
 class GrpcCodeExtractor:
     """
-    Provides methods for extracing code from generated gRPC c++ files.
+    Provides methods for extracting code from generated gRPC c++ files.
     """
 
     def __init__(self, proto_file: ProtoFileHandle, base_path: str):
