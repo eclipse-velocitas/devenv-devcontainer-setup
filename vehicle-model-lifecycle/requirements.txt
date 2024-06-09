@@ -1,5 +1,4 @@
-velocitas-lib==0.0.4
+velocitas-lib @ git+https://github.com/eclipse-velocitas/velocitas-lib@move-shared-from-devcontainer-setup
 velocitas-model-generator==0.7.1
 types-requests
 requests
-./_shared
