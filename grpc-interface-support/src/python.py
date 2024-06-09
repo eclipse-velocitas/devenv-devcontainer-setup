@@ -29,6 +29,7 @@ from velocitas_lib import (
     to_camel_case,
 )
 
+
 def get_required_sdk_version_python() -> str:
     sdk_version: str = "0.11.0"
     with open(

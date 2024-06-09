@@ -22,7 +22,14 @@ from typing import Dict, List
 
 from generator import GrpcServiceSdkGenerator, GrpcServiceSdkGeneratorFactory
 from proto import ProtoFileHandle
-from velocitas_lib import capture_textfile_area, conan_helper, get_package_path, get_workspace_dir, templates, to_camel_case
+from velocitas_lib import (
+    capture_textfile_area,
+    conan_helper,
+    get_package_path,
+    get_workspace_dir,
+    templates,
+    to_camel_case,
+)
 
 CONAN_PROFILE_NAME = "host"
 
