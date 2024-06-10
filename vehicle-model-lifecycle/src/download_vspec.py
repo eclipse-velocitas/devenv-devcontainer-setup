@@ -212,7 +212,7 @@ def main(app_manifest_dict: Dict[str, Any]) -> None:
         print(f"Downloading file from {vspec_src!r} to {local_vspec_path!r}")
         try:
             download_file(vspec_src, local_vspec_path)
-        except:
+        except Exception:
             print("Download failed. Using default vss source")
             local_vspec_path = os.path.join(get_package_path(), require_env("vssSrc"))
 
