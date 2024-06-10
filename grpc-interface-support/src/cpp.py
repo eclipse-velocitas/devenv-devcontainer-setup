@@ -12,13 +12,14 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+import glob
 import os
 import re
 import shutil
 import subprocess
 import tempfile
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 from generator import GrpcServiceSdkGenerator, GrpcServiceSdkGeneratorFactory
 from proto import ProtoFileHandle
@@ -185,8 +186,46 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
             ),
         ]
 
+    def __move_generated_sources(
+        self,
+        generated_source_dir: str,
+        output_dir: str,
+        include_dir_rel: str,
+        src_dir_rel: str,
+    ) -> Tuple[List[str], List[str]]:
+        """Move generated source code from the generation dir into
+        headers: <output_dir>/<include_dir_rel>
+        sources: <output_dir>/<src_dir_rel>
+        Args:
+            generated_source_dir (str): The directory containing the generated sources.
+            output_dir (str): The root directory to move the generated files to.
+            include_dir_rel (str): Path relative to output_dir where to move the headers to.
+            src_dir_rel (str): Path relative to the output_dir where to move the sources to.
+            @@ -57,19 +57,19 @@ def move_generated_sources(
+                [1] = a list of the paths to all sources
+        """
+
+        headers = glob.glob(os.path.join(generated_source_dir, "*.h"))
+        sources = glob.glob(os.path.join(generated_source_dir, "*.cc"))
+
+        headers_relative = []
+        for header in headers:
+            rel_path = os.path.relpath(header, generated_source_dir)
+            os.makedirs(os.path.join(output_dir, include_dir_rel), exist_ok=True)
+            shutil.move(header, os.path.join(output_dir, include_dir_rel, rel_path))
+            headers_relative.append(os.path.join(include_dir_rel, rel_path))
+
+        sources_relative = []
+        for source in sources:
+            rel_path = os.path.relpath(source, generated_source_dir)
+            os.makedirs(os.path.join(output_dir, src_dir_rel), exist_ok=True)
+            shutil.move(source, os.path.join(output_dir, src_dir_rel, rel_path))
+            sources_relative.append(os.path.join(src_dir_rel, rel_path))
+
+        return headers_relative, sources_relative
+
     def install_package(self) -> None:
-        conan_helper.move_generated_sources(
+        self.__move_generated_sources(
             self.__package_directory_path,
             self.__package_directory_path,
             self.__get_include_dir(),
