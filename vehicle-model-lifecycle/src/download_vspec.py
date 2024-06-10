@@ -215,6 +215,9 @@ def main(app_manifest_dict: Dict[str, Any]) -> None:
         except Exception:
             print("Download failed. Using default vss source")
             local_vspec_path = os.path.join(get_package_path(), require_env("vssSrc"))
+    else:
+        if not os.path.isfile(local_vspec_path):
+            local_vspec_path = os.path.join(get_package_path(), require_env("vssSrc"))
 
     unit_src_list = get_vehicle_signal_interface_unit_files(unit_src_list)
 
