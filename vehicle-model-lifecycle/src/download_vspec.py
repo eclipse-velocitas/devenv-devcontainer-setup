@@ -210,7 +210,11 @@ def main(app_manifest_dict: Dict[str, Any]) -> None:
     if is_uri(vspec_src):
         local_vspec_path = os.path.join(get_project_cache_dir(), "vspec.json")
         print(f"Downloading file from {vspec_src!r} to {local_vspec_path!r}")
-        download_file(vspec_src, local_vspec_path)
+        try:
+            download_file(vspec_src, local_vspec_path)
+        except:
+            print("Download failed. Using default vss source")
+            local_vspec_path = os.path.join(get_package_path(), require_env("vssSrc"))
 
     unit_src_list = get_vehicle_signal_interface_unit_files(unit_src_list)
 
