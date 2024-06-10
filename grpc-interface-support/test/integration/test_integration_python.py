@@ -47,22 +47,25 @@ def test_python_package_is_generated():
 
 
 def test_pip_package_is_usable():
-    os.chdir(os.environ["SERVICE_CLIENT_ROOT"])
-    assert subprocess.check_call(["velocitas", "init", "-v"]) == 0
-
-    from seats_service_sdk.SeatsServiceClientFactory import SeatsServiceClientFactory
     from velocitas_sdk.base import Middleware, ServiceLocator
 
-    class TestServiceLocator(ServiceLocator):
+    class TestClientServiceLocator(ServiceLocator):
         def get_service_location(self, service_name: str) -> str:
-            return f"{service_name}@anyserver:anyport"  # noqa: E231
+            return f"{service_name}@127.0.0.1:1234"  # noqa: E231
+
+        def get_metadata(self, service_name: Optional[str] = None):
+            pass
+
+    class TestServerServiceLocator(ServiceLocator):
+        def get_service_location(self, service_name: str) -> str:
+            return "127.0.0.1:1234"  # noqa: E231
 
         def get_metadata(self, service_name: Optional[str] = None):
             pass
 
     class TestMiddleware(Middleware):
-        def __init__(self) -> None:
-            self.service_locator = TestServiceLocator()
+        def __init__(self, serviceLocator: ServiceLocator) -> None:
+            self.service_locator = serviceLocator
 
         async def start(self):
             pass
@@ -73,7 +76,30 @@ def test_pip_package_is_usable():
         async def stop(self):
             pass
 
-    middleware = TestMiddleware()
+    print("============= BUILDING SERVER ===================")
+    os.chdir(os.environ["SERVICE_SERVER_ROOT"])
+    assert subprocess.check_call(["velocitas", "init", "-v"]) == 0
+
+    from seats_service_sdk.seats_pb2_grpc import SeatsServicer
+    from seats_service_sdk.SeatsServiceServerFactory import SeatsServiceServerFactory
+
+    middleware = TestMiddleware(TestServerServiceLocator())
+    servicer = SeatsServicer()
+
+    server = SeatsServiceServerFactory.create(
+        middleware,
+        servicer,
+    )
+
+    assert server is not None
+
+    print("============= BUILDING CLIENT ===================")
+    os.chdir(os.environ["SERVICE_CLIENT_ROOT"])
+    assert subprocess.check_call(["velocitas", "init", "-v"]) == 0
+
+    from seats_service_sdk.SeatsServiceClientFactory import SeatsServiceClientFactory
+
+    middleware = TestMiddleware(TestClientServiceLocator())
     client = SeatsServiceClientFactory.create(middleware)
 
     assert client is not None

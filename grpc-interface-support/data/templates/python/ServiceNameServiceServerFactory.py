@@ -16,7 +16,7 @@ import grpc
 import concurrent.futures
 
 from ${{ service_name_lower }}_service_sdk.${{ service_name_lower }}_pb2_grpc import (
-    ${{ service_name }}Stub,
+    ${{ service_name }}Servicer, add_${{ service_name }}Servicer_to_server
 )
 from velocitas_sdk.base import Middleware
 
@@ -24,12 +24,11 @@ MAX_THREAD_POOL_WORKERS = 10
 
 class ${{ service_name_camel_case }}ServiceServerFactory:
     @staticmethod
-    def create(middleware: Middleware) -> grpc.Server:
+    def create(middleware: Middleware, servicer: ${{ service_name }}Servicer) -> grpc.Server:
         address = middleware.service_locator.get_service_location("${{ service_name }}")
         server = grpc.server(concurrent.futures.ThreadPoolExecutor(MAX_THREAD_POOL_WORKERS))
         server.add_insecure_port(address)
-
-        server.start()
-        server.wait_for_termination()
+        
+        add_${{ service_name }}Servicer_to_server(servicer, server)
 
         return server
