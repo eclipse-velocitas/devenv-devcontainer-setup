@@ -1,2 +1,1 @@
-velocitas-lib==0.0.4
-./_shared
+velocitas-lib==0.0.5
