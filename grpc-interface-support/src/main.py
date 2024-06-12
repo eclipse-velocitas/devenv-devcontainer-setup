@@ -14,6 +14,7 @@
 
 import argparse
 import os
+import re
 import shutil
 from typing import Any, Dict
 
@@ -32,6 +33,18 @@ from velocitas_lib.functional_interface import get_interfaces_for_type
 DEPENDENCY_TYPE_KEY = "grpc-interface"
 
 
+def is_uri(path: str) -> bool:
+    """Check if the provided path is a URI.
+
+    Args:
+        path (str): The path to check.
+
+    Returns:
+        bool: True if the path is a URI. False otherwise.
+    """
+    return re.match(r"(\w+)\:\/\/(\w+)", path) is not None
+
+
 def download_proto(config: Dict[str, Any]) -> proto.ProtoFileHandle:
     """Download the proto file defined in the grpc-interface
     config to the local project cache.
@@ -43,8 +56,10 @@ def download_proto(config: Dict[str, Any]) -> proto.ProtoFileHandle:
         proto.ProtoFileHandle: A handle to the proto file.
     """
     service_if_spec_src = config["src"]
-    _, filename = os.path.split(service_if_spec_src)
+    if not is_uri(service_if_spec_src):
+        return proto.ProtoFileHandle(service_if_spec_src)
 
+    _, filename = os.path.split(service_if_spec_src)
     cached_proto_file_path = os.path.join(get_project_cache_dir(), "services", filename)
 
     download_file(service_if_spec_src, cached_proto_file_path)
