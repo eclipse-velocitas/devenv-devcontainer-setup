@@ -53,8 +53,7 @@ class GrpcCodeExtractor:
     def get_header_stub_code(self, include_path: str = ".") -> List[str]:
         grpc_header_path = os.path.join(
             self.__base_path,
-            include_path,
-            f"{self.__proto_file.get_service_name().lower()}.grpc.pb.h",
+            f"{Path(self.__proto_file.file_path).stem}.grpc.pb.h",
         )
 
         header_content: List[str] = capture_textfile_area(
@@ -67,8 +66,7 @@ class GrpcCodeExtractor:
     def get_source_stub_code(self, source_path: str = ".") -> List[str]:
         grpc_source_path = os.path.join(
             self.__base_path,
-            source_path,
-            f"{self.__proto_file.get_service_name().lower()}.grpc.pb.cc",
+            f"{Path(self.__proto_file.file_path).stem}.grpc.pb.h",
         )
 
         service_name = to_camel_case(self.__proto_file.get_service_name())
@@ -91,10 +89,12 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
         package_directory_path: str,
         proto_file_handle: ProtoFileHandle,
         verbose: bool,
+        include_path: str,
     ):
         self.__package_directory_path = package_directory_path
         self.__proto_file_handle = proto_file_handle
         self.__verbose = verbose
+        self.__include_path = include_path
 
     def __get_binary_path(self, binary_name: str) -> str:
         path = shutil.which(binary_name)
@@ -104,17 +104,20 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
 
     def __invoke_code_generator(self, include_path: str, output_path: str) -> None:
         print("Invoking gRPC code generator")
+        self.__output_path = os.path.join(
+            output_path, os.path.relpath(include_path, self.__include_path)
+        )
         args = [
             self.__get_binary_path("protoc"),
             f"--plugin=protoc-gen-grpc={self.__get_binary_path('grpc_cpp_plugin')}",
-            f"-I{include_path}",
+            f"-I{self.__include_path}",
             f"--cpp_out={output_path}",
             f"--grpc_out={output_path}",
             self.__proto_file_handle.file_path,
         ]
         subprocess.check_call(
             args,
-            cwd=include_path,
+            cwd=self.__include_path,
             env=os.environ,
             stdout=subprocess.DEVNULL if not self.__verbose else None,
         )
@@ -291,7 +294,7 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
 
     def __create_or_update_service_header(self) -> None:
         header_stub_code = GrpcCodeExtractor(
-            self.__proto_file_handle, self.__package_directory_path
+            self.__proto_file_handle, self.__output_path
         ).get_header_stub_code(self.__get_include_dir())
 
         header_stub_code = self.__transform_header_stub_code(header_stub_code)
@@ -343,7 +346,7 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
             return
 
         source_code = GrpcCodeExtractor(
-            self.__proto_file_handle, self.__package_directory_path
+            self.__proto_file_handle, self.__output_path
         ).get_source_stub_code(self.__get_source_dir())
 
         source_code = self.__transform_source_stub_code(source_code)
@@ -376,9 +379,11 @@ class CppGrpcServiceSdkGeneratorFactory(GrpcServiceSdkGeneratorFactory):  # type
         self._verbose = verbose
 
     def create_service_generator(
-        self, output_path: str, proto_file_handle: ProtoFileHandle
+        self, output_path: str, proto_file_handle: ProtoFileHandle, include_path: str
     ) -> GrpcServiceSdkGenerator:
-        return CppGrpcServiceSdkGenerator(output_path, proto_file_handle, self._verbose)
+        return CppGrpcServiceSdkGenerator(
+            output_path, proto_file_handle, self._verbose, include_path
+        )
 
     def __create_conan_profile(self) -> None:
         subprocess.check_call(

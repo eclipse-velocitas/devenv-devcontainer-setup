@@ -107,7 +107,9 @@ def generate_single_service(
     is_client = "required" in if_config
     is_server = "provided" in if_config
 
-    generator = factory.create_service_generator(service_sdk_dir, proto_file_handle)
+    generator = factory.create_service_generator(
+        service_sdk_dir, proto_file_handle, if_config["includeDir"]
+    )
     generator.generate_package(is_client, is_server)
     generator.install_package()
     generator.update_package_references()
@@ -149,7 +151,7 @@ def main(verbose: bool) -> None:
 
 
 if __name__ == "__main__":
-    argument_parser = argparse.ArgumentParser("generate-sdk")
+    argument_parser = argparse.ArgumentParser()
     argument_parser.add_argument("-v", "--verbose", action="store_true")
     args = argument_parser.parse_args()
     main(args.verbose)
