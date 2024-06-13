@@ -159,7 +159,12 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
         }
 
     def __get_relative_file_dir(self) -> str:
-        return f"services/{self.__proto_file_handle.get_service_name().lower()}"
+        rel_path = os.path.relpath(
+            Path(self.__proto_file_handle.file_path).parent, self.__include_path
+        )
+        return (
+            f"services/{self.__proto_file_handle.get_service_name().lower()}/{rel_path}"
+        )
 
     def __get_include_dir(self) -> str:
         return f"include/{self.__get_relative_file_dir()}"
@@ -215,17 +220,19 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
 
         headers_relative = []
         for header in headers:
-            rel_path = os.path.basename(header)
-            os.makedirs(os.path.join(output_dir, include_dir_rel), exist_ok=True)
-            shutil.move(header, os.path.join(output_dir, include_dir_rel, rel_path))
-            headers_relative.append(os.path.join(include_dir_rel, rel_path))
+            header_path = os.path.join(output_dir, include_dir_rel)
+            os.makedirs(header_path, exist_ok=True)
+            shutil.move(header, header_path)
+            headers_relative.append(
+                os.path.join(include_dir_rel, os.path.basename(header))
+            )
 
         sources_relative = []
         for source in sources:
-            rel_path = os.path.basename(source)
-            os.makedirs(os.path.join(output_dir, src_dir_rel), exist_ok=True)
-            shutil.move(source, os.path.join(output_dir, src_dir_rel, rel_path))
-            sources_relative.append(os.path.join(src_dir_rel, rel_path))
+            source_path = os.path.join(output_dir, src_dir_rel)
+            os.makedirs(source_path, exist_ok=True)
+            shutil.move(source, source_path)
+            sources_relative.append(os.path.join(src_dir_rel, os.path.basename(source)))
 
         return headers_relative, sources_relative
 
@@ -348,7 +355,7 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
             return
 
         source_code = GrpcCodeExtractor(
-            self.__proto_file_handle, self.__package_directory_path
+            self.__proto_file_handle, self.__output_path
         ).get_source_stub_code(self.__get_source_dir())
 
         source_code = self.__transform_source_stub_code(source_code)
