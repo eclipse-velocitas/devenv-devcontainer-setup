@@ -28,6 +28,7 @@ from velocitas_lib import (
     download_file,
     get_programming_language,
     get_project_cache_dir,
+    get_workspace_dir,
 )
 from velocitas_lib.functional_interface import get_interfaces_for_type
 
@@ -58,7 +59,15 @@ def download_proto(config: Dict[str, Any]) -> proto.ProtoFileHandle:
     """
     service_if_spec_src = config["src"]
     if not is_uri(service_if_spec_src):
-        return proto.ProtoFileHandle(service_if_spec_src)
+        # Check if absolute or relative path
+        if os.path.isfile(service_if_spec_src):
+            return proto.ProtoFileHandle(service_if_spec_src)
+        elif os.path.isfile(os.path.join(get_workspace_dir(), service_if_spec_src)):
+            return proto.ProtoFileHandle(
+                os.path.join(get_workspace_dir(), service_if_spec_src)
+            )
+        else:
+            raise FileNotFoundError(f"File not found: {service_if_spec_src}")
 
     _, filename = os.path.split(service_if_spec_src)
     cached_proto_file_path = os.path.join(get_project_cache_dir(), "services", filename)
