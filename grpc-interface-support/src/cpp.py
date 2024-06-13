@@ -149,15 +149,16 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
 
     def __get_template_variables(self) -> Dict[str, str]:
         service_name = self.__proto_file_handle.get_service_name()
-
         return {
             "service_name": service_name,
             "service_name_lower": service_name.lower(),
             "service_name_camel_case": to_camel_case(service_name),
             "package_id": self.__proto_file_handle.get_package().replace(".", "::"),
             "core_sdk_version": str(conan_helper.get_required_sdk_version()),
-            "service_include_dir": self.__get_relative_file_dir(),
-            "service_file_name": Path(self.__proto_file_handle.file_path).stem,
+            "grpc_service_header_path": os.path.join(
+                self.__get_relative_file_dir(),
+                f"{Path(self.__proto_file_handle.file_path).stem}.grpc.pb.h",
+            ),
         }
 
     def __get_relative_file_dir(self) -> str:
@@ -329,10 +330,6 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
 
         variables = self.__get_template_variables()
         variables["service_header_code"] = "\n".join(header_stub_code)
-        variables["grpc_service_header_path"] = os.path.join(
-            self.__get_relative_file_dir(),
-            f"{self.__proto_file_handle.get_service_name().lower()}.grpc.pb.h",
-        )
         variables["service_header_user_code"] = "\n".join(user_defined_code)
 
         templates.copy_templates(

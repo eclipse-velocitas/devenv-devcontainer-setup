@@ -17,8 +17,7 @@
 #ifndef VELOCITAS_SERVICE_${{ service_name }}_SERVER_FACTORY_H
 #define VELOCITAS_SERVICE_${{ service_name }}_SERVER_FACTORY_H
 
-
-#include "${{ service_include_dir }}/${{ service_file_name }}.grpc.pb.h"
+#include "${{ grpc_service_header_path }}"
 
 #include <grpcpp/server.h>
 #include <memory>
