@@ -166,6 +166,9 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
         rel_path = os.path.relpath(
             Path(self.__proto_file_handle.file_path).parent, self.__include_path
         )
+        if rel_path == ".":
+            return f"services/{self.__proto_file_handle.get_service_name().lower()}"
+
         return (
             f"services/{self.__proto_file_handle.get_service_name().lower()}/{rel_path}"
         )
