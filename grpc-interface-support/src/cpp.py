@@ -156,6 +156,8 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
             "service_name_camel_case": to_camel_case(service_name),
             "package_id": self.__proto_file_handle.get_package().replace(".", "::"),
             "core_sdk_version": str(conan_helper.get_required_sdk_version()),
+            "service_include_dir": self.__get_relative_file_dir(),
+            "service_file_name": Path(self.__proto_file_handle.file_path).stem,
         }
 
     def __get_relative_file_dir(self) -> str:
@@ -198,7 +200,6 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
 
     def __move_generated_sources(
         self,
-        generated_source_dir: str,
         output_dir: str,
         include_dir_rel: str,
         src_dir_rel: str,
@@ -238,7 +239,6 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
 
     def install_package(self) -> None:
         self.__move_generated_sources(
-            self.__package_directory_path,
             self.__package_directory_path,
             self.__get_include_dir(),
             self.__get_source_dir(),
@@ -355,7 +355,7 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
             return
 
         source_code = GrpcCodeExtractor(
-            self.__proto_file_handle, self.__output_path
+            self.__proto_file_handle, self.__package_directory_path
         ).get_source_stub_code(self.__get_source_dir())
 
         source_code = self.__transform_source_stub_code(source_code)
