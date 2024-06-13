@@ -155,6 +155,7 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
             "service_name_camel_case": to_camel_case(service_name),
             "package_id": self.__proto_file_handle.get_package().replace(".", "::"),
             "core_sdk_version": str(conan_helper.get_required_sdk_version()),
+            "service_include_dir": self.__get_relative_file_dir(),
             "grpc_service_header_path": os.path.join(
                 self.__get_relative_file_dir(),
                 f"{Path(self.__proto_file_handle.file_path).stem}.grpc.pb.h",

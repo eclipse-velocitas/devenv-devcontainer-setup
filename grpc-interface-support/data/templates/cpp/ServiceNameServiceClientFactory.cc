@@ -14,7 +14,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "services/${{ service_name_lower }}/${{ service_name_camel_case }}ServiceClientFactory.h"
+#include "${{ service_include_dir }}/${{ service_name_camel_case }}ServiceClientFactory.h"
 
 #include "sdk/middleware/Middleware.h"
 
