@@ -16,6 +16,7 @@ import argparse
 import os
 import re
 import shutil
+from pathlib import Path
 from typing import Any, Dict
 
 import proto
@@ -108,7 +109,9 @@ def generate_single_service(
     is_server = "provided" in if_config
 
     generator = factory.create_service_generator(
-        service_sdk_dir, proto_file_handle, if_config["includeDir"]
+        service_sdk_dir,
+        proto_file_handle,
+        if_config.get("includeDir", str(Path(proto_file_handle.file_path).parent)),
     )
     generator.generate_package(is_client, is_server)
     generator.install_package()
