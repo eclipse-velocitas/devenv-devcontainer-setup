@@ -14,11 +14,26 @@
 
 import os
 import subprocess
+from typing import List
 
 import pytest
 
 if not os.environ["VELOCITAS_TEST_LANGUAGE"] == "python":
     pytest.skip("skipping Python only tests", allow_module_level=True)
+
+
+@pytest.fixture(autouse=True)
+def clean_downloads():
+    os.removedirs(os.path.join(get_project_cache_dir(), "downloads"))
+
+
+def get_subdirs(path: str) -> List[str]:
+    return [f.path for f in os.scandir(path) if f.is_dir()]
+
+
+def get_project_cache_dir() -> str:
+    project_caches = os.path.join(os.path.expanduser("~"), ".velocitas", "projects")
+    return get_subdirs(project_caches)[0]
 
 
 def is_package_installed(package_name: str) -> bool:

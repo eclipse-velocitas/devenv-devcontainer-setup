@@ -26,9 +26,6 @@ def pytest_sessionstart(session):
     client_path = "/tmp/service_client"
     server_path = "/tmp/service_server"
 
-    # Clean up the cache directory
-    shutil.rmtree(os.path.join(os.path.expanduser("~"), ".velocitas"))
-
     shutil.copytree(os.environ["VELOCITAS_TEST_ROOT"], client_path)
     shutil.copytree(os.environ["VELOCITAS_TEST_ROOT"], server_path)
 

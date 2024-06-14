@@ -18,6 +18,12 @@ from typing import List, Optional
 
 import pytest
 
+
+@pytest.fixture(autouse=True)
+def clean_downloads():
+    os.removedirs(os.path.join(get_project_cache_dir(), "downloads"))
+
+
 if not os.environ["VELOCITAS_TEST_LANGUAGE"] == "python":
     pytest.skip("skipping Python only tests", allow_module_level=True)
 
