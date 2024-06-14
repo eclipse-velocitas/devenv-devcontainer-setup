@@ -36,10 +36,9 @@ vspec_400_uri = "https://github.com/COVESA/vehicle_signal_specification/releases
 
 @pytest.fixture()
 def create_files(fs: FakeFilesystem):
+    fs.create_file("/workspaces/my_vehicle_app/units.yaml")
     fs.create_file(
-        os.path.join(
-            os.path.dirname(os.path.dirname(os.path.realpath(__file__))), "units.yaml"
-        )
+        "/workspaces/devenv-devcontainer-setup/vehicle-model-lifecycle/test/units.yaml"
     )
     fs.create_file("/workspaces/my_vehicle_app/app/vspec.json")
     return fs
@@ -99,9 +98,7 @@ def test_proper_interface_type__correct_type():
                     "type": "vehicle-signal-interface",
                     "config": {
                         "src": "./app/vspec.json",
-                        "unit_src": [
-                            "/workspaces/devenv-devcontainer-setup/vehicle-model-lifecycle/test/units.yaml"
-                        ],
+                        "unit_src": ["units.yaml"],
                     },
                 }
             ],
@@ -113,7 +110,7 @@ def test_proper_interface_type__correct_type():
         },
     ],
 )
-def test_main__relative_src__converted_to_absolute(app_manifest, create_files):
+def test_main__relative_src__converted_to_absolute(create_files, app_manifest):
     with capture_stdout() as capture, mock_env():
         main(app_manifest)
 
@@ -122,7 +119,7 @@ def test_main__relative_src__converted_to_absolute(app_manifest, create_files):
         assert vspec_file_path == "/workspaces/my_vehicle_app/app/vspec.json"
         unit_file_path_list = get_unit_file_path_list_value(capture.getvalue())
         assert unit_file_path_list == json.dumps(
-            ["./app/units.yaml"]
+            ["/workspaces/my_vehicle_app/units.yaml"]
         ) or unit_file_path_list == json.dumps(
             [os.path.join(get_package_path(), "units.yaml")]
         )
