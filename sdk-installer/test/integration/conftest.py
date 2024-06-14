@@ -22,6 +22,8 @@ def pytest_sessionstart(session):
     Called after the Session object has been created and
     before performing collection and entering the run test loop.
     """
+    # Clean up the cache directory
+    shutil.rmtree(os.path.join(os.path.expanduser("~"), ".velocitas"))
 
     os.chdir(os.environ["VELOCITAS_TEST_ROOT"])
     shutil.copy("../../common/AppManifest.json", "./app/AppManifest.json")

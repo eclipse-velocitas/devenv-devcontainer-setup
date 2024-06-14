@@ -196,7 +196,7 @@ def main(app_manifest_dict: Dict[str, Any]) -> None:
         vspec_src, os.path.join(get_project_cache_dir(), "vspec.json")
     )
 
-    print(f"vspec_file_path={vspec_src!r} >> VELOCITAS_CACHE")
+    print(f"vspec_file_path={os.path.abspath(vspec_src)!r} >> VELOCITAS_CACHE")
     print(f"unit_file_path_list={json.dumps(unit_src_list)} >> VELOCITAS_CACHE")
 
 
