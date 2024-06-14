@@ -37,7 +37,9 @@ vspec_400_uri = "https://github.com/COVESA/vehicle_signal_specification/releases
 @pytest.fixture()
 def create_files(fs: FakeFilesystem):
     fs.create_file(
-        "/workspaces/devenv-devcontainer-setup/vehicle-model-lifecycle/test/units.yaml"
+        os.path.join(
+            os.path.dirname(os.path.dirname(os.path.realpath(__file__))), "units.yaml"
+        )
     )
     fs.create_file("/workspaces/my_vehicle_app/app/vspec.json")
     return fs
