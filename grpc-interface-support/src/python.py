@@ -16,18 +16,17 @@ import glob
 import os
 import shutil
 import subprocess
-from pathlib import Path
 from typing import List
 
 import proto
 from generator import GrpcServiceSdkGenerator, GrpcServiceSdkGeneratorFactory
-from velocitas_lib.templates import CopySpec, copy_templates
 from velocitas_lib import (
     get_package_path,
     get_workspace_dir,
     replace_in_file,
     to_camel_case,
 )
+from velocitas_lib.templates import CopySpec, copy_templates
 
 
 def get_required_sdk_version_python() -> str:
@@ -48,10 +47,12 @@ class PythonGrpcInterfaceGenerator(GrpcServiceSdkGenerator):  # type: ignore
         package_directory_path: str,
         proto_file_handle: proto.ProtoFileHandle,
         verbose: bool,
+        include_path: str,
     ):
         self.__package_directory_path = package_directory_path
         self.__proto_file_handle = proto_file_handle
         self.__verbose = verbose
+        self.__include_path = include_path
 
     def __invoke_code_generator(self) -> None:
         subprocess.check_call(
@@ -59,7 +60,7 @@ class PythonGrpcInterfaceGenerator(GrpcServiceSdkGenerator):  # type: ignore
                 "python",
                 "-m",
                 "grpc_tools.protoc",
-                f"-I{Path(self.__proto_file_handle.file_path).parent}",
+                f"-I{self.__include_path}",
                 f"--python_out={self.__package_directory_path}",
                 f"--pyi_out={self.__package_directory_path}",
                 f"--grpc_python_out={self.__package_directory_path}",
@@ -157,8 +158,11 @@ class PythonGrpcServiceSdkGeneratorFactory(GrpcServiceSdkGeneratorFactory):  # t
         subprocess.check_call(["pip", "install", "grpcio-tools"])
 
     def create_service_generator(
-        self, output_path: str, proto_file_handle: proto.ProtoFileHandle
+        self,
+        output_path: str,
+        proto_file_handle: proto.ProtoFileHandle,
+        include_path: str,
     ) -> PythonGrpcInterfaceGenerator:
         return PythonGrpcInterfaceGenerator(
-            output_path, proto_file_handle, self._verbose
+            output_path, proto_file_handle, self._verbose, include_path
         )
