@@ -16,31 +16,18 @@
 
 import json
 import os
-import re
 from typing import Any, Dict, List, Optional, Tuple
 
 from velocitas_lib import (
-    download_file,
     get_app_manifest,
     get_package_path,
     get_project_cache_dir,
-    get_workspace_dir,
+    is_uri,
+    obtain_local_file_path,
     require_env,
 )
 
 FUNCTIONAL_INTERFACE_TYPE_KEY = "vehicle-signal-interface"
-
-
-def is_uri(path: str) -> bool:
-    """Check if the provided path is a URI.
-
-    Args:
-        path (str): The path to check.
-
-    Returns:
-        bool: True if the path is a URI. False otherwise.
-    """
-    return re.match(r"(\w+)\:\/\/(\w+)", path) is not None
 
 
 def is_legacy_app_manifest(app_manifest_dict: Dict[str, Any]) -> bool:
@@ -161,15 +148,14 @@ def get_vehicle_signal_interface_unit_files(unit_src_list: List[str]) -> List[st
     id = 0
     list = []
     for unit_src in unit_src_list:
+        list.append(
+            obtain_local_file_path(
+                unit_src,
+                os.path.join(get_project_cache_dir(), "downloads", f"units_{id}.yaml"),
+            )
+        )
         if is_uri(unit_src):
-            local_unit_path = os.path.join(get_project_cache_dir(), f"units_{id}.yaml")
-            # since there is no release for units file 4.0 we need to download from blob and this is different than downloading from release
-            print(f"Downloading file from {unit_src!r} to {local_unit_path!r}")
-            download_file(unit_src, local_unit_path)
-            list.append(local_unit_path)
             id += 1
-        else:
-            list.append(unit_src)
 
     return list
 
@@ -205,16 +191,10 @@ def main(app_manifest_dict: Dict[str, Any]) -> None:
             if opt_unit_src_list is not None:
                 unit_src_list = opt_unit_src_list
 
-    local_vspec_path = os.path.join(get_workspace_dir(), os.path.normpath(vspec_src))
-
-    if is_uri(vspec_src):
-        local_vspec_path = os.path.join(get_project_cache_dir(), "vspec.json")
-        print(f"Downloading file from {vspec_src!r} to {local_vspec_path!r}")
-        download_file(vspec_src, local_vspec_path)
-
     unit_src_list = get_vehicle_signal_interface_unit_files(unit_src_list)
-
-    vspec_src = local_vspec_path
+    vspec_src = obtain_local_file_path(
+        vspec_src, os.path.join(get_project_cache_dir(), "vspec.json")
+    )
 
     print(f"vspec_file_path={vspec_src!r} >> VELOCITAS_CACHE")
     print(f"unit_file_path_list={json.dumps(unit_src_list)} >> VELOCITAS_CACHE")

@@ -71,7 +71,7 @@ class GrpcCodeExtractor:
             f"{Path(self.__proto_file.file_path).stem}.grpc.pb.cc",
         )
 
-        service_name = to_camel_case(self.__proto_file.get_service_name())
+        service_name = self.__proto_file.get_service_name()
 
         package_pieces = self.__proto_file.get_package().split(".")
 

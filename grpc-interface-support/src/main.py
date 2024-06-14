@@ -14,7 +14,6 @@
 
 import argparse
 import os
-import re
 import shutil
 from pathlib import Path
 from typing import Any, Dict
@@ -25,56 +24,13 @@ from generator import GrpcServiceSdkGeneratorFactory
 from python import PythonGrpcServiceSdkGeneratorFactory
 from velocitas_lib import (
     create_truncated_string,
-    download_file,
     get_programming_language,
     get_project_cache_dir,
-    get_workspace_dir,
+    obtain_local_file_path,
 )
 from velocitas_lib.functional_interface import get_interfaces_for_type
 
 DEPENDENCY_TYPE_KEY = "grpc-interface"
-
-
-def is_uri(path: str) -> bool:
-    """Check if the provided path is a URI.
-
-    Args:
-        path (str): The path to check.
-
-    Returns:
-        bool: True if the path is a URI. False otherwise.
-    """
-    return re.match(r"(\w+)\:\/\/(\w+)", path) is not None
-
-
-def download_proto(config: Dict[str, Any]) -> proto.ProtoFileHandle:
-    """Download the proto file defined in the grpc-interface
-    config to the local project cache.
-
-    Args:
-        config (Dict[str, Any]): The grpc-interface config.
-
-    Returns:
-        proto.ProtoFileHandle: A handle to the proto file.
-    """
-    service_if_spec_src = config["src"]
-    if not is_uri(service_if_spec_src):
-        # Check if absolute or relative path
-        if os.path.isfile(service_if_spec_src):
-            return proto.ProtoFileHandle(service_if_spec_src)
-        elif os.path.isfile(os.path.join(get_workspace_dir(), service_if_spec_src)):
-            return proto.ProtoFileHandle(
-                os.path.join(get_workspace_dir(), service_if_spec_src)
-            )
-        else:
-            raise FileNotFoundError(f"File not found: {service_if_spec_src}")
-
-    _, filename = os.path.split(service_if_spec_src)
-    cached_proto_file_path = os.path.join(get_project_cache_dir(), "services", filename)
-
-    download_file(service_if_spec_src, cached_proto_file_path)
-
-    return proto.ProtoFileHandle(cached_proto_file_path)
 
 
 def create_service_sdk_dir(proto_file_handle: proto.ProtoFileHandle) -> str:
@@ -111,7 +67,7 @@ def generate_single_service(
     print(
         f"Generating service SDK for {create_truncated_string(if_config['src'], 100)!r}"
     )
-    proto_file_handle = download_proto(if_config)
+    proto_file_handle = proto.ProtoFileHandle(obtain_local_file_path(if_config["src"]))
     service_sdk_dir = create_service_sdk_dir(proto_file_handle)
 
     is_client = "required" in if_config
