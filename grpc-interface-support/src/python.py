@@ -23,15 +23,17 @@ import proto
 from generator import GrpcServiceSdkGenerator, GrpcServiceSdkGeneratorFactory
 from proto import ProtoFileHandle
 from shared_utils import (
-    capture_textfile_area,
-    replace_in_file,
-    replace_line,
-    replace_text_area,
     templates,
-    to_camel_case,
 )
 from shared_utils.templates import CopySpec, copy_templates
 from velocitas_lib import get_package_path, get_workspace_dir
+from velocitas_lib.text_utils import (
+    capture_area_in_file,
+    replace_item_in_list,
+    replace_text_area,
+    replace_text_in_file,
+    to_camel_case,
+)
 
 
 def get_required_sdk_version_python() -> str:
@@ -73,7 +75,7 @@ class GrpcCodeExtractor:
     def create_source_stub_code(self) -> List[str]:
         service_name = to_camel_case(self.__proto_file.get_service_name())
 
-        source_content: List[str] = capture_textfile_area(
+        source_content: List[str] = capture_area_in_file(
             open(self.grpc_source_path, encoding="utf-8"),
             f"class {service_name}Servicer(object):",
             f"def add_{service_name}Servicer_to_server(servicer, server):",
@@ -129,7 +131,7 @@ class PythonGrpcInterfaceGenerator(GrpcServiceSdkGenerator):  # type: ignore
         generated_sources = glob.glob(
             os.path.join(self.__package_directory_path, "*.py*")
         )
-        replace_in_file(
+        replace_text_in_file(
             os.path.join(
                 self.__package_directory_path, f"{service_name.lower()}_pb2_grpc.py"
             ),
@@ -236,7 +238,7 @@ class PythonGrpcInterfaceGenerator(GrpcServiceSdkGenerator):  # type: ignore
             '"""',
             '"""',
         )
-        source_content = replace_line(
+        source_content = replace_item_in_list(
             source_content,
             "context.set",
         )
