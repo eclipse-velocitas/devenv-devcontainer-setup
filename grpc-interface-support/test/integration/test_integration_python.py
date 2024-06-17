@@ -21,7 +21,7 @@ import pytest
 
 @pytest.fixture(autouse=True)
 def clean_downloads():
-    if os.path.exists(os.path.join(get_project_cache_dir(), "downloads")):
+    if os.path.isdir(os.path.join(get_project_cache_dir(), "downloads")):
         os.rmdir(os.path.join(get_project_cache_dir(), "downloads"))
 
 
