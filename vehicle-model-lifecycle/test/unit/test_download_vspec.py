@@ -20,12 +20,11 @@ from typing import List
 import pytest
 from pyfakefs.fake_filesystem import FakeFilesystem
 from test_lib import capture_stdout, mock_env
-from velocitas_lib import get_project_cache_dir
+from velocitas_lib import get_package_path, get_project_cache_dir
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "..", "src"))
 from download_vspec import (  # noqa
     get_legacy_model_src,
-    get_package_path,
     is_proper_interface_type,
     main,
 )
@@ -36,10 +35,9 @@ vspec_400_uri = "https://github.com/COVESA/vehicle_signal_specification/releases
 
 @pytest.fixture()
 def create_files(fs: FakeFilesystem):
+    test_folder = os.path.dirname(os.path.dirname(__file__))
+    fs.create_file(os.path.join(test_folder, "units.yaml"))
     fs.create_file("/workspaces/my_vehicle_app/units.yaml")
-    fs.create_file(
-        "/workspaces/devenv-devcontainer-setup/vehicle-model-lifecycle/test/units.yaml"
-    )
     fs.create_file("/workspaces/my_vehicle_app/app/vspec.json")
     return fs
 
