@@ -14,6 +14,7 @@
 
 import os
 import subprocess
+import shutil
 from typing import List, Optional
 
 import pytest
@@ -21,8 +22,7 @@ import pytest
 
 @pytest.fixture(autouse=True)
 def clean_downloads():
-    if os.path.isdir(os.path.join(get_project_cache_dir(), "downloads")):
-        os.rmdir(os.path.join(get_project_cache_dir(), "downloads"))
+    shutil.rmtree(os.path.join(get_project_cache_dir(), "downloads"))
 
 
 if not os.environ["VELOCITAS_TEST_LANGUAGE"] == "python":
