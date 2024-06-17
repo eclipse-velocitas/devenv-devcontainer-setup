@@ -25,7 +25,7 @@ if not os.environ["VELOCITAS_TEST_LANGUAGE"] == "python":
 @pytest.fixture(autouse=True)
 def clean_downloads():
     if os.path.exists(os.path.join(get_project_cache_dir(), "downloads")):
-        os.removedirs(os.path.join(get_project_cache_dir(), "downloads"))
+        os.rmdir(os.path.join(get_project_cache_dir(), "downloads"))
 
 
 def get_subdirs(path: str) -> List[str]:
