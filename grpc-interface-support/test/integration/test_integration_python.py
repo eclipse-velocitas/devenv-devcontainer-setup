@@ -13,8 +13,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import os
-import subprocess
 import shutil
+import subprocess
 from typing import List, Optional
 
 import pytest
@@ -22,7 +22,13 @@ import pytest
 
 @pytest.fixture(autouse=True)
 def clean_downloads():
-    shutil.rmtree(os.path.join(get_project_cache_dir(), "downloads"))
+    if not os.path.isdir(
+        os.path.join(os.path.expanduser("~"), ".velocitas", "projects")
+    ):
+        return
+    shutil.rmtree(
+        os.path.join(get_project_cache_dir(), "downloads"), ignore_errors=True
+    )
 
 
 if not os.environ["VELOCITAS_TEST_LANGUAGE"] == "python":
