@@ -12,7 +12,7 @@
         {
             "type": "grpc-interface",
             "config": {
-                "src": "bcm/door/v1/door.proto",
+                "src": "bcm/horn/v1/horn.proto",
                 "provided": {}
             }
         }
