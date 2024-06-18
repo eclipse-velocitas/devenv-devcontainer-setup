@@ -1,0 +1,32 @@
+/*
+ * Software-defined automotive service APIs
+ * API Version 1
+ * Part one: Atomic Services API reference
+ * (Body Control & Thermal Management)
+ * 2021-10-15 released
+ * Software-defined automotive workgroup
+ * China Automobile Industry Association
+ * SDV/T 001-2021
+ */
+syntax = "proto3";
+package bcm.horn.v1;
+
+service BCMHornService {
+  rpc Stop(StopRequest) returns (StopResponse);
+  rpc Start(StartRequest) returns (StartResponse);
+  rpc SetVolumeLevel(SetVolumeLevelRequest) returns (SetVolumeLevelResponse);
+  rpc IsRunning(IsRunningRequest) returns (IsRunningResponse);
+  rpc GetVolume(GetVolumeRequest) returns (GetVolumeResponse);
+}
+
+message StopRequest {}
+message StartRequest {}
+message SetVolumeLevelRequest {}
+message IsRunningRequest {}
+message GetVolumeRequest {}
+
+message StopResponse {}
+message StartResponse {}
+message SetVolumeLevelResponse {}
+message IsRunningResponse {}
+message GetVolumeResponse {}
