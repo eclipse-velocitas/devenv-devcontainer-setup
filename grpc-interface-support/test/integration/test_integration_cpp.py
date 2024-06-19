@@ -79,7 +79,7 @@ def test__integration():
     ensure_project_initialized()
     ensure_package_is_generated()
     assert get_dependency_count("seats-service-sdk") == 1
-    assert get_dependency_count("bcmhornservice-service-sdk") == 1
+    assert get_dependency_count("hornservice-service-sdk") == 1
     ensure_build_successful()
     server_process = ensure_app_running()
 
@@ -88,7 +88,7 @@ def test__integration():
     ensure_project_initialized()
     ensure_package_is_generated()
     assert get_dependency_count("seats-service-sdk") == 1
-    assert get_dependency_count("bcmhornservice-service-sdk") == 1
+    assert get_dependency_count("hornservice-service-sdk") == 1
     ensure_build_successful()
     client_process = ensure_app_running()
 
