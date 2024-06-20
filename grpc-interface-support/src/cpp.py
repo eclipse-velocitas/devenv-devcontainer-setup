@@ -91,12 +91,12 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
         package_directory_path: str,
         proto_file_handle: ProtoFileHandle,
         verbose: bool,
-        include_path: str,
+        proto_include_path: str,
     ):
         self.__package_directory_path = package_directory_path
         self.__proto_file_handle = proto_file_handle
         self.__verbose = verbose
-        self.__include_path = include_path
+        self.__proto_include_path = proto_include_path
 
     def __get_binary_path(self, binary_name: str) -> str:
         path = shutil.which(binary_name)
@@ -107,19 +107,19 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
     def __invoke_code_generator(self, include_path: str, output_path: str) -> None:
         print("Invoking gRPC code generator")
         self.__output_path = os.path.join(
-            output_path, os.path.relpath(include_path, self.__include_path)
+            output_path, os.path.relpath(include_path, self.__proto_include_path)
         )
         args = [
             self.__get_binary_path("protoc"),
             f"--plugin=protoc-gen-grpc={self.__get_binary_path('grpc_cpp_plugin')}",
-            f"-I{self.__include_path}",
+            f"-I{self.__proto_include_path}",
             f"--cpp_out={output_path}",
             f"--grpc_out={output_path}",
             self.__proto_file_handle.file_path,
         ]
         subprocess.check_call(
             args,
-            cwd=self.__include_path,
+            cwd=self.__proto_include_path,
             env=os.environ,
             stdout=subprocess.DEVNULL if not self.__verbose else None,
         )
@@ -164,7 +164,7 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
 
     def __get_relative_file_dir(self) -> str:
         rel_path = os.path.relpath(
-            Path(self.__proto_file_handle.file_path).parent, self.__include_path
+            Path(self.__proto_file_handle.file_path).parent, self.__proto_include_path
         )
         if rel_path == ".":
             return f"services/{self.__proto_file_handle.get_service_name().lower()}"
@@ -389,10 +389,13 @@ class CppGrpcServiceSdkGeneratorFactory(GrpcServiceSdkGeneratorFactory):  # type
         self._verbose = verbose
 
     def create_service_generator(
-        self, output_path: str, proto_file_handle: ProtoFileHandle, include_path: str
+        self,
+        output_path: str,
+        proto_file_handle: ProtoFileHandle,
+        proto_include_path: str,
     ) -> GrpcServiceSdkGenerator:
         return CppGrpcServiceSdkGenerator(
-            output_path, proto_file_handle, self._verbose, include_path
+            output_path, proto_file_handle, self._verbose, proto_include_path
         )
 
     def __create_conan_profile(self) -> None:

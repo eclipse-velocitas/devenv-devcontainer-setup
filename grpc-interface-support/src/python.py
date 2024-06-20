@@ -47,12 +47,12 @@ class PythonGrpcInterfaceGenerator(GrpcServiceSdkGenerator):  # type: ignore
         package_directory_path: str,
         proto_file_handle: proto.ProtoFileHandle,
         verbose: bool,
-        include_path: str,
+        proto_include_path: str,
     ):
         self.__package_directory_path = package_directory_path
         self.__proto_file_handle = proto_file_handle
         self.__verbose = verbose
-        self.__include_path = include_path
+        self.__proto_include_path = proto_include_path
 
     def __invoke_code_generator(self) -> None:
         subprocess.check_call(
@@ -60,7 +60,7 @@ class PythonGrpcInterfaceGenerator(GrpcServiceSdkGenerator):  # type: ignore
                 "python",
                 "-m",
                 "grpc_tools.protoc",
-                f"-I{self.__include_path}",
+                f"-I{self.__proto_include_path}",
                 f"--python_out={self.__package_directory_path}",
                 f"--pyi_out={self.__package_directory_path}",
                 f"--grpc_python_out={self.__package_directory_path}",
@@ -161,8 +161,8 @@ class PythonGrpcServiceSdkGeneratorFactory(GrpcServiceSdkGeneratorFactory):  # t
         self,
         output_path: str,
         proto_file_handle: proto.ProtoFileHandle,
-        include_path: str,
+        proto_include_path: str,
     ) -> PythonGrpcInterfaceGenerator:
         return PythonGrpcInterfaceGenerator(
-            output_path, proto_file_handle, self._verbose, include_path
+            output_path, proto_file_handle, self._verbose, proto_include_path
         )

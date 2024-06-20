@@ -59,7 +59,7 @@ class GrpcServiceSdkGeneratorFactory(ABC):
         self,
         output_path: str,
         proto_file_handle: proto.ProtoFileHandle,
-        include_path: str,
+        proto_include_path: str,
     ) -> GrpcServiceSdkGenerator:
         """Create a new service SDK generator for a specific service.
 

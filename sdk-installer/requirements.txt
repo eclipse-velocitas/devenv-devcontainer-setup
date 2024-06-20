@@ -1,2 +1,2 @@
-velocitas-lib==0.0.6
+velocitas-lib==0.0.7
 cloudevents # FIXME: this dep is missing in SDK!

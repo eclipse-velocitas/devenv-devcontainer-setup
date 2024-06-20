@@ -85,7 +85,7 @@ def generate_single_service(
         generator.update_auto_generated_code()
 
 
-def main(verbose: bool) -> None:
+def generate_sdks(verbose: bool) -> None:
     """Generate service SDKs for all grpc-interfaces defined in the AppManifest.json.
 
     Args:
@@ -122,4 +122,4 @@ if __name__ == "__main__":
     argument_parser = argparse.ArgumentParser()
     argument_parser.add_argument("-v", "--verbose", action="store_true")
     args = argument_parser.parse_args()
-    main(args.verbose)
+    generate_sdks(args.verbose)

@@ -22,7 +22,6 @@ from velocitas_lib import (
     get_app_manifest,
     get_package_path,
     get_project_cache_dir,
-    is_uri,
     obtain_local_file_path,
     require_env,
 )
@@ -145,22 +144,14 @@ def get_vehicle_signal_interface_unit_files(unit_src_list: List[str]) -> List[st
     Returns:
         List[str]]: List with local paths to the unit file(s).
     """
-    id = 0
     list = []
     for unit_src in unit_src_list:
-        list.append(
-            obtain_local_file_path(
-                unit_src,
-                os.path.join(get_project_cache_dir(), "downloads", f"units_{id}.yaml"),
-            )
-        )
-        if is_uri(unit_src):
-            id += 1
+        list.append(obtain_local_file_path(unit_src))
 
     return list
 
 
-def main(app_manifest_dict: Dict[str, Any]) -> None:
+def download_vspec(app_manifest_dict: Dict[str, Any]) -> None:
     """Entry point for downloading the vspec file for a
     vehicle-signal-interface.
 
@@ -201,4 +192,4 @@ def main(app_manifest_dict: Dict[str, Any]) -> None:
 
 
 if __name__ == "__main__":
-    main(get_app_manifest())
+    download_vspec(get_app_manifest())

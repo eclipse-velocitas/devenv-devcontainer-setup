@@ -26,7 +26,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "..", "..", "src"))
 from download_vspec import (  # noqa
     get_legacy_model_src,
     is_proper_interface_type,
-    main,
+    download_vspec,
 )
 
 vspec_300_uri = "https://github.com/COVESA/vehicle_signal_specification/releases/download/v3.0/vss_rel_3.0.json"  # noqa
@@ -108,9 +108,9 @@ def test_proper_interface_type__correct_type():
         },
     ],
 )
-def test_main__relative_src__converted_to_absolute(create_files, app_manifest):
+def test_download_vspec__relative_src__converted_to_absolute(create_files, app_manifest):
     with capture_stdout() as capture, mock_env():
-        main(app_manifest)
+        download_vspec(app_manifest)
 
         vspec_file_path = get_vspec_file_path_value(capture.getvalue())
         assert os.path.isabs(vspec_file_path)
@@ -141,11 +141,11 @@ def test_main__relative_src__converted_to_absolute(create_files, app_manifest):
         {"VehicleModel": {"src": vspec_300_uri}},
     ],
 )
-def test_main__valid_app_manifest__uri_src_downloaded_and_stored_in_cache(
+def test_download_vspec__valid_app_manifest__uri_src_downloaded_and_stored_in_cache(
     app_manifest, create_files
 ):
     with capture_stdout() as capture, mock_env():
-        main(app_manifest)
+        download_vspec(app_manifest)
 
         vspec_file_path = get_vspec_file_path_value(capture.getvalue())
         assert os.path.isabs(vspec_file_path)
@@ -156,7 +156,7 @@ def test_main__valid_app_manifest__uri_src_downloaded_and_stored_in_cache(
         )
 
 
-def test_main__duplicate_vehicle_signal_interface__raises_error():
+def test_download_vspec__duplicate_vehicle_signal_interface__raises_error():
     app_manifest = {
         "manifestVersion": "v3",
         "interfaces": [
@@ -165,16 +165,16 @@ def test_main__duplicate_vehicle_signal_interface__raises_error():
         ],
     }
     with pytest.raises(KeyError):
-        main(app_manifest)
+        download_vspec(app_manifest)
 
 
-def test_main__no_vehicle_signal_interface__adds_default_to_cache(create_files):
+def test_download_vspec__no_vehicle_signal_interface__adds_default_to_cache(create_files):
     app_manifest = {
         "manifestVersion": "v3",
         "interfaces": [{"type": "pubsub", "config": {}}],
     }
     with capture_stdout() as capture, mock_env():
-        main(app_manifest)
+        download_vspec(app_manifest)
 
         expected_path = str(os.path.join(get_project_cache_dir(), "vspec.json"))
         expected_unit_path: List[str] = [os.path.join(get_package_path(), "units.yaml")]
