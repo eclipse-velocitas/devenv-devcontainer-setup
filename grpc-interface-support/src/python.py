@@ -16,6 +16,7 @@ import glob
 import os
 import shutil
 import subprocess
+from pathlib import Path
 from typing import List
 
 import proto
@@ -82,7 +83,8 @@ class PythonGrpcInterfaceGenerator(GrpcServiceSdkGenerator):  # type: ignore
         )
         replace_text_in_file(
             os.path.join(
-                self.__package_directory_path, f"{service_name.lower()}_pb2_grpc.py"
+                self.__package_directory_path,
+                f"{Path(self.__proto_file_handle.file_path).stem}_pb2_grpc.py",
             ),
             f"import {service_name.lower()}_pb2",
             f"import {module_name}.{service_name.lower()}_pb2",
