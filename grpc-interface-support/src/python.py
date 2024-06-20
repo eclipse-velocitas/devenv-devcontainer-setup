@@ -81,13 +81,14 @@ class PythonGrpcInterfaceGenerator(GrpcServiceSdkGenerator):  # type: ignore
         generated_sources = glob.glob(
             os.path.join(self.__package_directory_path, "*.py*")
         )
+        file_prefix = Path(self.__proto_file_handle.file_path).stem
         replace_text_in_file(
             os.path.join(
                 self.__package_directory_path,
-                f"{Path(self.__proto_file_handle.file_path).stem}_pb2_grpc.py",
+                f"{file_prefix}_pb2_grpc.py",
             ),
-            f"import {service_name.lower()}_pb2",
-            f"import {module_name}.{service_name.lower()}_pb2",
+            f"import {file_prefix}_pb2 as {file_prefix}__pb2",
+            f"import {module_name}.{file_prefix}_pb2 as {file_prefix}__pb2",
         )
 
         for file in generated_sources:
