@@ -31,7 +31,7 @@ def get_project_cache_dir() -> str:
     return get_subdirs(project_caches)[0]
 
 
-def get_dependency_count() -> int:
+def get_dependency_count(service_name: str) -> int:
     # Use a number rather than a bool to ensure
     # the generator has added the dependency only
     # once.
@@ -43,7 +43,7 @@ def get_dependency_count() -> int:
         elif line.startswith("["):
             in_requires_section = False
 
-        if in_requires_section and line.strip() == "seats-service-sdk/generated":
+        if in_requires_section and line.strip() == f"{service_name}/generated":
             dependency_count = dependency_count + 1
     return dependency_count
 
@@ -78,7 +78,8 @@ def test__integration():
     os.chdir(os.environ["SERVICE_SERVER_ROOT"])
     ensure_project_initialized()
     ensure_package_is_generated()
-    assert get_dependency_count() == 1
+    assert get_dependency_count("seats-service-sdk") == 1
+    assert get_dependency_count("hornservice-service-sdk") == 1
     ensure_build_successful()
     server_process = ensure_app_running()
 
@@ -86,7 +87,8 @@ def test__integration():
     os.chdir(os.environ["SERVICE_CLIENT_ROOT"])
     ensure_project_initialized()
     ensure_package_is_generated()
-    assert get_dependency_count() == 1
+    assert get_dependency_count("seats-service-sdk") == 1
+    assert get_dependency_count("hornservice-service-sdk") == 1
     ensure_build_successful()
     client_process = ensure_app_running()
 
