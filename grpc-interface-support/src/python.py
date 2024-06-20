@@ -21,9 +21,13 @@ from typing import List
 
 import proto
 from generator import GrpcServiceSdkGenerator, GrpcServiceSdkGeneratorFactory
-from shared_utils import replace_in_file, to_camel_case
-from shared_utils.templates import CopySpec, copy_templates
-from velocitas_lib import get_package_path, get_workspace_dir
+from velocitas_lib.templates import CopySpec, copy_templates
+from velocitas_lib import (
+    get_package_path,
+    get_workspace_dir,
+    replace_in_file,
+    to_camel_case,
+)
 
 
 def get_required_sdk_version_python() -> str:
