@@ -29,10 +29,9 @@ from velocitas_lib import (
     get_programming_language,
     get_project_cache_dir,
     obtain_local_file_path,
-    get_workspace_dir
+    get_workspace_dir,
 )
 from velocitas_lib.functional_interface import get_interfaces_for_type
-from velocitas_lib.text_utils import create_truncated_string
 
 DEPENDENCY_TYPE_KEY = "grpc-interface"
 
@@ -70,6 +69,17 @@ def find_proto_files(directory: str) -> List[proto.ProtoFileHandle]:
     return proto_files
 
 
+def check_zipfile(file_path: str) -> List[proto.ProtoFileHandle]:
+    if zipfile.is_zipfile(file_path):
+        return find_proto_files(
+            extract_zip(
+                file_path, os.path.join(get_project_cache_dir(), Path(file_path).stem)
+            )
+        )
+    else:
+        return [proto.ProtoFileHandle(file_path)]
+
+
 def fetch_protos(path: str) -> List[proto.ProtoFileHandle]:
     """Fetch the proto files defined in the grpc-interface
     config to the local project cache.
@@ -81,9 +91,9 @@ def fetch_protos(path: str) -> List[proto.ProtoFileHandle]:
         List[proto.ProtoFileHandle]: A list of proto files.
     """
     if os.path.isfile(path):
-        return [proto.ProtoFileHandle(path)]
+        return check_zipfile(path)
     elif os.path.isfile(os.path.join(get_workspace_dir(), path)):
-        return [proto.ProtoFileHandle(os.path.join(get_workspace_dir(), path))]
+        return check_zipfile(os.path.join(get_workspace_dir(), path))
     elif os.path.isdir(path):
         return find_proto_files(path)
     elif os.path.isdir(os.path.join(get_workspace_dir(), path)):
@@ -91,12 +101,9 @@ def fetch_protos(path: str) -> List[proto.ProtoFileHandle]:
     elif urlparse(path).scheme in ("http", "https"):
         _, filename = os.path.split(path)
         temp_dir = os.path.join(get_project_cache_dir(), "services")
-        file_dir = os.path.join(temp_dir, filename)
-        download_file(path, file_dir)
-        if zipfile.is_zipfile(file_dir):
-            return find_proto_files(extract_zip(file_dir, temp_dir))
-        else:
-            return [proto.ProtoFileHandle(filename)]
+        file_path = os.path.join(temp_dir, filename)
+        download_file(path, file_path)
+        return check_zipfile(file_path)
     else:
         raise ValueError("Path does not exist or is not a valid URL")
 
