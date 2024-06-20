@@ -23,10 +23,9 @@ from generator import GrpcServiceSdkGenerator, GrpcServiceSdkGeneratorFactory
 from velocitas_lib import (
     get_package_path,
     get_workspace_dir,
-    replace_in_file,
-    to_camel_case,
 )
 from velocitas_lib.templates import CopySpec, copy_templates
+from velocitas_lib.text_utils import replace_text_in_file, to_camel_case
 
 
 def get_required_sdk_version_python() -> str:
@@ -81,7 +80,7 @@ class PythonGrpcInterfaceGenerator(GrpcServiceSdkGenerator):  # type: ignore
         generated_sources = glob.glob(
             os.path.join(self.__package_directory_path, "*.py*")
         )
-        replace_in_file(
+        replace_text_in_file(
             os.path.join(
                 self.__package_directory_path, f"{service_name.lower()}_pb2_grpc.py"
             ),
