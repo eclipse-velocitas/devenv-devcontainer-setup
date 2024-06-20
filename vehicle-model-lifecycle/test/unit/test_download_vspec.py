@@ -108,7 +108,9 @@ def test_proper_interface_type__correct_type():
         },
     ],
 )
-def test_download_vspec__relative_src__converted_to_absolute(create_files, app_manifest):
+def test_download_vspec__relative_src__converted_to_absolute(
+    create_files, app_manifest
+):
     with capture_stdout() as capture, mock_env():
         download_vspec(app_manifest)
 
@@ -168,7 +170,9 @@ def test_download_vspec__duplicate_vehicle_signal_interface__raises_error():
         download_vspec(app_manifest)
 
 
-def test_download_vspec__no_vehicle_signal_interface__adds_default_to_cache(create_files):
+def test_download_vspec__no_vehicle_signal_interface__adds_default_to_cache(
+    create_files,
+):
     app_manifest = {
         "manifestVersion": "v3",
         "interfaces": [{"type": "pubsub", "config": {}}],
