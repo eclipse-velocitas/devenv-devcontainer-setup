@@ -24,11 +24,17 @@ from typing import Dict, List, Tuple
 from generator import GrpcServiceSdkGenerator, GrpcServiceSdkGeneratorFactory
 from proto import ProtoFileHandle
 from velocitas_lib import (
-    capture_textfile_area,
-    conan_helper,
     get_package_path,
     get_workspace_dir,
     templates,
+)
+from velocitas_lib.conan_utils import (
+    add_dependency_to_conanfile,
+    export_conan_project,
+    get_required_sdk_version,
+)
+from velocitas_lib.text_utils import (
+    capture_area_in_file,
     to_camel_case,
 )
 
@@ -57,7 +63,7 @@ class GrpcCodeExtractor:
             f"{self.__proto_file.get_service_name().lower()}.grpc.pb.h",
         )
 
-        header_content: List[str] = capture_textfile_area(
+        header_content: List[str] = capture_area_in_file(
             open(grpc_header_path, encoding="utf-8"),
             "virtual ~Service();",
             "};",
@@ -75,7 +81,7 @@ class GrpcCodeExtractor:
 
         package_pieces = self.__proto_file.get_package().split(".")
 
-        source_content: List[str] = capture_textfile_area(
+        source_content: List[str] = capture_area_in_file(
             open(grpc_source_path, encoding="utf-8"),
             f"{service_name}::Service::~Service() {{",
             f"}}  // namespace {package_pieces[0]}",
@@ -150,7 +156,7 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
             "service_name_lower": service_name.lower(),
             "service_name_camel_case": to_camel_case(service_name),
             "package_id": self.__proto_file_handle.get_package().replace(".", "::"),
-            "core_sdk_version": str(conan_helper.get_required_sdk_version()),
+            "core_sdk_version": str(get_required_sdk_version()),
         }
 
     def __get_relative_file_dir(self) -> str:
@@ -263,7 +269,7 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
             variables,
         )
 
-        conan_helper.export_conan_project(self.__package_directory_path)
+        export_conan_project(self.__package_directory_path)
 
     def __transform_header_stub_code(self, lines: List[str]) -> List[str]:
         service_name = self.__proto_file_handle.get_service_name()
@@ -309,7 +315,7 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
             # there is a previous version of the header
             # extract the user-defined code
 
-            user_defined_code = capture_textfile_area(
+            user_defined_code = capture_area_in_file(
                 open(service_header_file_path, encoding="utf-8"),
                 "// <user-defined>",
                 "// </user-defined>",
@@ -361,7 +367,7 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
     def update_package_references(self) -> None:
         """Update all references to the generated package."""
 
-        conan_helper.add_dependency_to_conanfile(
+        add_dependency_to_conanfile(
             f"{self.__proto_file_handle.get_service_name().lower()}-service-sdk",
             "generated",
         )

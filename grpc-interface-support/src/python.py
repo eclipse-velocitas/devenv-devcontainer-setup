@@ -22,11 +22,8 @@ from typing import Dict, List
 import proto
 from generator import GrpcServiceSdkGenerator, GrpcServiceSdkGeneratorFactory
 from proto import ProtoFileHandle
-from shared_utils import (
-    templates,
-)
-from shared_utils.templates import CopySpec, copy_templates
-from velocitas_lib import get_package_path, get_workspace_dir
+from velocitas_lib.templates import CopySpec, copy_templates
+from velocitas_lib import get_package_path, get_workspace_dir, templates
 from velocitas_lib.text_utils import (
     capture_area_in_file,
     replace_item_in_list,

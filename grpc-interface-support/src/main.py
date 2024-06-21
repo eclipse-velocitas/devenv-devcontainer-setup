@@ -22,12 +22,12 @@ from cpp import CppGrpcServiceSdkGeneratorFactory
 from generator import GrpcServiceSdkGeneratorFactory
 from python import PythonGrpcServiceSdkGeneratorFactory
 from velocitas_lib import (
-    create_truncated_string,
     download_file,
     get_programming_language,
     get_project_cache_dir,
 )
 from velocitas_lib.functional_interface import get_interfaces_for_type
+from velocitas_lib.text_utils import create_truncated_string
 
 DEPENDENCY_TYPE_KEY = "grpc-interface"
 

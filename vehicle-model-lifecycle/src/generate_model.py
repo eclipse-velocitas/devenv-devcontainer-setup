@@ -21,7 +21,7 @@ import sys
 from pathlib import Path
 from typing import List
 
-from velocitas_lib.conan_helper import add_dependency_to_conanfile, export_conan_project
+from velocitas_lib.conan_utils import add_dependency_to_conanfile, export_conan_project
 from velocitas.model_generator import generate_model
 from velocitas_lib import (
     get_cache_data,
