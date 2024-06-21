@@ -1,0 +1,22 @@
+{
+    "manifestVersion": "v3",
+    "name": "SampleApp",
+    "interfaces": [
+        {
+            "type": "grpc-interface",
+            "config": {
+                "src": "bcm/horn/v1/horn.proto",
+                "required": {},
+                "provided": {}
+            }
+        },
+        {
+            "type": "grpc-interface",
+            "config": {
+                "src": "proto/",
+                "required": {},
+                "provided": {}
+            }
+        }
+    ]
+}
