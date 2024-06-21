@@ -1,0 +1,129 @@
+/*
+ * Status of the lock.
+ */
+syntax = "proto3";
+package vcs.v1;
+
+/*
+   Typedef struct { S16BIN4 vspAbsltVal; S16BIN4 vspActVal; uint8 vspDir; boolean vspVld; sint16 motSpdAvg;
+   } VCS VehSpd;
+
+   Name of the member 	Description
+   VspAbsltVal 	Vehicle speed absolute in km/h.
+   VspActVal 	Vehicle speed actual value in km/h.
+   VspDir 	Vehicle speed direction:
+   0x0: Forward
+   0x1: Backward
+   0x2: Unknown
+   VspVld 	Vehicle speed valid flag:
+   False : Invalid
+   True: Valid
+   MotSpdAvg 	Average motor speed in rpm
+*/
+
+/*
+   Vehicle speed direction:
+   0x0: Forward
+   0x1: Backward
+   0x2: Unknown
+*/
+
+enum VehicleSpeedDirection {
+  VEHICLE_SPEED_DIRECTION_UNSPECIFIED = 0;
+  VEHICLE_SPEED_DIRECTION_FORWARD = 1;
+  VEHICLE_SPEED_DIRECTION_BACKWARD = 2;
+  VEHICLE_SPEED_DIRECTION_UNKNOWN = 3;
+}
+
+message VCSVehSpd {
+  /* S16BIN4 */
+  int32 vsp_abslt_val = 1;
+  /* S16BIN4 */
+  int32 vsp_act_val = 2;
+  VehicleSpeedDirection vsp_dir = 3;
+  bool vsp_vld = 4;
+  /* sint16 */
+  int32 mot_spd_avg = 5;
+}
+
+/*
+   Typedef struct {
+   U16BIN4 brkPedPosn; boolean brkPedVld; boolean brkPeddsd;
+   S32BIN2 brkPedPosnRate; } VCS_BrkPedl;
+*/
+message VCSBrkPedl {
+  /* u16bin4 Brake pedal opening value in % */
+  int32 brk_ped_posn = 1;
+
+  /* Brake pedal flag digit:
+     False : Invalid
+     True: Valid
+  */
+  bool brk_ped_vld = 2;
+  /*
+         Brake pedal pressed flag digit:
+     False : Invalid
+     True: Valid
+  */
+  bool brk_ped_psd = 3;
+
+  /* Rate of change in brake pedal opening in %/s.  */
+  int32 brk_ped_posn_rate = 4;
+}
+
+/*
+   Typedef struct {
+   U16BIN4 accPedPosn; boolean accPedVld; boolean accPedPsd;
+   S32BIN2 accPedPosnRate;
+   U16BIN4 accPedPosn1;
+   U16BIN4 accPedPosn2; uint8 accPedPosnCalcnType; } 	VCS_AccPedl;
+*/
+message VCSAccPedl {
+  /* Accelerator pedal opening value in %  */
+  int32 acc_ped_posn = 1;
+
+  /* Accelerator pedal valid flag position:  */
+  bool acc_ped_vld = 2;
+
+  /* Accelerator pedal pressed flag bit:  */
+  bool acc_ped_psd = 3;
+
+  /* Rate of change in accelerator pedal opening in %/s.  */
+  int32 acc_ped_posn_rate = 4;
+
+  /* The first way corresponds to the opening value in %  */
+  int32 acc_ped_posn1 = 5;
+
+  /* The second way corresponds to the opening value in %  */
+  int32 acc_ped_posn2 = 6;
+
+  /* Pedal value calculated as:
+     0x0: Use first way
+     0x1: Use second way
+     0x2: Use average
+     0x3: Minimum value is used
+  */
+  AcceleratorPedalPositionCalculationType acc_ped_posn_calcn_type = 7;
+}
+
+enum AcceleratorPedalPositionCalculationType {
+  ACCELERATOR_PEDAL_POSITION_CALCULATION_TYPE_UNSPECIFIED = 0;
+  ACCELERATOR_PEDAL_POSITION_CALCULATION_TYPE_FIRST_WAY = 1;
+  ACCELERATOR_PEDAL_POSITION_CALCULATION_TYPE_SECOND_WAY = 2;
+  ACCELERATOR_PEDAL_POSITION_CALCULATION_TYPE_AVERAGE = 3;
+  ACCELERATOR_PEDAL_POSITION_CALCULATION_TYPE_MINIMUM_VALUE = 4;
+}
+
+/*
+   SxxBINxx/UxxBINxx
+
+   Uxx/Sxx this bit represents the signal numeric type and data orientation,
+       U (unsigned) represents an unsigned integer,
+       and S (signed) represents a signed integer, where the number xx represents the data range, the number of bits in the binary bit.
+       For example, U16 represents unsigned 16-bit integer and S16 represents signed 16-bit integer.
+
+   BINxx this bit represents the signal accuracy, bin is all called binary, and represents the binary,
+       followed by a number representing the negative number of times of xx, which must be an integer.
+       For example, BIN0 represents 0 subtitles with a precision of 2 and an accuracy of 0.5.
+
+*/

@@ -1,0 +1,28 @@
+/*
+ * Software-defined automotive service APIs
+ * API Version 1
+ * Part one: Atomic Services API reference
+ * (Motion Control)
+ * 2021-10-15 released
+ * Software-defined automotive workgroup
+ * China Automobile Industry Association
+ * SDV/T 001-2021
+ */
+syntax = "proto3";
+package vcs.powertrain.v1;
+
+import "vcs/v1/vcs_types.proto";
+
+/* Enables control of the MCU.  */
+service VCSMotorTrqMngService {
+  /* Sets the motor control */
+  rpc SetMCUCtrlReq(SetMCUCtrlReqRequest) returns (SetMCUCtrlReqResponse);
+}
+
+message SetMCUCtrlReqRequest {
+  VCSMCUCtrl mcu_ctrl_req = 1;
+}
+message SetMCUCtrlReqResponse {
+  bool success = 1;
+}
+message VCSMCUCtrl {}
