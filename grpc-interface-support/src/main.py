@@ -18,18 +18,16 @@ import shutil
 import zipfile
 from pathlib import Path
 from typing import Any, Dict, List
-from urllib.parse import urlparse
 
 import proto
 from cpp import CppGrpcServiceSdkGeneratorFactory
 from generator import GrpcServiceSdkGeneratorFactory
 from python import PythonGrpcServiceSdkGeneratorFactory
 from velocitas_lib import (
-    download_file,
     get_programming_language,
     get_project_cache_dir,
-    obtain_local_file_path,
     get_workspace_dir,
+    obtain_local_file_path,
 )
 from velocitas_lib.functional_interface import get_interfaces_for_type
 
@@ -37,11 +35,11 @@ DEPENDENCY_TYPE_KEY = "grpc-interface"
 
 
 def extract_zip(file_path: str, extract_to: str) -> str:
-    """Extrcat a zip file.
+    """Extract a zip file.
 
     Args:
         file_path (str): The file path to the zip.
-        extract_to (str): The fiel path to extract to.
+        extract_to (str): The file path to extract to.
 
     Returns:
         str: The file path to the extracted folder.
@@ -51,15 +49,15 @@ def extract_zip(file_path: str, extract_to: str) -> str:
         return extract_to
 
 
-def find_proto_files(directory: str) -> List[proto.ProtoFileHandle]:
+def discover_proto_files_in_directory(directory: str) -> List[proto.ProtoFileHandle]:
     """
-    Recursively searches for .proto files under the specified directory.
+    Recursively search for .proto files under the specified directory.
 
     Args:
         directory (str): The path to the directory to search in.
 
     Returns:
-        List[proto.ProtoFileHandle]: A list of proto files.
+        List[proto.ProtoFileHandle]: A list of file paths, relative to the search directory, each pointing to a proto file.
     """
     proto_files = []
     for root, _, files in os.walk(directory):
@@ -70,8 +68,16 @@ def find_proto_files(directory: str) -> List[proto.ProtoFileHandle]:
 
 
 def check_zipfile(file_path: str) -> List[proto.ProtoFileHandle]:
+    """Check if the file is a .zip file and extracts it.
+
+    Args:
+        file_path (str): The path to a file.
+
+    Returns:
+        List[proto.ProtoFileHandle]: A list of proto files.
+    """
     if zipfile.is_zipfile(file_path):
-        return find_proto_files(
+        return discover_proto_files_in_directory(
             extract_zip(
                 file_path, os.path.join(get_project_cache_dir(), Path(file_path).stem)
             )
@@ -80,7 +86,7 @@ def check_zipfile(file_path: str) -> List[proto.ProtoFileHandle]:
         return [proto.ProtoFileHandle(file_path)]
 
 
-def fetch_protos(path: str) -> List[proto.ProtoFileHandle]:
+def obtain_proto_files(path: str) -> List[proto.ProtoFileHandle]:
     """Fetch the proto files defined in the grpc-interface
     config to the local project cache.
 
@@ -90,22 +96,15 @@ def fetch_protos(path: str) -> List[proto.ProtoFileHandle]:
     Returns:
         List[proto.ProtoFileHandle]: A list of proto files.
     """
-    if os.path.isfile(path):
-        return check_zipfile(path)
-    elif os.path.isfile(os.path.join(get_workspace_dir(), path)):
-        return check_zipfile(os.path.join(get_workspace_dir(), path))
-    elif os.path.isdir(path):
-        return find_proto_files(path)
+    if os.path.isdir(path):
+        return discover_proto_files_in_directory(path)
     elif os.path.isdir(os.path.join(get_workspace_dir(), path)):
-        return find_proto_files(os.path.join(get_workspace_dir(), path))
-    elif urlparse(path).scheme in ("http", "https"):
-        _, filename = os.path.split(path)
-        temp_dir = os.path.join(get_project_cache_dir(), "services")
-        file_path = os.path.join(temp_dir, filename)
-        download_file(path, file_path)
-        return check_zipfile(file_path)
+        return discover_proto_files_in_directory(
+            os.path.join(get_workspace_dir(), path)
+        )
     else:
-        raise ValueError("Path does not exist or is not a valid URL")
+        path = obtain_local_file_path(path)
+        return check_zipfile(path)
 
 
 def create_service_sdk_dir(proto_file_handle: proto.ProtoFileHandle) -> str:
@@ -140,14 +139,18 @@ def generate_services(
         if_config (Dict[str, Any]): The grpc-interface config.
     """
 
-    proto_file_handles = fetch_protos(obtain_local_file_path(if_config["src"]))
+    proto_file_handles = obtain_proto_files(if_config["src"])
     is_client = "required" in if_config
     is_server = "provided" in if_config
 
-    for _proto in proto_file_handles:
+    for proto_file in proto_file_handles:
         try:
-            include_dir = if_config.get("includeDir", str(Path(proto.file_path).parent))
-            generate_single_service(_proto, factory, is_client, is_server, include_dir)
+            proto_include_dir = if_config.get(
+                "protoIncludeDir", str(Path(proto_file.file_path).parent)
+            )
+            generate_single_service(
+                proto_file, factory, is_client, is_server, proto_include_dir
+            )
         except RuntimeError:
             pass
             # skip a file with no service definition, can be an imported file
@@ -158,24 +161,26 @@ def generate_single_service(
     factory: GrpcServiceSdkGeneratorFactory,
     generate_client: bool,
     generate_server: bool,
-    include_dir: str,
+    proto_include_dir: str,
 ) -> None:
     """Generate an SDK for a single service.
 
     Args:
+        proto_file_handle (proto:ProtoFileHandle): A file containing the service to generate.
         factory (GrpcPackageGeneratorFactory):
             The factory from which to generate an SDK generator for a single service.
         generate_client (bool):     Generates client code.
         generate_server (bool):     Generates server code.
-        include_dir (str):          The directory in which to search for imports.
+        proto_include_dir (str):          The directory in which to search for imports.
     """
+
     service_sdk_dir = create_service_sdk_dir(proto_file_handle)
     print(f"Generating service SDK for {proto_file_handle.file_path}")
 
     generator = factory.create_service_generator(
         service_sdk_dir,
         proto_file_handle,
-        include_dir,
+        proto_include_dir,
     )
     generator.generate_package(generate_client, generate_server)
     generator.install_package()
