@@ -28,7 +28,7 @@ class ${{ service_name_camel_case }}ServiceServerFactory:
         address = middleware.service_locator.get_service_location("${{ service_name }}")
         server = grpc.server(concurrent.futures.ThreadPoolExecutor(MAX_THREAD_POOL_WORKERS))
         server.add_insecure_port(address)
-        
+
         add_${{ service_name }}Servicer_to_server(servicer, server)
 
         return server

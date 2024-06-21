@@ -21,7 +21,6 @@ import sys
 from pathlib import Path
 from typing import List
 
-from velocitas_lib.conan_utils import add_dependency_to_conanfile, export_conan_project
 from velocitas.model_generator import generate_model
 from velocitas_lib import (
     get_cache_data,
@@ -30,6 +29,7 @@ from velocitas_lib import (
     get_workspace_dir,
     require_env,
 )
+from velocitas_lib.conan_utils import add_dependency_to_conanfile, export_conan_project
 
 CACHE_KEY_VSS_FILE = "vspec_file_path"
 CACHE_KEY_UNITS_LIST = "unit_file_path_list"

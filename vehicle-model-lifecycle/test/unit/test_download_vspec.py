@@ -18,20 +18,28 @@ import sys
 from typing import List
 
 import pytest
+from pyfakefs.fake_filesystem import FakeFilesystem
 from test_lib import capture_stdout, mock_env
-from velocitas_lib import get_project_cache_dir
+from velocitas_lib import get_package_path, get_project_cache_dir
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "..", "src"))
 from download_vspec import (  # noqa
     get_legacy_model_src,
-    get_package_path,
     is_proper_interface_type,
-    is_uri,
-    main,
+    download_vspec,
 )
 
 vspec_300_uri = "https://github.com/COVESA/vehicle_signal_specification/releases/download/v3.0/vss_rel_3.0.json"  # noqa
 vspec_400_uri = "https://github.com/COVESA/vehicle_signal_specification/releases/download/v4.0/vss_rel_4.0.json"  # noqa
+
+
+@pytest.fixture()
+def create_files(fs: FakeFilesystem):
+    test_folder = os.path.dirname(os.path.dirname(__file__))
+    fs.create_file(os.path.join(test_folder, "units.yaml"))
+    fs.create_file("/workspaces/my_vehicle_app/units.yaml")
+    fs.create_file("/workspaces/my_vehicle_app/app/vspec.json")
+    return fs
 
 
 def get_vspec_file_path_value(capturedOutput: str) -> str:
@@ -48,12 +56,6 @@ def get_unit_file_path_list_value(capturedOutput: str) -> str:
         .split(" >> VELOCITAS_CACHE")[0]
         .replace("'", "")
     )
-
-
-def test_is_uri():
-    assert is_uri(vspec_300_uri)
-    assert is_uri("ftp://my-file")
-    assert not is_uri("./local/path/to/file.file")
 
 
 def test_get_legacy_model_src__camel_case_vehicle_model_key():
@@ -94,7 +96,7 @@ def test_proper_interface_type__correct_type():
                     "type": "vehicle-signal-interface",
                     "config": {
                         "src": "./app/vspec.json",
-                        "unit_src": ["./app/units.yaml"],
+                        "unit_src": ["units.yaml"],
                     },
                 }
             ],
@@ -106,16 +108,18 @@ def test_proper_interface_type__correct_type():
         },
     ],
 )
-def test_main__relative_src__converted_to_absolute(app_manifest):
+def test_download_vspec__relative_src__converted_to_absolute(
+    create_files, app_manifest
+):
     with capture_stdout() as capture, mock_env():
-        main(app_manifest)
+        download_vspec(app_manifest)
 
         vspec_file_path = get_vspec_file_path_value(capture.getvalue())
         assert os.path.isabs(vspec_file_path)
         assert vspec_file_path == "/workspaces/my_vehicle_app/app/vspec.json"
         unit_file_path_list = get_unit_file_path_list_value(capture.getvalue())
         assert unit_file_path_list == json.dumps(
-            ["./app/units.yaml"]
+            ["/workspaces/my_vehicle_app/units.yaml"]
         ) or unit_file_path_list == json.dumps(
             [os.path.join(get_package_path(), "units.yaml")]
         )
@@ -139,9 +143,11 @@ def test_main__relative_src__converted_to_absolute(app_manifest):
         {"VehicleModel": {"src": vspec_300_uri}},
     ],
 )
-def test_main__valid_app_manifest__uri_src_downloaded_and_stored_in_cache(app_manifest):
+def test_download_vspec__valid_app_manifest__uri_src_downloaded_and_stored_in_cache(
+    app_manifest, create_files
+):
     with capture_stdout() as capture, mock_env():
-        main(app_manifest)
+        download_vspec(app_manifest)
 
         vspec_file_path = get_vspec_file_path_value(capture.getvalue())
         assert os.path.isabs(vspec_file_path)
@@ -152,7 +158,7 @@ def test_main__valid_app_manifest__uri_src_downloaded_and_stored_in_cache(app_ma
         )
 
 
-def test_main__duplicate_vehicle_signal_interface__raises_error():
+def test_download_vspec__duplicate_vehicle_signal_interface__raises_error():
     app_manifest = {
         "manifestVersion": "v3",
         "interfaces": [
@@ -161,16 +167,18 @@ def test_main__duplicate_vehicle_signal_interface__raises_error():
         ],
     }
     with pytest.raises(KeyError):
-        main(app_manifest)
+        download_vspec(app_manifest)
 
 
-def test_main__no_vehicle_signal_interface__adds_default_to_cache():
+def test_download_vspec__no_vehicle_signal_interface__adds_default_to_cache(
+    create_files,
+):
     app_manifest = {
         "manifestVersion": "v3",
         "interfaces": [{"type": "pubsub", "config": {}}],
     }
     with capture_stdout() as capture, mock_env():
-        main(app_manifest)
+        download_vspec(app_manifest)
 
         expected_path = str(os.path.join(get_project_cache_dir(), "vspec.json"))
         expected_unit_path: List[str] = [os.path.join(get_package_path(), "units.yaml")]

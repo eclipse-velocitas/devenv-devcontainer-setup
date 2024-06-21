@@ -93,10 +93,12 @@ class PythonGrpcInterfaceGenerator(GrpcServiceSdkGenerator):  # type: ignore
         package_directory_path: str,
         proto_file_handle: proto.ProtoFileHandle,
         verbose: bool,
+        proto_include_path: str,
     ):
         self.__package_directory_path = package_directory_path
         self.__proto_file_handle = proto_file_handle
         self.__verbose = verbose
+        self.__proto_include_path = proto_include_path
         self.__seats_grpc_code_extractor = GrpcCodeExtractor(
             self.__proto_file_handle, self.__package_directory_path, "seats_service_sdk"
         )
@@ -107,7 +109,7 @@ class PythonGrpcInterfaceGenerator(GrpcServiceSdkGenerator):  # type: ignore
                 "python",
                 "-m",
                 "grpc_tools.protoc",
-                f"-I{Path(self.__proto_file_handle.file_path).parent}",
+                f"-I{self.__proto_include_path}",
                 f"--python_out={self.__package_directory_path}",
                 f"--pyi_out={self.__package_directory_path}",
                 f"--grpc_python_out={self.__package_directory_path}",
@@ -128,12 +130,14 @@ class PythonGrpcInterfaceGenerator(GrpcServiceSdkGenerator):  # type: ignore
         generated_sources = glob.glob(
             os.path.join(self.__package_directory_path, "*.py*")
         )
+        file_prefix = Path(self.__proto_file_handle.file_path).stem
         replace_text_in_file(
             os.path.join(
-                self.__package_directory_path, f"{service_name.lower()}_pb2_grpc.py"
+                self.__package_directory_path,
+                f"{file_prefix}_pb2_grpc.py",
             ),
-            f"import {service_name.lower()}_pb2",
-            f"import {module_name}.{service_name.lower()}_pb2",
+            f"import {file_prefix}_pb2 as {file_prefix}__pb2",
+            f"import {module_name}.{file_prefix}_pb2 as {file_prefix}__pb2",
         )
 
         for file in generated_sources:
@@ -225,7 +229,7 @@ class PythonGrpcInterfaceGenerator(GrpcServiceSdkGenerator):  # type: ignore
         )
 
     def __transform_service_source_code(self, lines: List[str]) -> List[str]:
-        source_content = replace_text_area(
+        source_content: List[str] = replace_text_area(
             lines,
             '"""',
             '"""',
@@ -291,8 +295,11 @@ class PythonGrpcServiceSdkGeneratorFactory(GrpcServiceSdkGeneratorFactory):  # t
         subprocess.check_call(["pip", "install", "grpcio-tools"])
 
     def create_service_generator(
-        self, output_path: str, proto_file_handle: proto.ProtoFileHandle
+        self,
+        output_path: str,
+        proto_file_handle: proto.ProtoFileHandle,
+        proto_include_path: str,
     ) -> PythonGrpcInterfaceGenerator:
         return PythonGrpcInterfaceGenerator(
-            output_path, proto_file_handle, self._verbose
+            output_path, proto_file_handle, self._verbose, proto_include_path
         )

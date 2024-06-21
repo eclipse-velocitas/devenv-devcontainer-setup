@@ -15,6 +15,7 @@
 import argparse
 import os
 import shutil
+from pathlib import Path
 from typing import Any, Dict
 
 import proto
@@ -22,34 +23,14 @@ from cpp import CppGrpcServiceSdkGeneratorFactory
 from generator import GrpcServiceSdkGeneratorFactory
 from python import PythonGrpcServiceSdkGeneratorFactory
 from velocitas_lib import (
-    download_file,
     get_programming_language,
     get_project_cache_dir,
+    obtain_local_file_path,
 )
 from velocitas_lib.functional_interface import get_interfaces_for_type
 from velocitas_lib.text_utils import create_truncated_string
 
 DEPENDENCY_TYPE_KEY = "grpc-interface"
-
-
-def download_proto(config: Dict[str, Any]) -> proto.ProtoFileHandle:
-    """Download the proto file defined in the grpc-interface
-    config to the local project cache.
-
-    Args:
-        config (Dict[str, Any]): The grpc-interface config.
-
-    Returns:
-        proto.ProtoFileHandle: A handle to the proto file.
-    """
-    service_if_spec_src = config["src"]
-    _, filename = os.path.split(service_if_spec_src)
-
-    cached_proto_file_path = os.path.join(get_project_cache_dir(), "services", filename)
-
-    download_file(service_if_spec_src, cached_proto_file_path)
-
-    return proto.ProtoFileHandle(cached_proto_file_path)
 
 
 def create_service_sdk_dir(proto_file_handle: proto.ProtoFileHandle) -> str:
@@ -86,13 +67,17 @@ def generate_single_service(
     print(
         f"Generating service SDK for {create_truncated_string(if_config['src'], 100)!r}"
     )
-    proto_file_handle = download_proto(if_config)
+    proto_file_handle = proto.ProtoFileHandle(obtain_local_file_path(if_config["src"]))
     service_sdk_dir = create_service_sdk_dir(proto_file_handle)
 
     is_client = "required" in if_config
     is_server = "provided" in if_config
 
-    generator = factory.create_service_generator(service_sdk_dir, proto_file_handle)
+    generator = factory.create_service_generator(
+        service_sdk_dir,
+        proto_file_handle,
+        if_config.get("includeDir", str(Path(proto_file_handle.file_path).parent)),
+    )
     generator.generate_package(is_client, is_server)
     generator.install_package()
     generator.update_package_references()
@@ -100,7 +85,7 @@ def generate_single_service(
         generator.update_auto_generated_code()
 
 
-def main(verbose: bool) -> None:
+def generate_sdks(verbose: bool) -> None:
     """Generate service SDKs for all grpc-interfaces defined in the AppManifest.json.
 
     Args:
@@ -134,7 +119,7 @@ def main(verbose: bool) -> None:
 
 
 if __name__ == "__main__":
-    argument_parser = argparse.ArgumentParser("generate-sdk")
+    argument_parser = argparse.ArgumentParser()
     argument_parser.add_argument("-v", "--verbose", action="store_true")
     args = argument_parser.parse_args()
-    main(args.verbose)
+    generate_sdks(args.verbose)
