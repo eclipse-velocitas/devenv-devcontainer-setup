@@ -27,8 +27,8 @@
         {
             "type": "grpc-interface",
             "config": {
-                "src": "proto/",
-                "required": { }
+                "src": "proto_catalogue/",
+                "required": {}
             }
         }
     ]

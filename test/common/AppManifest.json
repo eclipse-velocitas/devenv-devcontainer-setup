@@ -13,7 +13,7 @@
         {
             "type": "grpc-interface",
             "config": {
-                "src": "proto/",
+                "src": "proto_catalogue/",
                 "required": {},
                 "provided": {}
             }
