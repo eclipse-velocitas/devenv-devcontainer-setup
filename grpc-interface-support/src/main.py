@@ -156,7 +156,9 @@ def generate_services(
 
     for proto_file in proto_file_handles:
         try:
-            proto_include_dir = get_proto_include_dir(if_config["protoIncludeDir"])
+            proto_include_dir = str(Path(proto_file.file_path).parent)
+            if "protoIncludeDir" in if_config:
+                proto_include_dir = get_proto_include_dir(if_config["protoIncludeDir"])
             generate_single_service(
                 proto_file, factory, is_client, is_server, proto_include_dir
             )
