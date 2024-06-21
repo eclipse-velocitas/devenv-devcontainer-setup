@@ -50,12 +50,12 @@ def pytest_sessionstart(session):
         dirs_exist_ok=True,
     )
     shutil.copytree(
-        "test/common/multiple/proto",
+        "test/common/multiple/proto_catalogue",
         server_path,
         dirs_exist_ok=True,
     )
     shutil.copytree(
-        "test/common/multiple/proto",
+        "test/common/multiple/proto_catalogue",
         client_path,
         dirs_exist_ok=True,
     )
