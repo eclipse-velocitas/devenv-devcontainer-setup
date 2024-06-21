@@ -35,6 +35,18 @@
                     "type": "string",
                     "required": true,
                     "description": "Path of the AppManifest file, relative to the .velocitas.json"
+                },
+                {
+                    "name": "devContainerBaseImageUriPrefix",
+                    "type": "string",
+                    "default": "ghcr.io/eclipse-velocitas/devcontainer-base-images",
+                    "description": "The prefix URI of the devContainer base image to use."
+                },
+                {
+                    "name": "devContainerBaseImageTag",
+                    "type": "string",
+                    "default": "v0.3",
+                    "description": "The tag of the devContainer base image to use."
                 }
             ]
         },
