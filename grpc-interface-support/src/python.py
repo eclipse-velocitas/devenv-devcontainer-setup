@@ -170,7 +170,6 @@ class PythonGrpcInterfaceGenerator(GrpcServiceSdkGenerator):  # type: ignore
         variables = {
             "service_name": service_name,
             "service_name_lower": service_name.lower(),
-            "service_name_camel_case": to_camel_case(service_name),
             "core_sdk_version": get_required_sdk_version_python(),
         }
 
@@ -186,16 +185,14 @@ class PythonGrpcInterfaceGenerator(GrpcServiceSdkGenerator):  # type: ignore
             template_dir, self.__package_directory_path, files_to_copy, variables
         )
 
-    def __create_stub_source(self) -> None:
+    def __create_service_stub_source(self, service_name: str) -> None:
         app_source_dir = os.path.join(get_workspace_dir(), "app", "src")
 
         source_code = self.__seats_grpc_code_extractor.create_source_stub_code()
         variables = self.__create_stub_template_variables()
         variables["service_source_code"] = "\n".join(source_code)
 
-        source_file_name = (
-            f"{self.__proto_file_handle.get_service_name()}ServiceStub.py"
-        )
+        source_file_name = f"{service_name}ServiceStub.py"
         source_file_path = os.path.join(app_source_dir, source_file_name)
         templates.copy_templates(
             get_template_dir(),
@@ -204,11 +201,9 @@ class PythonGrpcInterfaceGenerator(GrpcServiceSdkGenerator):  # type: ignore
             variables,
         )
 
-    def __create_service_source(self) -> None:
+    def __create_service_source(self, service_name: str) -> None:
         app_source_dir = os.path.join(get_workspace_dir(), "app", "src")
-        service_source_file_name = (
-            f"{self.__proto_file_handle.get_service_name()}{self.TEMPLATE_PATH}"
-        )
+        service_source_file_name = f"{service_name}{self.TEMPLATE_PATH}"
         service_source_file_path = os.path.join(
             app_source_dir, service_source_file_name
         )
@@ -249,7 +244,6 @@ class PythonGrpcInterfaceGenerator(GrpcServiceSdkGenerator):  # type: ignore
             "service_name": service_name,
             "service_name_parent_postfix": "Servicer",
             "service_name_lower": service_name.lower(),
-            "service_name_camel_case": to_camel_case(service_name),
             "service_name_postfix": "Stub",
             "package_id": "seats_service_sdk.seats_pb2_grpc",
         }
@@ -261,7 +255,6 @@ class PythonGrpcInterfaceGenerator(GrpcServiceSdkGenerator):  # type: ignore
             "service_name": "SeatsServiceStub",
             "service_name_parent_postfix": "",
             "service_name_lower": service_name.lower(),
-            "service_name_camel_case": to_camel_case(service_name),
             "service_name_postfix": "",
             "package_id": "SeatsServiceStub",
         }
@@ -284,8 +277,10 @@ class PythonGrpcInterfaceGenerator(GrpcServiceSdkGenerator):  # type: ignore
         pass
 
     def update_auto_generated_code(self) -> None:
-        self.__create_stub_source()
-        self.__create_service_source()
+        service_name = self.__proto_file_handle.get_service_name()
+
+        self.__create_service_stub_source(service_name)
+        self.__create_service_source(service_name)
 
 
 class PythonGrpcServiceSdkGeneratorFactory(GrpcServiceSdkGeneratorFactory):  # type: ignore
