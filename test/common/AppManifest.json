@@ -5,17 +5,8 @@
         {
             "type": "grpc-interface",
             "config": {
-                "src": "bcm/horn/v1/horn.proto",
-                "required": {},
-                "provided": {}
-            }
-        },
-        {
-            "type": "grpc-interface",
-            "config": {
-                "src": "proto_catalogue/",
-                "required": {},
-                "provided": {}
+                "src": "https://raw.githubusercontent.com/eclipse-kuksa/kuksa-incubation/main/seat_service/proto/sdv/edge/comfort/seats/v1/seats.proto",
+                "required": {}
             }
         }
     ]
