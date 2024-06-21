@@ -24,8 +24,9 @@ For generating a client SDK:
         {
             "type": "grpc-interface",
             "config": {
-                "src": "<uri_to_proto_file>",
-                "required": {}
+                "src": "<uri_or_local_file_or_dir_path_to_proto_files>",
+                "protoIncludeDir": "<path_to_imports>",
+                "required": {},
             }
         }
     ]
@@ -41,8 +42,9 @@ For generating a server SDK:
         {
             "type": "grpc-interface",
             "config": {
-                "src": "<uri_to_proto_file>",
-                "provided": {}
+                "src": "<uri_or_local_file_or_dir_path_to_proto_files>",
+                "protoIncludeDir": "<path_to_imports>",
+                "provided": {},
             }
         }
     ]
@@ -58,7 +60,8 @@ For generating both:
         {
             "type": "grpc-interface",
             "config": {
-                "src": "<uri_to_proto_file>",
+                "src": "<uri_or_local_file_or_dir_path_to_proto_files>",
+                "protoIncludeDir": "<path_to_imports>",
                 "required": {},
                 "provided": {}
             }
