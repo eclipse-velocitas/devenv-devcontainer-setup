@@ -79,7 +79,10 @@ def check_zipfile(file_path: str) -> List[proto.ProtoFileHandle]:
     if zipfile.is_zipfile(file_path):
         return discover_proto_files_in_directory(
             extract_zip(
-                file_path, os.path.join(get_project_cache_dir(), Path(file_path).stem)
+                file_path,
+                os.path.join(
+                    get_project_cache_dir(), "downloads", Path(file_path).stem
+                ),
             )
         )
     else:
