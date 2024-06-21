@@ -134,13 +134,14 @@ Generated files:
 * `<Service-Name>ServiceImpl.py` contains method definitions for all server methods, defaulting to `UNIMPLEMENTED`. This file is only generated **once** if it does not exist.
 
 ```python
+from velocitas_sdk.config import middleware
 from seats_service_sdk.seats_pb2_grpc import SeatsServicer
 from seats_service_sdk.SeatsServiceServerFactory import SeatsServiceServerFactory
 
 async def on_start(self):
     server = SeatsServiceServerFactory.create(
         SeatsServicer(),
-        MyMiddleware(), # Create your own middleware sub class
+        middleware, # Create your own middleware sub class
     )
 
     server.start()
