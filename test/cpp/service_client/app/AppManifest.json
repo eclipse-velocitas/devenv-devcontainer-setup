@@ -15,6 +15,21 @@
                 "src": "bcm/horn/v1/horn.proto",
                 "required": { }
             }
+        },
+        {
+            "type": "grpc-interface",
+            "config": {
+                "src": "https://github.com/eclipse-kuksa/kuksa-databroker/archive/refs/tags/0.4.5.zip",
+                "protoIncludeDir": "kuksa-databroker-0.4.5/proto",
+                "required": { }
+            }
+        },
+        {
+            "type": "grpc-interface",
+            "config": {
+                "src": "proto/",
+                "provided": { }
+            }
         }
     ]
 }

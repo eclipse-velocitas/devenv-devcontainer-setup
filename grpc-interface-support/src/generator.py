@@ -67,6 +67,7 @@ class GrpcServiceSdkGeneratorFactory(ABC):
             output_path (str): Path where the SDK shall be generated at.
             proto_file_handle (proto.ProtoFileHandle): The proto file which serves
                 as the input for the generator.
+            proto_include_path (str): The path which is used to look for imports.
 
         Returns:
             GrpcServiceSdkGenerator: A new GrpcServiceSdkGenerator which can

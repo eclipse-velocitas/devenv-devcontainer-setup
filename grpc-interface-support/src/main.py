@@ -128,6 +128,17 @@ def create_service_sdk_dir(proto_file_handle: proto.ProtoFileHandle) -> str:
     return service_sdk_path
 
 
+def get_proto_include_dir(path: str) -> str:
+    if os.path.isdir(path):
+        return path
+    elif os.path.isdir(os.path.join(get_workspace_dir(), path)):
+        return os.path.join(get_workspace_dir(), path)
+    elif os.path.isdir(os.path.join(get_project_cache_dir(), "downloads", path)):
+        return os.path.join(get_project_cache_dir(), "downloads", path)
+    else:
+        raise FileNotFoundError(f"Directory {path} not found!")
+
+
 def generate_services(
     factory: GrpcServiceSdkGeneratorFactory, if_config: Dict[str, Any]
 ) -> None:
@@ -145,9 +156,7 @@ def generate_services(
 
     for proto_file in proto_file_handles:
         try:
-            proto_include_dir = if_config.get(
-                "protoIncludeDir", str(Path(proto_file.file_path).parent)
-            )
+            proto_include_dir = get_proto_include_dir(if_config["protoIncludeDir"])
             generate_single_service(
                 proto_file, factory, is_client, is_server, proto_include_dir
             )

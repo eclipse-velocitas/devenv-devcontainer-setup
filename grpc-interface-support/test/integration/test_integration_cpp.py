@@ -80,6 +80,11 @@ def test__integration():
     ensure_package_is_generated()
     assert get_dependency_count("seats-service-sdk") == 1
     assert get_dependency_count("hornservice-service-sdk") == 1
+    assert get_dependency_count("val-service-sdk") == 1
+    assert get_dependency_count("collector-service-sdk") == 1
+    assert get_dependency_count("broker-service-sdk") == 1
+    assert get_dependency_count("capacitylimit-service-sdk") == 1
+    assert get_dependency_count("motorcontrol-service-sdk") == 1
     ensure_build_successful()
     server_process = ensure_app_running()
 
@@ -89,6 +94,11 @@ def test__integration():
     ensure_package_is_generated()
     assert get_dependency_count("seats-service-sdk") == 1
     assert get_dependency_count("hornservice-service-sdk") == 1
+    assert get_dependency_count("val-service-sdk") == 1
+    assert get_dependency_count("collector-service-sdk") == 1
+    assert get_dependency_count("broker-service-sdk") == 1
+    assert get_dependency_count("capacitylimit-service-sdk") == 1
+    assert get_dependency_count("motorcontrol-service-sdk") == 1
     ensure_build_successful()
     client_process = ensure_app_running()
 
