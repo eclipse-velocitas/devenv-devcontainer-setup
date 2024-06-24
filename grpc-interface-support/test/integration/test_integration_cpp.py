@@ -28,6 +28,8 @@ def get_subdirs(path: str) -> List[str]:
 
 def get_project_cache_dir() -> str:
     project_caches = os.path.join(os.path.expanduser("~"), ".velocitas", "projects")
+    for dir in project_caches:
+        get_subdirs(dir)
     return get_subdirs(project_caches)[0]
 
 
