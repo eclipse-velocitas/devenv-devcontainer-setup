@@ -11,7 +11,7 @@
 syntax = "proto3";
 package vcs.powertrain.v1;
 
-import "vcs/v1/vcs_types.proto";
+import "vcs_types.proto";
 
 /*
  * Enables power battery power calculation, high voltage accessories (except motor systems, high voltage components of power battery systems including: DCDC, TMS, etc.) instantaneous power calculation, and power system permissible discharge power calculation. The power system uses the allowable charge power calculation, and the permissible power limit calculation function is based on the complete vehicle fault condition.
