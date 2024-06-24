@@ -11,7 +11,7 @@
 syntax = "proto3";
 package vcs.powertrain.v1;
 
-import "vcs/v1/vcs_types.proto";
+import "vcs_types.proto";
 
 /* Enables control of the MCU.  */
 service VCSMotorTrqMngService {
