@@ -12,6 +12,8 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+from typing import List
+
 from proto_schema_parser.parser import Parser, ast
 
 
@@ -62,3 +64,21 @@ class ProtoFileHandle:
             raise RuntimeError("No service name found in proto file!")
 
         return service_name
+
+    def get_imports(self) -> List[str]:
+        """Get the name of the service.
+
+        Returns:
+            List[str]: The names to the imports
+        """
+        imports = []
+        with open(self.file_path, "r") as file:
+            data = file.read()
+
+        parsed_data = Parser().parse(data)
+
+        for element in parsed_data.file_elements:
+            if isinstance(element, ast.Import):
+                imports.append(str(element.name))
+
+        return imports
