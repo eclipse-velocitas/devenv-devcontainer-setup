@@ -135,9 +135,7 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
 
         if some_imports:
             for element in some_imports:
-                path = os.path.join(
-                    element, os.path.relpath(include_path, self.__proto_include_path)
-                )
+                path = os.path.join(self.__proto_include_path, element)
                 args = [
                     self.__get_binary_path("protoc"),
                     f"-I{self.__proto_include_path}",
