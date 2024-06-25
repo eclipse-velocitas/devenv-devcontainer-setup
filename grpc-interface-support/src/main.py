@@ -57,6 +57,7 @@ def discover_proto_files_in_directory(
 
     Args:
         directory (str): The path to the directory to search in.
+        root (Optional[str]): The optional root for zip directories.
 
     Returns:
         List[proto.ProtoFileHandle]: A list of file paths, relative to the search directory, each pointing to a proto file.
@@ -78,6 +79,7 @@ def check_zipfile(
 
     Args:
         file_path (str): The path to a file.
+        root (Optional[str]): The optional root for zip directories.
 
     Returns:
         List[proto.ProtoFileHandle]: A list of proto files.
@@ -104,7 +106,7 @@ def obtain_proto_files(
 
     Args:
         path (str): The path/uri to a file to download/an existing one or a directory containing proto files.
-        root (str): directory to search for if path is zip
+        root (Optional[str]): directory to search for if path is zip
 
     Returns:
         List[proto.ProtoFileHandle]: A list of proto files.
