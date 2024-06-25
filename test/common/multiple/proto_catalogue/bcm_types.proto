@@ -1,0 +1,365 @@
+/*
+ * Status of the lock.
+ */
+syntax = "proto3";
+package bcm.v1;
+
+enum BCMLockStatus {
+  BCM_LOCK_STATUS_UNSPECIFIED = 0;
+  /* Locked */
+  BCM_LOCK_STATUS_LOCKED = 1;
+  /* Not locked */
+  BCM_LOCK_STATUS_UNLOCKED = 2;
+  /* Superlock is engaged */
+  BCM_LOCK_STATUS_SUPERLOCKED = 3;
+  /* Unknown */
+  BCM_LOCK_STATUS_UNKNOWN = 4;
+}
+
+enum BCMActuateStatus {
+  BCM_ACTUATE_STATUS_UNSPECIFIED = 0;
+  BCM_ACTUATE_STATUS_IDLE = 1;
+  BCM_ACTUATE_STATUS_CLOSING = 2;
+  BCM_ACTUATE_STATUS_OPENING = 3;
+  BCM_ACTUATE_STATUS_UNKNOWN = 4;
+}
+
+enum BCMLockStatusWindow {
+  BCM_LOCK_STATUS_WINDOW_UNSPECIFIED = 0;
+  BCM_LOCK_STATUS_WINDOW_LOCKED = 1;
+  BCM_LOCK_STATUS_WINDOW_UNLOCKED = 2;
+  BCM_LOCK_STATUS_WINDOW_UNKNOWN = 3;
+}
+
+enum BCMAuthStatus {
+  BCM_AUTH_STATUS_UNSPECIFIED = 0;
+  BCM_AUTH_STATUS_UNAUTHENTICATED = 1;
+  BCM_AUTH_STATUS_AUTHORIZED = 2;
+  BCM_AUTH_STATUS_UNKNOWN = 3;
+}
+
+enum BCMKeyLocation {
+  BCM_KEY_LOCATION_UNSPECIFIED = 0;
+  BCM_KEY_LOCATION_INSIDE = 1;
+  BCM_KEY_LOCATION_LEFT_WILL_AREA = 2;
+  BCM_KEY_LOCATION_RIGHT_WILL_AREA = 3;
+  BCM_KEY_LOCATION_LEFT_UK_AREA = 4;
+  BCM_KEY_LOCATION_RIGHT_UK_AREA = 5;
+  BCM_KEY_LOCATION_NEARBY = 6;
+  BCM_KEY_LOCATION_FARAWAY = 7;
+  BCM_KEY_LOCATION_TAILGATE_WELCOME_AREA = 8;
+  BCM_KEY_LOCATION_TAILGATE_UNLOCK_AREA = 9;
+  BCM_KEY_LOCATION_IN_TRUNK = 10;
+  BCM_KEY_LOCATION_UNKNOWN = 11;
+}
+
+enum BCMShadeType {
+  BCM_SHADE_TYPE_UNSPECIFIED = 0;
+  BCM_SHADE_TYPE_FABRIC = 1;
+  BCM_SHADE_TYPE_GLASS = 2;
+}
+
+enum BCMFogLightId {
+  BCM_FOG_LIGHT_ID_UNSPECIFIED = 0;
+  BCM_FOG_LIGHT_ID_FRONT = 1;
+  BCM_FOG_LIGHT_ID_REAR = 2;
+}
+
+enum BCMCommonLightId {
+  BCM_COMMON_LIGHT_ID_UNSPECIFIED = 0;
+  BCM_COMMON_LIGHT_ID_AMBIENT_LIGHT = 1;
+  BCM_COMMON_LIGHT_ID_READING_LIGHT = 2;
+  BCM_COMMON_LIGHT_ID_CURRENCY_LIGHT = 3;
+  BCM_COMMON_LIGHT_ID_TRUNK_LIGHT = 4;
+  BCM_COMMON_LIGHT_ID_FOOT_LIGHT = 5;
+  BCM_COMMON_LIGHT_ID_BACKGROUND_LIGHT = 6;
+  BCM_COMMON_LIGHT_ID_ARM_REST_BOX_LIGHT = 7;
+  BCM_COMMON_LIGHT_ID_OFF_FRONT_LIGHT = 8;
+  BCM_COMMON_LIGHT_ID_OFF_REAR_LIGHT = 9;
+  BCM_COMMON_LIGHT_ID_OFF_AMBIENT_LIGHT = 10;
+  BCM_COMMON_LIGHT_ID_LEFT_SIDE_LIGHT = 11;
+  BCM_COMMON_LIGHT_ID_RIGHT_SIDE_LIGHT = 12;
+  BCM_COMMON_LIGHT_ID_LEFT_FRONT_HEIGHT_LIGHT = 13;
+  BCM_COMMON_LIGHT_ID_RIGHT_FRONT_HEIGHT_LIGHT = 14;
+  BCM_COMMON_LIGHT_ID_LEFT_REAR_GLOBAL_LIGHT = 15;
+  BCM_COMMON_LIGHT_ID_RIGHT_REAR_HEIGHT_LIGHT = 16;
+  BCM_COMMON_LIGHT_ID_FRONT_LEFT_SCOPE_LIGHT = 17;
+  BCM_COMMON_LIGHT_ID_FRONT_RIGHT_SCOPE_LIGHT = 18;
+  BCM_COMMON_LIGHT_ID_LEFT_SCOPE_MIRROR_LIGHT = 19;
+  BCM_COMMON_LIGHT_ID_RIGHT_STEER_MIRROR_LIGHT = 20;
+  BCM_COMMON_LIGHT_ID_REAR_LEFT_ACER_LIGHT = 21;
+  BCM_COMMON_LIGHT_ID_REAR_LIGHT = 22;
+  BCM_COMMON_LIGHT_ID_STEER_LIGHT = 23;
+  BCM_COMMON_LIGHT_ID_FRONT_LEFT_LOW_BEAM_LIGHT = 24;
+  BCM_COMMON_LIGHT_ID_FRONT_RIGHT_LOW_BEAM_LIGHT = 25;
+  BCM_COMMON_LIGHT_ID_FRONT_LEFT_POSITION_LIGHT = 26;
+  BCM_COMMON_LIGHT_ID_FRONT_RIGHT_POSITION_LIGHT = 27;
+  BCM_COMMON_LIGHT_ID_REAR_LEFT_POSITION_LIGHT = 28;
+  BCM_COMMON_LIGHT_ID_REAR_RIGHT_POSITION_LIGHT = 29;
+  BCM_COMMON_LIGHT_ID_FRONT_LEFT_DAYTIME_LIGHT = 30;
+  BCM_COMMON_LIGHT_ID_FRONT_RIGHT_DAYTIME_LIGHT = 31;
+  BCM_COMMON_LIGHT_ID_FRONT_LEFT_DOOR_ALARM_LIGHT = 32;
+  BCM_COMMON_LIGHT_ID_FRONT_RIGHT_DOOR_ALARM_LIGHT = 33;
+  BCM_COMMON_LIGHT_ID_REAR_LEFT_DOOR_ALARM_LIGHT = 34;
+  BCM_COMMON_LIGHT_ID_REAR_RIGHT_DOOR_ALARM_LIGHT = 35;
+  BCM_COMMON_LIGHT_ID_LEFT_WO_LIGHT = 36;
+  BCM_COMMON_LIGHT_ID_RIGHT_WO_LIGHT = 37;
+  BCM_COMMON_LIGHT_ID_FRONT_LEFT_CORNER_CORP_LIGHT = 38;
+  BCM_COMMON_LIGHT_ID_FRONT_RIGHT_CORNER_CORP_LIGHT = 39;
+  BCM_COMMON_LIGHT_ID_REAR_LEFT_CORP_LIGHT = 40;
+  BCM_COMMON_LIGHT_ID_REAR_RIGHT_CORP_LIGHT = 41;
+  BCM_COMMON_LIGHT_ID_REAR_LICENSE_LIGHT_FRONT_LEFT = 42;
+  BCM_COMMON_LIGHT_ID_PUDDLE_LIGHT = 43;
+  BCM_COMMON_LIGHT_ID_FRONT_RIGHT_PUDDLE_LIGHT = 44;
+  BCM_COMMON_LIGHT_ID_REAR_LEFT_PUDDLE_LIGHT = 45;
+  BCM_COMMON_LIGHT_ID_REAR_RIGHT_PUDDLE_LIGHT = 46;
+  BCM_COMMON_LIGHT_ID_LEFT_BLIND_LIGHT = 47;
+  BCM_COMMON_LIGHT_ID_RIGHT_BLIND_LIGHT = 48;
+}
+
+enum BCMSteerLightId {
+  BCM_STEER_LIGHT_ID_UNSPECIFIED = 0;
+  BCM_STEER_LIGHT_ID_LEFT = 1;
+  BCM_STEER_LIGHT_ID_RIGHT = 2;
+}
+
+enum BCMVibratingMode {
+  BCM_VIBRATING_MODE_UNSPECIFIED = 0;
+  BCM_VIBRATING_MODE_LEFT_CALIBRATE = 1;
+  BCM_VIBRATING_MODE_RIGHT_CALIBRATE = 2;
+  BCM_VIBRATING_MODE_WHOLE_CALIBRATE = 3;
+}
+
+enum BCMWipingLevel {
+  BCM_WIPING_LEVEL_UNSPECIFIED = 0;
+  BCM_WIPING_LEVEL_LOW = 1;
+  BCM_WIPING_LEVEL_MEDIUM = 2;
+  BCM_WIPING_LEVEL_HIGH = 3;
+}
+
+enum BCMLightStatus {
+  BCM_LIGHT_STATUS_UNSPECIFIED = 0;
+  BCM_LIGHT_STATUS_ON = 1;
+  BCM_LIGHT_STATUS_OFF = 2;
+}
+
+/*
+ * The Body Atomic Services API call returned information
+ */
+enum BCMReturnCode {
+  BCM_RETURN_CODE_UNSPECIFIED = 0;
+  /*
+   * Success
+   */
+  BCM_RETURN_CODE_SUCCESS = 1;
+
+  /*
+   * Execution failed because the current mode is not supported
+   */
+  BCM_RETURN_CODE_FAIL_WORKING_CONDITION_UNFULFILLED = 2;
+
+  /*
+   * Execution failed because a high priority task was busy
+   */
+  BCM_RETURN_CODE_FAIL_HIGH_PRIORITY_TASK_ONGOING = 3;
+
+  /*
+   * The execution failed because the function is not available
+   */
+  BCM_RETURN_CODE_FAIL_FUNCTION_UNAVAILABLE = 4;
+
+  /*
+   * Execution failed due to invalid resource
+   */
+  BCM_RETURN_CODE_FAIL_INVALID_SOURCE_ID = 5;
+
+  /*
+   * Execution failed due to device exception
+   */
+  BCM_RETURN_CODE_FAIL_DEVICE_ABNORMAL = 6;
+
+  /*
+   * The execution failed because of low battery power
+   */
+  BCM_RETURN_CODE_FAIL_POWER_SHORTAGE = 7;
+
+  /*
+   * The execution failed because of a timeout
+   */
+  BCM_RETURN_CODE_FAIL_TIMEOUT = 8;
+
+  /*
+   * Execution failed due to thermal protection
+   */
+  BCM_RETURN_CODE_FAIL_OVERLAPPING = 9;
+
+  /*
+   * Execution failed because the parameter is out of range
+   */
+  BCM_RETURN_CODE_FAIL_OUT_OF_RANGE = 10;
+  /*
+   * Execution failed because anti-play was triggered
+   */
+  BCM_RETURN_CODE_FAIL_ANTIPLAY = 11;
+  /*
+   * Execution failed due to spin blocking
+   */
+  BCM_RETURN_CODE_FAIL_DRAG = 12;
+  /*
+   * Execution failed due to overcurrent
+   */
+  BCM_RETURN_CODE_FAIL_OVER_CURRENT = 13;
+  /*
+   * The execution failed because of the component health information
+   */
+  BCM_RETURN_CODE_FAIL_OTHERS = 14;
+}
+
+message BCMReturnCodeMessage {
+  bcm.v1.BCMReturnCode code = 1;
+}
+message BCMLockStatusMessage {
+  BCMLockStatus status = 1;
+}
+message BCMBoolMessage {
+  bool value = 1;
+}
+
+message BCMDoorPositionMessage {
+  uint32 position = 1;
+}
+message BCMDoorTypeMessage {
+  string door_type = 1;
+}
+message BCMHornVolumeMessage {
+  uint32 horn_volume = 1;
+}
+message BCMKeyNumberMessage {
+  uint32 key_number = 1;
+}
+message BCMKeySerialNumber {
+  uint32 key_serial_number = 1;
+}
+message BCMHeatingLevelMessage {
+  uint32 heating_level = 1;
+}
+message BCMRearViewXAngleMessage {
+  uint32 rear_view_x_angle = 1;
+}
+message BCMRearViewYAngleMessage {
+  uint32 rear_view_y_angle = 1;
+}
+message BCMSeatMainXDirMessage {
+  uint32 main_x_dir = 1;
+}
+message BCMSeatMainZDirMessage {
+  uint32 main_x_dir = 1;
+}
+message BCMSeatFrontZDirMessage {
+  uint32 front_z_dir = 1;
+}
+message BCMSeatBackRestAngleMessage {
+  uint32 back_rest_angle = 1;
+}
+message BCMGetTiltMessage {
+  uint32 tilt = 1;
+}
+message BCMGetVentilationLevelMessage {
+  uint32 ventilation_level = 1;
+}
+message BCMSteerWheelHeightMessage {
+  uint32 steer_wheel_height = 1;
+}
+message BCMSunroofPosition {
+  uint32 sunroof_position = 1;
+}
+message BCMSunroofAngleMessage {
+  uint32 sunroof_angle = 1;
+}
+message BCMWelcomePedalPosition {
+  uint32 welcome_pedal_position = 1;
+}
+message BCMWindowPositionMessage {
+  uint32 window_position = 1;
+}
+message BCMSunshadeGetShade {
+  uint32 sunshade_shade = 1;
+}
+message BCMGetWipingIntervalMessage {
+  uint32 wiping_interval = 1;
+}
+message BCMWaterLevelMessage {
+  uint32 water_level = 1;
+}
+message BCMBeamAngleMessage {
+  uint32 angle = 1;
+}
+message BCMCommonLightBrightness {
+  uint32 brightness = 1;
+}
+message SetVolumeLevelMessage {
+  uint32 volume_level = 1;
+}
+message DoorAdjustmentPositionMessage {
+  uint32 door_adjustment_position = 1;
+}
+message BcmKeyIdMessage {
+  uint32 key_id = 1;
+}
+message AdjustAngleMessage {
+  uint32 angle = 1;
+}
+message PositionMessage {
+  uint32 position = 1;
+}
+message VentilationLevelMessage {
+  uint32 ventilation_level = 1;
+}
+message WipingIntervalMessage {
+  uint32 wiping_interval = 1;
+}
+message BCMActuateStatusMessage {
+  BCMActuateStatus actuate_status = 1;
+}
+message BCMAuthStatusMessage {
+  BCMAuthStatus auth_status = 1;
+}
+message BCMKeyContentMessage {
+  uint32 content = 1;
+}
+message AdjustTiltMessage {
+  uint32 tilt = 1;
+}
+message AdjustHeightMessage {
+  uint32 height = 1;
+}
+message BCMLockStatusWindowMessage {
+  BCMLockStatusWindow window_lock_status = 1;
+}
+message BCMKeyLocationMessage {
+  BCMKeyLocation key_location = 1;
+}
+message BCMShadeTypeMessage {
+  BCMShadeType shade_type = 1;
+}
+message BCMWipingLevelMessage {
+  BCMWipingLevelMessage wiping_level = 1;
+}
+message BCMLightStatusMessage {
+  BCMLightStatus light_status = 1;
+}
+message BCMSteerLightIdMessage {
+  BCMSteerLightId steer_light_id = 1;
+}
+message BCMFogLightIdMessage {
+  BCMFogLightId fog_light_id = 1;
+}
+message BCMBrightnessMessage {
+  uint32 brightness = 1;
+}
+message BCMFlashModeMessage {
+  uint32 on_duration = 1;
+  uint32 off_duration = 2;
+}
+
+message Empty {}
