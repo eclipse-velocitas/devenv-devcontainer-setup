@@ -70,6 +70,27 @@ For generating both:
 }
 ```
 
+For generating from zip:
+
+```json
+{
+    "manifestVersion": "v3",
+    "name": "App",
+    "interfaces": [
+        {
+            "type": "grpc-interface",
+            "config": {
+                "src": "<uri_or_local_file_or_dir_path_to_proto_files>",
+                "protoIncludeDir": "<path_to_imports>",
+                "rootPath": "<set_if_you_want_to_search_a_specific_directory_in_zip>",
+                "required": {},
+                "provided": {},
+            }
+        }
+    ]
+}
+```
+
 ## Usage
 
 ### Client

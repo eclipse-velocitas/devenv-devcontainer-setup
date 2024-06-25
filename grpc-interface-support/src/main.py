@@ -17,7 +17,7 @@ import os
 import shutil
 import zipfile
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 import proto
 from cpp import CppGrpcServiceSdkGeneratorFactory
@@ -49,7 +49,9 @@ def extract_zip(file_path: str, extract_to: str) -> str:
         return extract_to
 
 
-def discover_proto_files_in_directory(directory: str) -> List[proto.ProtoFileHandle]:
+def discover_proto_files_in_directory(
+    directory: str, root: Optional[str] = None
+) -> List[proto.ProtoFileHandle]:
     """
     Recursively search for .proto files under the specified directory.
 
@@ -60,14 +62,18 @@ def discover_proto_files_in_directory(directory: str) -> List[proto.ProtoFileHan
         List[proto.ProtoFileHandle]: A list of file paths, relative to the search directory, each pointing to a proto file.
     """
     proto_files = []
-    for root, _, files in os.walk(directory):
+    if root is not None:
+        directory = os.path.join(directory, root)
+    for begin, _, files in os.walk(directory):
         for file in files:
             if file.endswith(".proto"):
-                proto_files.append(proto.ProtoFileHandle(os.path.join(root, file)))
+                proto_files.append(proto.ProtoFileHandle(os.path.join(begin, file)))
     return proto_files
 
 
-def check_zipfile(file_path: str) -> List[proto.ProtoFileHandle]:
+def check_zipfile(
+    file_path: str, root: Optional[str] = None
+) -> List[proto.ProtoFileHandle]:
     """Check if the file is a .zip file and extracts it.
 
     Args:
@@ -83,18 +89,22 @@ def check_zipfile(file_path: str) -> List[proto.ProtoFileHandle]:
                 os.path.join(
                     get_project_cache_dir(), "downloads", Path(file_path).stem
                 ),
-            )
+            ),
+            root,
         )
     else:
         return [proto.ProtoFileHandle(file_path)]
 
 
-def obtain_proto_files(path: str) -> List[proto.ProtoFileHandle]:
+def obtain_proto_files(
+    path: str, root: Optional[str] = None
+) -> List[proto.ProtoFileHandle]:
     """Fetch the proto files defined in the grpc-interface
     config to the local project cache.
 
     Args:
         path (str): The path/uri to a file to download/an existing one or a directory containing proto files.
+        root (str): directory to search for if path is zip
 
     Returns:
         List[proto.ProtoFileHandle]: A list of proto files.
@@ -107,7 +117,7 @@ def obtain_proto_files(path: str) -> List[proto.ProtoFileHandle]:
         )
     else:
         path = obtain_local_file_path(path)
-        return check_zipfile(path)
+        return check_zipfile(path, root)
 
 
 def create_service_sdk_dir(proto_file_handle: proto.ProtoFileHandle) -> str:
@@ -153,7 +163,8 @@ def generate_services(
         if_config (Dict[str, Any]): The grpc-interface config.
     """
 
-    proto_file_handles = obtain_proto_files(if_config["src"])
+    root = if_config.get("rootPath", None)
+    proto_file_handles = obtain_proto_files(if_config["src"], root)
     is_client = "required" in if_config
     is_server = "provided" in if_config
 
