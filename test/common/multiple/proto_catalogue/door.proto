@@ -4,7 +4,7 @@
 syntax = "proto3";
 package bcm.door.v1;
 
-import "bcm/v1/bcm_types.proto";
+import "bcm_types.proto";
 
 service BCMDoorService {
   /* The door is unlocked. */
