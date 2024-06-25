@@ -19,7 +19,7 @@ from ${{ service_name_lower }}_service_sdk.${{ service_name_lower }}_pb2_grpc im
 from velocitas_sdk.base import Middleware
 
 
-class ${{ service_name_camel_case }}ServiceClientFactory:
+class ${{ service_name }}ServiceClientFactory:
     @staticmethod
     def create(middleware: Middleware) -> ${{ service_name }}Stub:
         address = middleware.service_locator.get_service_location("${{ service_name }}")

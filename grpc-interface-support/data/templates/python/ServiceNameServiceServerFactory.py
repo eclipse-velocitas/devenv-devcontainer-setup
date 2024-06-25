@@ -22,7 +22,7 @@ from velocitas_sdk.base import Middleware
 
 MAX_THREAD_POOL_WORKERS = 10
 
-class ${{ service_name_camel_case }}ServiceServerFactory:
+class ${{ service_name }}ServiceServerFactory:
     @staticmethod
     def create(middleware: Middleware, servicer: ${{ service_name }}Servicer) -> grpc.Server:
         address = middleware.service_locator.get_service_location("${{ service_name }}")
