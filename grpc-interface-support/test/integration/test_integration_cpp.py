@@ -81,8 +81,7 @@ def test__integration():
     assert get_dependency_count("seats-service-sdk") == 1
     assert get_dependency_count("hornservice-service-sdk") == 1
     assert get_dependency_count("val-service-sdk") == 1
-    assert get_dependency_count("collector-service-sdk") == 1
-    assert get_dependency_count("broker-service-sdk") == 1
+    assert get_dependency_count("door-service-sdk") == 1
     assert get_dependency_count("vcsptcpbylimservice-service-sdk") == 1
     assert get_dependency_count("vcsmotortrqmngservice-service-sdk") == 1
     ensure_build_successful()
@@ -95,8 +94,7 @@ def test__integration():
     assert get_dependency_count("seats-service-sdk") == 1
     assert get_dependency_count("hornservice-service-sdk") == 1
     assert get_dependency_count("val-service-sdk") == 1
-    assert get_dependency_count("collector-service-sdk") == 1
-    assert get_dependency_count("broker-service-sdk") == 1
+    assert get_dependency_count("door-service-sdk") == 1
     assert get_dependency_count("vcsptcpbylimservice-service-sdk") == 1
     assert get_dependency_count("vcsmotortrqmngservice-service-sdk") == 1
     ensure_build_successful()
