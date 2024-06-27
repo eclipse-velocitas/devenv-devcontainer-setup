@@ -131,23 +131,22 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
             stdout=subprocess.DEVNULL if not self.__verbose else None,
         )
 
-        some_imports = self.__proto_file_handle.get_imports()
+        imports = self.__proto_file_handle.get_imports()
 
-        if some_imports:
-            for element in some_imports:
-                path = os.path.join(self.__proto_include_path, element)
-                args = [
-                    self.__get_binary_path("protoc"),
-                    f"-I{self.__proto_include_path}",
-                    f"--cpp_out={output_path}",
-                    path,
-                ]
-                subprocess.check_call(
-                    args,
-                    cwd=self.__proto_include_path,
-                    env=os.environ,
-                    stdout=subprocess.DEVNULL if not self.__verbose else None,
-                )
+        for element in imports:
+            path = os.path.join(self.__proto_include_path, element)
+            args = [
+                self.__get_binary_path("protoc"),
+                f"-I{self.__proto_include_path}",
+                f"--cpp_out={output_path}",
+                path,
+            ]
+            subprocess.check_call(
+                args,
+                cwd=self.__proto_include_path,
+                env=os.environ,
+                stdout=subprocess.DEVNULL if not self.__verbose else None,
+            )
 
     def generate_package(self, client_required: bool, server_required: bool) -> None:
         self.__invoke_code_generator(
