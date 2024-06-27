@@ -50,36 +50,36 @@ def extract_zip(file_path: str, extract_to: str) -> str:
 
 
 def discover_proto_files_in_directory(
-    directory: str, root: Optional[str] = None
+    directory: str, path_in_zip: Optional[str] = None
 ) -> List[proto.ProtoFileHandle]:
     """
     Recursively search for .proto files under the specified directory.
 
     Args:
         directory (str): The path to the directory to search in.
-        root (Optional[str]): The optional root for zip directories.
+        path_in_zip (Optional[str]): The optional path_in_zip for zip directories.
 
     Returns:
         List[proto.ProtoFileHandle]: A list of file paths, relative to the search directory, each pointing to a proto file.
     """
     proto_files = []
-    if root is not None:
-        directory = os.path.join(directory, root)
-    for begin, _, files in os.walk(directory):
+    if path_in_zip is not None:
+        directory = os.path.join(directory, path_in_zip)
+    for dir, _, files in os.walk(directory):
         for file in files:
             if file.endswith(".proto"):
-                proto_files.append(proto.ProtoFileHandle(os.path.join(begin, file)))
+                proto_files.append(proto.ProtoFileHandle(os.path.join(dir, file)))
     return proto_files
 
 
 def check_zipfile(
-    file_path: str, root: Optional[str] = None
+    file_path: str, path_in_zip: Optional[str] = None
 ) -> List[proto.ProtoFileHandle]:
     """Check if the file is a .zip file and extracts it.
 
     Args:
         file_path (str): The path to a file.
-        root (Optional[str]): The optional root for zip directories.
+        path_in_zip (Optional[str]): The optional path_in_zip for zip directories.
 
     Returns:
         List[proto.ProtoFileHandle]: A list of proto files.
@@ -92,21 +92,21 @@ def check_zipfile(
                     get_project_cache_dir(), "downloads", Path(file_path).stem
                 ),
             ),
-            root,
+            path_in_zip,
         )
     else:
         return [proto.ProtoFileHandle(file_path)]
 
 
 def obtain_proto_files(
-    path: str, root: Optional[str] = None
+    path: str, path_in_zip: Optional[str] = None
 ) -> List[proto.ProtoFileHandle]:
     """Fetch the proto files defined in the grpc-interface
     config to the local project cache.
 
     Args:
         path (str): The path/uri to a file to download/an existing one or a directory containing proto files.
-        root (Optional[str]): directory to search for if path is zip
+        path_in_zip (Optional[str]): directory to search for if path is zip
 
     Returns:
         List[proto.ProtoFileHandle]: A list of proto files.
@@ -119,7 +119,7 @@ def obtain_proto_files(
         )
     else:
         path = obtain_local_file_path(path)
-        return check_zipfile(path, root)
+        return check_zipfile(path, path_in_zip)
 
 
 def create_service_sdk_dir(proto_file_handle: proto.ProtoFileHandle) -> str:
@@ -144,6 +144,16 @@ def create_service_sdk_dir(proto_file_handle: proto.ProtoFileHandle) -> str:
 
 
 def get_proto_include_dir(path: str) -> str:
+    """Get the absolute path to the proto include directory.
+
+    Args:
+        path (str): The path to check.
+    Raises:
+        FileNotFoundError: In case the specified directory does not exist
+
+    Returns:
+        str: The absolute path to the proto include directory.
+    """
     if os.path.isdir(path):
         return path
     elif os.path.isdir(os.path.join(get_workspace_dir(), path)):
@@ -157,7 +167,7 @@ def get_proto_include_dir(path: str) -> str:
 def generate_services(
     factory: GrpcServiceSdkGeneratorFactory, if_config: Dict[str, Any]
 ) -> None:
-    """Generate an SDK for service(s).
+    """Generate SDKs for the services defined in the AppManifest..
 
     Args:
         factory (GrpcPackageGeneratorFactory):
@@ -165,8 +175,8 @@ def generate_services(
         if_config (Dict[str, Any]): The grpc-interface config.
     """
 
-    root = if_config.get("rootPath", None)
-    proto_file_handles = obtain_proto_files(if_config["src"], root)
+    path_in_zip = if_config.get("pathInZip", None)
+    proto_file_handles = obtain_proto_files(if_config["src"], path_in_zip)
     is_client = "required" in if_config
     is_server = "provided" in if_config
 

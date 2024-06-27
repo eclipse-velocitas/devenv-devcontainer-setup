@@ -52,9 +52,7 @@ class ProtoFileHandle:
         """
         service_name = None
         with open(self.file_path, "r") as file:
-            data = file.read()
-
-        parsed_data = Parser().parse(data)
+            parsed_data = Parser().parse(file.read())
 
         for element in parsed_data.file_elements:
             if isinstance(element, ast.Service):
@@ -73,9 +71,7 @@ class ProtoFileHandle:
         """
         imports = []
         with open(self.file_path, "r") as file:
-            data = file.read()
-
-        parsed_data = Parser().parse(data)
+            parsed_data = Parser().parse(file.read())
 
         for element in parsed_data.file_elements:
             if isinstance(element, ast.Import):
