@@ -24,7 +24,7 @@ For generating a client SDK:
         {
             "type": "grpc-interface",
             "config": {
-                "src": "<uri_or_local_file_or_dir_path_to_proto_files>",
+                "src": "<examples: /home/user/proto_dir; /home/user/proto_file.proto; proto/; proto/proto_file.proto; https://github.com/project/release.zip; https://github.com/project/raw/proto_file.proto;>",
                 "protoIncludeDir": "<path_to_imports>",
                 "required": {},
             }
