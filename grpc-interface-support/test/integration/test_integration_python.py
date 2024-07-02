@@ -113,12 +113,14 @@ def test_pip_package_is_usable():
     assert server is not None
 
     print("============= BUILDING LOCAL HORN SERVICE ===================")
-    from horn_service_sdk.horn_pb2_grpcs import HornServicer
-    from seats_service_sdk.SeatsServiceServerFactory import SeatsServiceServerFactory
+    from hornservice_service_sdk.horn_pb2_grpc import HornServiceServicer
+    from hornservice_service_sdk.HornServiceServiceServerFactory import (
+        HornServiceServiceServerFactory,
+    )
 
-    servicer_horn = HornServicer()
+    servicer_horn = HornServiceServicer()
 
-    server_horn = SeatsServiceServerFactory.create(
+    server_horn = HornServiceServiceServerFactory.create(
         middleware,
         servicer_horn,
     )

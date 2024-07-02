@@ -258,7 +258,7 @@ class PythonGrpcInterfaceGenerator(GrpcServiceSdkGenerator):  # type: ignore
             "service_name": f"{self.__service_name}",
             "service_name_parent_postfix": "ServiceStub",
             "service_name_lower": self.__service_name_lower,
-            "service_name_postfix": "",
+            "service_name_postfix": "Service",
         }
 
     def __install_module(self) -> None:
