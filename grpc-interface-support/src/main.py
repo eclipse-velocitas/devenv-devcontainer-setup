@@ -32,6 +32,7 @@ from velocitas_lib import (
 from velocitas_lib.functional_interface import get_interfaces_for_type
 
 DEPENDENCY_TYPE_KEY = "grpc-interface"
+ARCHIVE_PATH = None
 
 
 def extract_zip(file_path: str, extract_to: str) -> str:
@@ -49,23 +50,23 @@ def extract_zip(file_path: str, extract_to: str) -> str:
         return extract_to
 
 
-def discover_proto_files_in_directory(
-    directory: str, path_in_zip: Optional[str] = None
+def discover_proto_files_in_filetree(
+    tree_root: str, path_in_zip: Optional[str] = None
 ) -> List[proto.ProtoFileHandle]:
     """
-    Recursively search for .proto files under the specified directory.
+    Recursively search for .proto files under the specified tree root.
 
     Args:
-        directory (str): The path to the directory to search in.
+        tree_root (str): The path to the tree root to search from.
         path_in_zip (Optional[str]): The optional path_in_zip for zip directories.
 
     Returns:
-        List[proto.ProtoFileHandle]: A list of file paths, relative to the search directory, each pointing to a proto file.
+        List[proto.ProtoFileHandle]: A list of file paths, relative to the search tree root, each pointing to a proto file.
     """
     proto_files = []
-    if path_in_zip is not None:
-        directory = os.path.join(directory, path_in_zip)
-    for dir, _, files in os.walk(directory):
+    if path_in_zip and ARCHIVE_PATH is not None:
+        tree_root = os.path.join(ARCHIVE_PATH, path_in_zip)
+    for dir, _, files in os.walk(tree_root):
         for file in files:
             if file.endswith(".proto"):
                 proto_files.append(proto.ProtoFileHandle(os.path.join(dir, file)))
@@ -85,12 +86,13 @@ def check_zipfile(
         List[proto.ProtoFileHandle]: A list of proto files.
     """
     if zipfile.is_zipfile(file_path):
-        return discover_proto_files_in_directory(
+        ARCHIVE_PATH = os.path.join(
+            get_project_cache_dir(), "downloads", Path(file_path).stem
+        )
+        return discover_proto_files_in_filetree(
             extract_zip(
                 file_path,
-                os.path.join(
-                    get_project_cache_dir(), "downloads", Path(file_path).stem
-                ),
+                os.path.join(ARCHIVE_PATH),
             ),
             path_in_zip,
         )
@@ -112,11 +114,9 @@ def obtain_proto_files(
         List[proto.ProtoFileHandle]: A list of proto files.
     """
     if os.path.isdir(path):
-        return discover_proto_files_in_directory(path)
+        return discover_proto_files_in_filetree(path)
     elif os.path.isdir(os.path.join(get_workspace_dir(), path)):
-        return discover_proto_files_in_directory(
-            os.path.join(get_workspace_dir(), path)
-        )
+        return discover_proto_files_in_filetree(os.path.join(get_workspace_dir(), path))
     else:
         path = obtain_local_file_path(path)
         return check_zipfile(path, path_in_zip)
@@ -158,8 +158,9 @@ def get_proto_include_dir(path: str) -> str:
         return path
     elif os.path.isdir(os.path.join(get_workspace_dir(), path)):
         return os.path.join(get_workspace_dir(), path)
-    elif os.path.isdir(os.path.join(get_project_cache_dir(), "downloads", path)):
-        return os.path.join(get_project_cache_dir(), "downloads", path)
+    elif ARCHIVE_PATH is not None:
+        if os.path.isdir(os.path.join(ARCHIVE_PATH, path)):
+            return os.path.join(ARCHIVE_PATH, path)
     else:
         raise FileNotFoundError(f"Directory {path} not found!")
 
