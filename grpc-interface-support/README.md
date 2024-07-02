@@ -15,41 +15,17 @@ velocitas exec grpc-interface-support generate-sdk
 
 Depending on the interfaces defined in the `AppManifest` file, either classes and SDKs for client, server or both are generated.
 
-For generating a client SDK:
-```json
-{
-    "manifestVersion": "v3",
-    "name": "App",
-    "interfaces": [
-        {
-            "type": "grpc-interface",
-            "config": {
-                "src": "<uri_to_proto_file>",
-                "required": {},
-            }
-        }
-    ]
-}
-```
 
-For generating a server SDK:
-```json
-{
-    "manifestVersion": "v3",
-    "name": "App",
-    "interfaces": [
-        {
-            "type": "grpc-interface",
-            "config": {
-                "src": "<uri_to_proto_file>",
-                "provided": {},
-            }
-        }
-    ]
-}
-```
+| Example                          | src                                                               | required          | provided         | protoIncludeDir | pathInZip        |
+| -------------------------------- | ----------------------------------------------------------------- | ----------------- | ---------------- | --------------- | ---------------- |
+| client SDK                       | /home/user/proto_file.proto                                       | client_function() | not defined      | path_to_imports | undefined        |
+| server SDK                       | /home/user/proto_file.proto                                       | not defined       | {}               | path_to_imports | undefined        |
+| local proto file (absolute path) | /home/user/proto_file.proto                                       | see sdk examples  | see sdk examples | path_to_imports | undefined        |
+| local proto file (relative path) | proto_file.proto (located under workspace of template repository) | see sdk examples  | see sdk examples | path_to_imports | undefined        |
+| archive                          | https://github.com/project/release.zip                            | see sdk examples  | see sdk examples | path_to_imports | rel_path_archive |
+| downloadable file (raw not blob) | https://github.com/project/raw/proto_file.proto                   |see sdk examples  | see sdk examples | path_to_imports | undefined        |
 
-For generating both:
+Example json:
 ```json
 {
     "manifestVersion": "v3",
@@ -58,7 +34,8 @@ For generating both:
         {
             "type": "grpc-interface",
             "config": {
-                "src": "<uri_to_proto_file>",
+                "src": "home/user/proto_file.proto",
+                "protoIncludeDir": "<path_to_imports>",
                 "required": {},
                 "provided": {},
             }

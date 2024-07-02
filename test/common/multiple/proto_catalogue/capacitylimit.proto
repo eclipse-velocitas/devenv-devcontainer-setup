@@ -1,0 +1,59 @@
+/*
+ * Software-defined automotive service APIs
+ * API Version 1
+ * Part one: Atomic Services API reference
+ * (Motion Control)
+ * 2021-10-15 released
+ * Software-defined automotive workgroup
+ * China Automobile Industry Association
+ * SDV/T 001-2021
+ */
+syntax = "proto3";
+package vcs.powertrain.v1;
+
+import "vcs_types.proto";
+
+/*
+ * Enables power battery power calculation, high voltage accessories (except motor systems, high voltage components of power battery systems including: DCDC, TMS, etc.) instantaneous power calculation, and power system permissible discharge power calculation. The power system uses the allowable charge power calculation, and the permissible power limit calculation function is based on the complete vehicle fault condition.
+ */
+service VCSPtCpbyLimService {
+  /* Escalate the powertrain power limit status. */
+  rpc NtfPtPwrLim(NtfPtPwrLimRequest) returns (NtfPtPwrLimResponse);
+}
+
+message NtfPtPwrLimRequest {}
+message NtfPtPwrLimResponse {
+  /* Powertrain power limitation  */
+  VCSPtPweLim value = 1;
+}
+
+/* Vehicle power system capacity limitation services are widely available.
+   Typedef struct {
+   Sint32 ptDchaPwrShoLim;
+   Sint32 ptChrgPwrShoLim;
+   Sint32 ptDchaPwrLongLime;
+   Sint32 ptChrgPwrLongLim;
+   Sint32 ptDchaPwrConnsLim;
+   Sint32 ptChrgPwrConnsLim;
+   } VCS PtPwrLim;
+
+*/
+message VCSPtPweLim {
+  /* Power limit for short-term discharge of the powertrain in W */
+  int32 pt_dcha_pwr_sho_lim = 1;
+
+  /* Powertrain short charge power limit in W.  */
+  int32 pt_chrg_pwr_sho_lim = 2;
+
+  /* Power limit for long-term discharge of the powertrain in W. */
+  int32 pt_dcha_pwr_long_lim = 3;
+
+  /* Powertrain long-term charge power limit in W.  */
+  int32 pt_chrg_pwr_long_lim = 4;
+
+  /* Power limit for continuous discharge of the powertrain in W */
+  int32 pt_dcha_pwr_conns_lim = 5;
+
+  /* Power limit for continuous charge of the powertrain in W */
+  int32 pt_chrg_pwr_conns_lim = 6;
+}

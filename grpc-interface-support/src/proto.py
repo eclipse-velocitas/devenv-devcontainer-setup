@@ -12,6 +12,10 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+from typing import List
+
+from proto_schema_parser.parser import Parser, ast
+
 
 class ProtoFileHandle:
     def __init__(self, file_path: str):
@@ -47,12 +51,30 @@ class ProtoFileHandle:
             str: The name of the service.
         """
         service_name = None
-        with open(self.file_path, encoding="utf-8") as file:
-            for line in file:
-                if line.startswith("service"):
-                    service_name = line.split(" ")[1].strip()
+        with open(self.file_path, "r") as file:
+            parsed_data = Parser().parse(file.read())
+
+        for element in parsed_data.file_elements:
+            if isinstance(element, ast.Service):
+                service_name = str(element.name)
 
         if service_name is None:
             raise RuntimeError("No service name found in proto file!")
 
         return service_name
+
+    def get_imports(self) -> List[str]:
+        """Get the name of the service.
+
+        Returns:
+            List[str]: The names to the imports
+        """
+        imports = []
+        with open(self.file_path, "r") as file:
+            parsed_data = Parser().parse(file.read())
+
+        for element in parsed_data.file_elements:
+            if isinstance(element, ast.Import):
+                imports.append(str(element.name))
+
+        return imports
