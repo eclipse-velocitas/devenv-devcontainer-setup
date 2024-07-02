@@ -112,6 +112,19 @@ def test_pip_package_is_usable():
 
     assert server is not None
 
+    print("============= BUILDING LOCAL HORN SERVICE ===================")
+    from horn_service_sdk.horn_pb2_grpcs import HornServicer
+    from seats_service_sdk.SeatsServiceServerFactory import SeatsServiceServerFactory
+
+    servicer_horn = HornServicer()
+
+    server_horn = SeatsServiceServerFactory.create(
+        middleware,
+        servicer_horn,
+    )
+
+    assert server_horn is not None
+
     print("============= BUILDING CLIENT ===================")
     os.chdir(os.environ["SERVICE_CLIENT_ROOT"])
     assert subprocess.check_call(["velocitas", "init", "-v"]) == 0

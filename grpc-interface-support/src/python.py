@@ -245,20 +245,20 @@ class PythonGrpcInterfaceGenerator(GrpcServiceSdkGenerator):  # type: ignore
 
     def __create_stub_template_variables(self) -> Dict[str, str]:
         return {
+            "imports": f"import grpc{os.linesep}from {self.__service_name_lower}_service_sdk.{self.__service_name_lower}_pb2_grpc import {self.__service_name}Servicer",
             "service_name": self.__service_name,
             "service_name_parent_postfix": "Servicer",
             "service_name_lower": self.__service_name_lower,
-            "service_name_postfix": "Stub",
-            "package_id": f"{self.__service_name_lower}_service_sdk.{self.__service_name_lower}_pb2_grpc",
+            "service_name_postfix": "ServiceStub",
         }
 
     def __create_service_template_variables(self) -> Dict[str, str]:
         return {
-            "service_name": f"{self.__service_name}ServiceStub",
-            "service_name_parent_postfix": "",
+            "imports": f"from {self.__service_name}ServiceStub import {self.__service_name}ServiceStub",
+            "service_name": f"{self.__service_name}",
+            "service_name_parent_postfix": "ServiceStub",
             "service_name_lower": self.__service_name_lower,
             "service_name_postfix": "",
-            "package_id": f"{self.__service_name}ServiceStub",
         }
 
     def __install_module(self) -> None:
