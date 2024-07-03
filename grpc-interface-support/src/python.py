@@ -55,6 +55,9 @@ class GrpcCodeExtractor:
     Provides methods for extracting code from generated gRPC python files.
     """
 
+    file_name: str
+    file_name_prefix: str
+
     def __init__(
         self, proto_file: ProtoFileHandle, base_path: str, source_path: str = "."
     ):
@@ -62,10 +65,13 @@ class GrpcCodeExtractor:
         self.__base_path = base_path
         self.__source_path = source_path
 
+        file_prefix = Path(self.__proto_file.file_path).stem
+        self.file_name_prefix = f"{file_prefix}_pb2_grpc"
+        self.file_name = f"{file_prefix}_pb2_grpc.py"
         self.grpc_source_path = os.path.join(
             self.__base_path,
             self.__source_path,
-            f"{self.__proto_file.get_service_name().lower()}_pb2_grpc.py",
+            f"{self.file_name}",
         )
 
     def create_source_stub_code(self) -> List[str]:
@@ -132,14 +138,15 @@ class PythonGrpcInterfaceGenerator(GrpcServiceSdkGenerator):  # type: ignore
         generated_sources = glob.glob(
             os.path.join(self.__package_directory_path, "*.py*")
         )
-        file_prefix = Path(self.__proto_file_handle.file_path).stem
+        grpc_file_name = self.__service_grpc_code_extractor.file_name
+        proto_file_prefix = Path(self.__proto_file_handle.file_path).stem
         replace_text_in_file(
             os.path.join(
                 self.__package_directory_path,
-                f"{file_prefix}_pb2_grpc.py",
+                f"{grpc_file_name}",
             ),
-            f"import {file_prefix}_pb2 as {file_prefix}__pb2",
-            f"import {module_name}.{file_prefix}_pb2 as {file_prefix}__pb2",
+            f"import {proto_file_prefix}_pb2 as {proto_file_prefix}__pb2",
+            f"import {module_name}.{proto_file_prefix}_pb2 as {proto_file_prefix}__pb2",
         )
 
         for file in generated_sources:
@@ -176,6 +183,7 @@ class PythonGrpcInterfaceGenerator(GrpcServiceSdkGenerator):  # type: ignore
         variables = {
             "service_name": self.__service_name,
             "service_name_lower": self.__service_name_lower,
+            "grpc_file_name_prefix": self.__service_grpc_code_extractor.file_name_prefix,
             "core_sdk_version": get_required_sdk_version_python(),
         }
 
@@ -244,11 +252,11 @@ class PythonGrpcInterfaceGenerator(GrpcServiceSdkGenerator):  # type: ignore
         return source_content
 
     def __create_stub_template_variables(self) -> Dict[str, str]:
+        proto_file_prefix = self.__service_grpc_code_extractor.file_name_prefix
         return {
-            "imports": f"import grpc{os.linesep}from {self.__service_name_lower}_service_sdk.{self.__service_name_lower}_pb2_grpc import {self.__service_name}Servicer",
+            "imports": f"import grpc{os.linesep}from {self.__service_name_lower}_service_sdk.{proto_file_prefix} import {self.__service_name}Servicer",
             "service_name": self.__service_name,
             "service_name_parent_postfix": "Servicer",
-            "service_name_lower": self.__service_name_lower,
             "service_name_postfix": "ServiceStub",
         }
 
@@ -257,8 +265,7 @@ class PythonGrpcInterfaceGenerator(GrpcServiceSdkGenerator):  # type: ignore
             "imports": f"from {self.__service_name}ServiceStub import {self.__service_name}ServiceStub",
             "service_name": f"{self.__service_name}",
             "service_name_parent_postfix": "ServiceStub",
-            "service_name_lower": self.__service_name_lower,
-            "service_name_postfix": "Service",
+            "service_name_postfix": "",
         }
 
     def __install_module(self) -> None:

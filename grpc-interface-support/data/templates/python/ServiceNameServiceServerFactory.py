@@ -15,7 +15,7 @@
 import grpc
 import concurrent.futures
 
-from ${{ service_name_lower }}_service_sdk.${{ service_name_lower }}_pb2_grpc import (
+from ${{ service_name_lower }}_service_sdk.${{ grpc_file_name_prefix }} import (
     ${{ service_name }}Servicer, add_${{ service_name }}Servicer_to_server
 )
 from velocitas_sdk.base import Middleware

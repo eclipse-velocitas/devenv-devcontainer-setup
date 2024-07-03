@@ -30,12 +30,12 @@ def pytest_sessionstart(session):
     shutil.copytree(os.environ["VELOCITAS_TEST_ROOT"], server_path)
 
     shutil.copytree(
-        f"test/{os.environ['VELOCITAS_TEST_LANGUAGE']}/app_seat_service_client",
+        f"test/{os.environ['VELOCITAS_TEST_LANGUAGE']}/service_client",
         client_path,
         dirs_exist_ok=True,
     )
     shutil.copytree(
-        f"test/{os.environ['VELOCITAS_TEST_LANGUAGE']}/app_seat_service_server",
+        f"test/{os.environ['VELOCITAS_TEST_LANGUAGE']}/service_server",
         server_path,
         dirs_exist_ok=True,
     )

@@ -13,7 +13,7 @@
             "type": "grpc-interface",
             "config": {
                 "src": "bcm/horn/v1/horn.proto",
-                "required": { }
+                "provided": { }
             }
         }
     ]

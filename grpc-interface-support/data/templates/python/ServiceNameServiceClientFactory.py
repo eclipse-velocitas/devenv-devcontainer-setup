@@ -13,7 +13,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import grpc
-from ${{ service_name_lower }}_service_sdk.${{ service_name_lower }}_pb2_grpc import (
+from ${{ service_name_lower }}_service_sdk.${{ grpc_file_name_prefix }} import (
     ${{ service_name }}Stub,
 )
 from velocitas_sdk.base import Middleware
