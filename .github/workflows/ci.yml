@@ -152,6 +152,8 @@ jobs:
           export PACKAGE_PATH=~/.velocitas/packages/package_under_test/@main
           mkdir -p $PACKAGE_PATH
           cp -r * $PACKAGE_PATH
+          whoami
+          echo $PACKAGE_PATH
           ls -al $PACKAGE_PATH
 
       - name: Run integration tests
