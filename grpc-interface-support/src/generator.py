@@ -56,7 +56,10 @@ class GrpcServiceSdkGeneratorFactory(ABC):
 
     @abstractmethod
     def create_service_generator(
-        self, output_path: str, proto_file_handle: proto.ProtoFileHandle
+        self,
+        output_path: str,
+        proto_file_handle: proto.ProtoFileHandle,
+        proto_include_path: str,
     ) -> GrpcServiceSdkGenerator:
         """Create a new service SDK generator for a specific service.
 

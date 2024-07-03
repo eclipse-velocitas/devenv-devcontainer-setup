@@ -1,0 +1,22 @@
+syntax = "proto3";
+package bcm.horn.v1;
+
+service HornService {
+  rpc Stop(StopRequest) returns (StopResponse);
+  rpc Start(StartRequest) returns (StartResponse);
+  rpc SetVolumeLevel(SetVolumeLevelRequest) returns (SetVolumeLevelResponse);
+  rpc IsRunning(IsRunningRequest) returns (IsRunningResponse);
+  rpc GetVolume(GetVolumeRequest) returns (GetVolumeResponse);
+}
+
+message StopRequest {}
+message StartRequest {}
+message SetVolumeLevelRequest {}
+message IsRunningRequest {}
+message GetVolumeRequest {}
+
+message StopResponse {}
+message StartResponse {}
+message SetVolumeLevelResponse {}
+message IsRunningResponse {}
+message GetVolumeResponse {}

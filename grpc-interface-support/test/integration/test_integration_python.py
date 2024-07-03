@@ -13,10 +13,25 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import os
+import shutil
 import subprocess
 from typing import List, Optional
 
 import pytest
+
+
+@pytest.fixture(autouse=True)
+def clean_velocitas_download_directory():
+    # return early if project directory does not yet exist
+    if not os.path.isdir(
+        os.path.join(os.path.expanduser("~"), ".velocitas", "projects")
+    ):
+        return
+
+    shutil.rmtree(
+        os.path.join(get_project_cache_dir(), "downloads"), ignore_errors=True
+    )
+
 
 if not os.environ["VELOCITAS_TEST_LANGUAGE"] == "python":
     pytest.skip("skipping Python only tests", allow_module_level=True)
@@ -35,15 +50,19 @@ def test_python_package_is_generated():
     os.chdir(os.environ["SERVICE_CLIENT_ROOT"])
     assert subprocess.check_call(["velocitas", "init", "-v"]) == 0
 
-    service_path = os.path.join(get_project_cache_dir(), "services", "seats")
+    assert_python_package_generated("seats")
+
+
+def assert_python_package_generated(service_name: str):
+    service_path = os.path.join(get_project_cache_dir(), "services", service_name)
     assert os.path.isdir(service_path)
     assert os.path.isfile(os.path.join(service_path, "pyproject.toml"))
 
-    source_path = os.path.join(service_path, "seats_service_sdk")
+    source_path = os.path.join(service_path, f"{service_name}_service_sdk")
     assert os.path.isdir(source_path)
-    assert os.path.isfile(os.path.join(source_path, "seats_pb2_grpc.py"))
-    assert os.path.isfile(os.path.join(source_path, "seats_pb2.py"))
-    assert os.path.isfile(os.path.join(source_path, "seats_pb2.pyi"))
+    assert os.path.isfile(os.path.join(source_path, f"{service_name}_pb2_grpc.py"))
+    assert os.path.isfile(os.path.join(source_path, f"{service_name}_pb2.py"))
+    assert os.path.isfile(os.path.join(source_path, f"{service_name}_pb2.pyi"))
 
 
 def test_pip_package_is_usable():
