@@ -2,18 +2,19 @@
     "components": [
         {
             "id": "devcontainer-setup",
-            "type": "setup",
+            "description": "Basic setup of the devContainer for VApp development.",
+            "basePath": "setup",
             "files": [
                 {
-                    "src": "setup/src/common",
+                    "src": "src/common",
                     "dst": ".devcontainer"
                 },
                 {
-                    "src": "setup/src/${{ language }}/common",
+                    "src": "src/${{ language }}/common",
                     "dst": ".devcontainer"
                 },
                 {
-                    "src": "setup/src/${{ language }}/${{ repoType }}",
+                    "src": "src/${{ language }}/${{ repoType }}",
                     "dst": ".devcontainer"
                 }
             ],
@@ -52,7 +53,8 @@
         },
         {
             "id": "vehicle-signal-interface",
-            "type": "setup",
+            "description": "Generates a VSS based API for interfacing with KUKSA Databroker.",
+            "basePath": "./vehicle-model-lifecycle",
             "onPostInit": [
                 {
                     "ref": "install-deps"
@@ -69,21 +71,21 @@
                     "id": "install-deps",
                     "executable": "python",
                     "args": [
-                        "./vehicle-model-lifecycle/src/install_deps.py"
+                        "./src/install_deps.py"
                     ]
                 },
                 {
                     "id": "download-vspec",
                     "executable": "python",
                     "args": [
-                        "./vehicle-model-lifecycle/src/download_vspec.py"
+                        "./src/download_vspec.py"
                     ]
                 },
                 {
                     "id": "generate-model",
                     "executable": "python",
                     "args": [
-                        "./vehicle-model-lifecycle/src/generate_model.py"
+                        "./src/generate_model.py"
                     ]
                 }
             ],
@@ -113,12 +115,13 @@
         {
             "id": "conan-setup",
             "description": "Sets up the conan client to connect to different remotes with credentials.",
+            "basePath": "./conan-setup",
             "programs": [
                 {
                     "id": "run",
                     "executable": "python3",
                     "args": [
-                        "./conan-setup/src/run.py"
+                        "./src/run.py"
                     ]
                 }
             ],
@@ -130,7 +133,7 @@
         },
         {
             "id": "sdk-installer",
-            "type": "setup",
+            "basePath": "sdk-installer",
             "onPostInit": [
                 {
                     "ref": "install-deps"
@@ -148,14 +151,14 @@
                         "pip",
                         "install",
                         "-r",
-                        "./sdk-installer/requirements.txt"
+                        "./requirements.txt"
                     ]
                 },
                 {
                     "id": "run",
                     "executable": "python",
                     "args": [
-                        "./sdk-installer/src/run.py"
+                        "./src/run.py"
                     ]
                 }
             ],
@@ -200,7 +203,7 @@
         },
         {
             "id": "grpc-interface-support",
-            "type": "setup",
+            "basePath": "grpc-interface-support",
             "onPostInit": [
                 {
                     "ref": "install-deps"
@@ -218,7 +221,7 @@
                         "pip",
                         "install",
                         "-r",
-                        "./grpc-interface-support/requirements.txt"
+                        "./requirements.txt"
                     ]
                 },
                 {
@@ -226,21 +229,21 @@
                     "description": "Generates service client SDKs to be used in business logic.",
                     "executable": "python",
                     "args": [
-                        "./grpc-interface-support/src/main.py"
+                        "./src/main.py"
                     ]
                 }
             ]
         },
         {
             "id": "build-system",
-            "type": "setup",
+            "basePath": "build-system",
             "programs": [
                 {
                     "id": "install",
                     "description": "Installs all necessary dependencies / packages for the application",
                     "executable": "python",
                     "args": [
-                        "./build-system/cpp-cmake-conan/src/install_deps.py"
+                        "./cpp-cmake-conan/src/install_deps.py"
                     ]
                 },
                 {
@@ -248,13 +251,13 @@
                     "description": "Builds the application",
                     "executable": "python",
                     "args": [
-                        "./build-system/cpp-cmake-conan/src/build.py"
+                        "./cpp-cmake-conan/src/build.py"
                     ]
                 }
             ],
             "files": [
                 {
-                    "src": "build-system/cpp-cmake-conan/src",
+                    "src": "./cpp-cmake-conan/src",
                     "dst": ".",
                     "condition": "'${{ language }}' === 'cpp'"
                 }
