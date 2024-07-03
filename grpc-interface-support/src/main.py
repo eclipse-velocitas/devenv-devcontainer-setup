@@ -33,6 +33,7 @@ from velocitas_lib.functional_interface import get_interfaces_for_type
 
 DEPENDENCY_TYPE_KEY = "grpc-interface"
 ARCHIVE_PATH = None
+DOWNLOAD_PATH = os.path.join(get_project_cache_dir(), "downloads")
 
 
 def extract_zip(file_path: str, extract_to: str) -> str:
@@ -43,10 +44,16 @@ def extract_zip(file_path: str, extract_to: str) -> str:
         extract_to (str): The file path to extract to.
 
     Returns:
-        str: The file path to the extracted folder.
+        str: The file path to the extracted top level folder.
     """
     with zipfile.ZipFile(file_path, "r") as zip_ref:
         zip_ref.extractall(extract_to)
+
+    extracted_items = zip_ref.namelist()
+    if len(extracted_items) > 0:
+        top_level_folder = os.path.commonprefix(extracted_items).split("/")[0]
+        return os.path.join(extract_to, top_level_folder)
+    else:
         return extract_to
 
 
@@ -86,13 +93,10 @@ def check_zipfile(
         List[proto.ProtoFileHandle]: A list of proto files.
     """
     if zipfile.is_zipfile(file_path):
-        ARCHIVE_PATH = os.path.join(
-            get_project_cache_dir(), "downloads", Path(file_path).stem
-        )
         return discover_proto_files_in_filetree(
             extract_zip(
                 file_path,
-                os.path.join(ARCHIVE_PATH),
+                DOWNLOAD_PATH,
             ),
             path_in_zip,
         )
