@@ -20,8 +20,8 @@
             "type": "grpc-interface",
             "config": {
               "src": "https://github.com/eclipse-kuksa/kuksa-databroker/archive/refs/tags/0.4.5.zip",
-              "pathInZip": "proto/kuksa",
-              "protoIncludeDir": "proto",
+              "pathInZip": "kuksa-databroker-0.4.5/proto/kuksa",
+              "protoIncludeDir": "kuksa-databroker-0.4.5/proto",
               "provided": {}
             }
         },
