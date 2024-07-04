@@ -139,9 +139,11 @@ def generate_services(
 
     path_in_zip = if_config.get("pathInZip", None)
     path = if_config["src"]
-    if os.path.isabs(path):
+    proto_files = list()
+
+    if os.path.isdir(path):
         pass
-    elif os.path.isabs(os.path.join(get_workspace_dir(), path)):
+    elif os.path.isdir(os.path.join(get_workspace_dir(), path)):
         path = os.path.join(get_workspace_dir(), path)
     else:
         path = obtain_local_file_path(path)
@@ -149,7 +151,11 @@ def generate_services(
             path = extract_zip(path, DOWNLOAD_PATH)
             if path_in_zip is not None:
                 path = os.path.join(path, path_in_zip)
-    proto_files = discover_service_proto_files_in_filetree(path)
+        else:
+            proto_files.append(path)
+
+    proto_service_files = discover_service_proto_files_in_filetree(path)
+    proto_files.append(proto_service_files) if proto_service_files else None
 
     is_client = "required" in if_config
     is_server = "provided" in if_config
@@ -168,7 +174,7 @@ def generate_services(
             )
         except RuntimeError:
             skipped_files += 1
-            # skip a file with no service definition, can be an imported file
+
     if skipped_files == len(proto_files):
         raise RuntimeError("No services defined!")
 
