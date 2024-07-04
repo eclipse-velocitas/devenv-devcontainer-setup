@@ -139,7 +139,7 @@ def generate_services(
 
     path_in_zip = if_config.get("pathInZip", None)
     path = if_config["src"]
-    proto_files = list()
+    proto_files = []
 
     if os.path.isdir(path):
         pass
@@ -155,7 +155,7 @@ def generate_services(
             proto_files.append(path)
 
     proto_service_files = discover_service_proto_files_in_filetree(path)
-    proto_files.append(proto_service_files) if proto_service_files else None
+    proto_files.extend(proto_service_files) if proto_service_files else None
 
     is_client = "required" in if_config
     is_server = "provided" in if_config
