@@ -139,7 +139,7 @@ def test_pip_package_is_usable():
     assert client_seats is not None
 
     print("============= TEST HORN Service CLIENT ===================")
-    from seats_service_sdk.HornServiceServiceClientFactory import (
+    from hornservice_service_sdk.HornServiceServiceClientFactory import (
         HornServiceServiceClientFactory,
     )
 
