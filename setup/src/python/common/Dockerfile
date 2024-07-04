@@ -12,7 +12,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-FROM ${{ devContainerBaseImageUriPrefix }}/python:${{ devContainerBaseImageTag }}
+FROM ${{ devContainerBaseImageUri }}
 
 ENV DOCKER_BUILDKIT=1
 

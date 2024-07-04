@@ -20,12 +20,6 @@
             ],
             "variables": [
                 {
-                    "name": "language",
-                    "type": "string",
-                    "required": true,
-                    "description": "The programming language of the project. Either 'python' or 'cpp'"
-                },
-                {
                     "name": "repoType",
                     "type": "string",
                     "required": true,
@@ -38,16 +32,16 @@
                     "description": "Path of the AppManifest file, relative to the .velocitas.json"
                 },
                 {
-                    "name": "devContainerBaseImageUriPrefix",
+                    "name": "devContainerBaseImageUri",
                     "type": "string",
-                    "default": "ghcr.io/eclipse-velocitas/devcontainer-base-images",
-                    "description": "The prefix URI of the devContainer base image to use."
+                    "default": "ghcr.io/eclipse-velocitas/devcontainer-base-images/${{ language }}:v0.3",
+                    "description": "The URI of the devContainer base image to use."
                 },
                 {
-                    "name": "devContainerBaseImageTag",
+                    "name": "language",
                     "type": "string",
-                    "default": "v0.3",
-                    "description": "The tag of the devContainer base image to use."
+                    "required": true,
+                    "description": "The programming language of the project. Either 'python' or 'cpp'"
                 }
             ]
         },

@@ -12,7 +12,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-FROM ${{ devContainerBaseImageUriPrefix }}/cpp:${{ devContainerBaseImageTag }}
+FROM ${{ devContainerBaseImageUri }}
 
 ARG REINSTALL_CMAKE_VERSION_FROM_SOURCE
 ENV REINSTALL_CMAKE_VERSION_FROM_SOURCE="${REINSTALL_CMAKE_VERSION_FROM_SOURCE:-none}"
