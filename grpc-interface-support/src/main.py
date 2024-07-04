@@ -17,7 +17,7 @@ import os
 import shutil
 import zipfile
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 import proto
 from cpp import CppGrpcServiceSdkGeneratorFactory
@@ -43,7 +43,7 @@ def extract_zip(file_path: str, extract_to: str) -> str:
         extract_to (str): The file path to extract to.
 
     Raises:
-        RunTimeError if the file_path is not a zip.
+        RuntimeError if the file_path is not a zip.
 
     Returns:
         str: The file path to the extracted top level folder.
@@ -54,74 +54,27 @@ def extract_zip(file_path: str, extract_to: str) -> str:
 
         return extract_to
     else:
-        raise RuntimeError("Not a zip file!")
+        raise RuntimeError(f"{file_path!r} is not a zip file!")
 
 
-def discover_proto_files_in_filetree(
-    tree_root: str, path_in_zip: Optional[str] = None
-) -> List[proto.ProtoFileHandle]:
+def discover_service_proto_files_in_filetree(
+    tree_root: str,
+) -> List[str]:
     """
     Recursively search for .proto files under the specified tree root.
 
     Args:
         tree_root (str): The path to the tree root to search from.
-        path_in_zip (Optional[str]): The optional path_in_zip for zip directories.
 
     Returns:
-        List[proto.ProtoFileHandle]: A list of file paths, relative to the search tree root, each pointing to a proto file.
+        List[str]: A list of file paths, relative to the search tree root, each pointing to a proto file.
     """
     proto_files = []
-    if path_in_zip is not None:
-        tree_root = os.path.join(tree_root, path_in_zip)
     for dir, _, files in os.walk(tree_root):
         for file in files:
             if file.endswith(".proto"):
-                proto_files.append(proto.ProtoFileHandle(os.path.join(dir, file)))
+                proto_files.append(os.path.join(dir, file))
     return proto_files
-
-
-def check_zipfile(
-    file_path: str, path_in_zip: Optional[str] = None
-) -> List[proto.ProtoFileHandle]:
-    """Check if the file is a .zip file and extracts it.
-
-    Args:
-        file_path (str): The path to a file.
-        path_in_zip (Optional[str]): The optional path_in_zip for zip directories.
-
-    Returns:
-        List[proto.ProtoFileHandle]: A list of proto files.
-    """
-
-    if zipfile.is_zipfile(file_path):
-        return discover_proto_files_in_filetree(
-            extract_zip(file_path, DOWNLOAD_PATH),
-            path_in_zip,
-        )
-    else:
-        return [proto.ProtoFileHandle(file_path)]
-
-
-def obtain_proto_files(
-    path: str, path_in_zip: Optional[str] = None
-) -> List[proto.ProtoFileHandle]:
-    """Fetch the proto files defined in the grpc-interface
-    config to the local project cache.
-
-    Args:
-        path (str): The path/uri to a file to download/an existing one or a directory containing proto files.
-        path_in_zip (Optional[str]): directory to search for if path is zip
-
-    Returns:
-        List[proto.ProtoFileHandle]: A list of proto files.
-    """
-    if os.path.isdir(path):
-        return discover_proto_files_in_filetree(path)
-    elif os.path.isdir(os.path.join(get_workspace_dir(), path)):
-        return discover_proto_files_in_filetree(os.path.join(get_workspace_dir(), path))
-    else:
-        path = obtain_local_file_path(path)
-        return check_zipfile(path, path_in_zip)
 
 
 def create_service_sdk_dir(proto_file_handle: proto.ProtoFileHandle) -> str:
@@ -134,7 +87,7 @@ def create_service_sdk_dir(proto_file_handle: proto.ProtoFileHandle) -> str:
     Returns:
         str: The absolute path to the SDK directory.
     """
-    service_name = proto_file_handle.get_service_name()
+    service_name = proto_file_handle.service_name
     service_sdk_path = os.path.join(
         get_project_cache_dir(), "services", service_name.lower()
     )
@@ -145,11 +98,11 @@ def create_service_sdk_dir(proto_file_handle: proto.ProtoFileHandle) -> str:
     return service_sdk_path
 
 
-def get_proto_include_dir(path: str) -> str:
+def get_absolute_proto_include_path(relative_path: str) -> str:
     """Get the absolute path to the proto include directory.
 
     Args:
-        path (str): The path to check.
+        relative_path (str): The relative path to check.
 
     Raises:
         FileNotFoundError: In case the specified directory does not exist
@@ -158,20 +111,25 @@ def get_proto_include_dir(path: str) -> str:
         str: The absolute path to the proto include directory.
     """
 
-    if os.path.isdir(path):
-        return path
-    elif os.path.isdir(os.path.join(get_workspace_dir(), path)):
-        return os.path.join(get_workspace_dir(), path)
-    if os.path.isdir(os.path.join(DOWNLOAD_PATH, path)):
-        return os.path.join(DOWNLOAD_PATH, path)
+    if os.path.isdir(relative_path):
+        return relative_path
+    elif os.path.isdir(os.path.join(get_workspace_dir(), relative_path)):
+        return os.path.join(get_workspace_dir(), relative_path)
+    if os.path.isdir(os.path.join(DOWNLOAD_PATH, relative_path)):
+        return os.path.join(DOWNLOAD_PATH, relative_path)
     else:
-        raise FileNotFoundError(f"Directory {path} not found!")
+        raise FileNotFoundError(
+            f"Directory {relative_path} not found! Searched additionally {get_workspace_dir()} and {DOWNLOAD_PATH}!"
+        )
 
 
 def generate_services(
     factory: GrpcServiceSdkGeneratorFactory, if_config: Dict[str, Any]
 ) -> None:
     """Generate SDKs for the services defined in the AppManifest..
+
+    Raises:
+        RuntimeError: If there is no service defined in any proto files given.
 
     Args:
         factory (GrpcPackageGeneratorFactory):
@@ -180,21 +138,39 @@ def generate_services(
     """
 
     path_in_zip = if_config.get("pathInZip", None)
-    proto_file_handles = obtain_proto_files(if_config["src"], path_in_zip)
+    path = if_config["src"]
+    if os.path.isabs(path):
+        pass
+    elif os.path.isabs(os.path.join(get_workspace_dir(), path)):
+        path = os.path.join(get_workspace_dir(), path)
+    else:
+        path = obtain_local_file_path(path)
+        if zipfile.is_zipfile(path):
+            path = extract_zip(path, DOWNLOAD_PATH)
+            if path_in_zip is not None:
+                path = os.path.join(path, path_in_zip)
+    proto_files = discover_service_proto_files_in_filetree(path)
+
     is_client = "required" in if_config
     is_server = "provided" in if_config
+    skipped_files = 0
 
-    for proto_file in proto_file_handles:
+    for proto_file in proto_files:
         try:
-            proto_include_dir = str(Path(proto_file.file_path).parent)
+            proto_service_file = proto.ProtoFileHandle(proto_file)
+            proto_include_dir = str(Path(proto_service_file.file_path).parent)
             if "protoIncludeDir" in if_config:
-                proto_include_dir = get_proto_include_dir(if_config["protoIncludeDir"])
+                proto_include_dir = get_absolute_proto_include_path(
+                    if_config["protoIncludeDir"]
+                )
             generate_single_service(
-                proto_file, factory, is_client, is_server, proto_include_dir
+                proto_service_file, factory, is_client, is_server, proto_include_dir
             )
         except RuntimeError:
-            pass
+            skipped_files += 1
             # skip a file with no service definition, can be an imported file
+    if skipped_files == len(proto_files):
+        raise RuntimeError("No services defined!")
 
 
 def generate_single_service(

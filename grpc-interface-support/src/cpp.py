@@ -78,7 +78,7 @@ class GrpcCodeExtractor:
             f"{Path(self.__proto_file.file_path).stem}.grpc.pb.cc",
         )
 
-        service_name = self.__proto_file.get_service_name()
+        service_name = self.__proto_file.service_name
 
         package_pieces = self.__proto_file.get_package().split(".")
 
@@ -131,7 +131,7 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
             stdout=subprocess.DEVNULL if not self.__verbose else None,
         )
 
-        imports = self.__proto_file_handle.get_imports()
+        imports = self.__proto_file_handle.imports
 
         for element in imports:
             path = os.path.join(self.__proto_include_path, element)
@@ -154,7 +154,7 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
             self.__package_directory_path,
         )
 
-        service_name = self.__proto_file_handle.get_service_name()
+        service_name = self.__proto_file_handle.service_name
 
         files_to_copy: List[CopySpec] = []
 
@@ -172,7 +172,7 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
         )
 
     def __get_template_variables(self) -> Dict[str, str]:
-        service_name = self.__proto_file_handle.get_service_name()
+        service_name = self.__proto_file_handle.service_name
         return {
             "service_name": service_name,
             "service_name_lower": service_name.lower(),
@@ -191,11 +191,9 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
             Path(self.__proto_file_handle.file_path).parent, self.__proto_include_path
         )
         if rel_path == ".":
-            return f"services/{self.__proto_file_handle.get_service_name().lower()}"
+            return f"services/{self.__proto_file_handle.service_name.lower()}"
 
-        return (
-            f"services/{self.__proto_file_handle.get_service_name().lower()}/{rel_path}"
-        )
+        return f"services/{self.__proto_file_handle.service_name.lower()}/{rel_path}"
 
     def __get_include_dir(self) -> str:
         return f"include/{self.__get_relative_file_dir()}"
@@ -307,7 +305,7 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
         export_conan_project(self.__package_directory_path)
 
     def __transform_header_stub_code(self, lines: List[str]) -> List[str]:
-        service_name = self.__proto_file_handle.get_service_name()
+        service_name = self.__proto_file_handle.service_name
         service_class_name = to_camel_case(service_name) + "Service"
 
         result: List[str] = []
@@ -320,7 +318,7 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
         return result
 
     def __transform_source_stub_code(self, lines: List[str]) -> List[str]:
-        service_name = self.__proto_file_handle.get_service_name()
+        service_name = self.__proto_file_handle.service_name
         service_class_name = to_camel_case(service_name) + "Service"
 
         result: List[str] = []
@@ -339,7 +337,7 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
 
         app_source_dir = os.path.join(get_workspace_dir(), "app", "src")
         service_header_file_name = (
-            f"{self.__proto_file_handle.get_service_name()}ServiceImpl.h"
+            f"{self.__proto_file_handle.service_name}ServiceImpl.h"
         )
         service_header_file_path = os.path.join(
             app_source_dir, service_header_file_name
@@ -370,7 +368,7 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
     def __create_service_source(self) -> None:
         app_source_dir = os.path.join(get_workspace_dir(), "app", "src")
         service_source_file_name = (
-            f"{self.__proto_file_handle.get_service_name()}ServiceImpl.cpp"
+            f"{self.__proto_file_handle.service_name}ServiceImpl.cpp"
         )
         service_source_file_path = os.path.join(
             app_source_dir, service_source_file_name
@@ -399,7 +397,7 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
         """Update all references to the generated package."""
 
         add_dependency_to_conanfile(
-            f"{self.__proto_file_handle.get_service_name().lower()}-service-sdk",
+            f"{self.__proto_file_handle.service_name.lower()}-service-sdk",
             "generated",
         )
 

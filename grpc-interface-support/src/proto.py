@@ -20,6 +20,8 @@ from proto_schema_parser.parser import Parser, ast
 class ProtoFileHandle:
     def __init__(self, file_path: str):
         self.file_path = file_path
+        self.service_name = self.get_service_name()
+        self.imports = self.get_imports()
 
     def get_package(self) -> str:
         """Return the package of the proto file.
