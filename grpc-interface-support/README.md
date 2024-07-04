@@ -94,9 +94,7 @@ int main(int argc, char** argv) {
 
 ### Server
 
-When generating a server SDK, in addition to the SDK package, one or more files (depending on the target language) are auto generated into your application's source directory. To instantiate a server with your custom implementation, use the provided factory API to interface with the Velocitas core SDK:
-
-**Why is one file continuously re-generated and the another file is not?** - One file always contains up-to-date method declarations reflecting the proto state. If they change, the source code, which most likely has more LoC, needs to be adapted manually.
+When generating a server SDK, in addition to the SDK package, one or more files (depending on the target language) are auto generated into your application's source directory. To instantiate a server with your custom implementation, use the provided factory API to interface with the Velocitas core SDK.
 
 ***C++***
 
@@ -137,13 +135,17 @@ Generated files:
 from velocitas_sdk.config import middleware
 from seats_service_sdk.seats_pb2_grpc import SeatsServicer
 from seats_service_sdk.SeatsServiceServerFactory import SeatsServiceServerFactory
+from SeatsServiceImpl import SeatsService
 
 async def on_start(self):
+    seatsService = SeatsService()
     server = SeatsServiceServerFactory.create(
-        SeatsServicer(),
+        seatsService,
         middleware, # Create your own middleware sub class
     )
 
     server.start()
     server.wait_for_termination()
 ```
+
+**Why is one file continuously re-generated and the another file is not?** - One file always contains up-to-date method declarations reflecting the proto state. If they change, the source code, which most likely has more LoC, needs to be adapted manually.

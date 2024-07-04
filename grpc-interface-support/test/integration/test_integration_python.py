@@ -99,11 +99,11 @@ def test_pip_package_is_usable():
     os.chdir(os.environ["SERVICE_SERVER_ROOT"])
     assert subprocess.check_call(["velocitas", "init", "-v"]) == 0
 
-    from seats_service_sdk.seats_pb2_grpc import SeatsServicer
     from seats_service_sdk.SeatsServiceServerFactory import SeatsServiceServerFactory
+    from SeatsServiceImpl import SeatsService
 
     middleware_server_mock = TestMiddleware(TestServerServiceLocator())
-    servicer = SeatsServicer()
+    servicer = SeatsService()
 
     server_seats = SeatsServiceServerFactory.create(
         middleware_server_mock,
@@ -113,12 +113,12 @@ def test_pip_package_is_usable():
     assert server_seats is not None
 
     print("============= TEST HORN SERVER ===================")
-    from hornservice_service_sdk.horn_pb2_grpc import HornServiceServicer
     from hornservice_service_sdk.HornServiceServiceServerFactory import (
         HornServiceServiceServerFactory,
     )
+    from HornServiceServiceImpl import HornServiceService
 
-    servicer_horn = HornServiceServicer()
+    servicer_horn = HornServiceService()
 
     server_horn = HornServiceServiceServerFactory.create(
         middleware_server_mock,
