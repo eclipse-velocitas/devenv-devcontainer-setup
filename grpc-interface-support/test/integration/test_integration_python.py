@@ -105,12 +105,23 @@ def test_pip_package_is_usable():
     middleware = TestMiddleware(TestServerServiceLocator())
     servicer = SeatsServicer()
 
-    server = SeatsServiceServerFactory.create(
+    server_seats = SeatsServiceServerFactory.create(
         middleware,
         servicer,
     )
 
-    assert server is not None
+    assert server_seats is not None
+
+    print("============= BUILDING CLIENT ===================")
+    os.chdir(os.environ["SERVICE_CLIENT_ROOT"])
+    assert subprocess.check_call(["velocitas", "init", "-v"]) == 0
+
+    from seats_service_sdk.SeatsServiceClientFactory import SeatsServiceClientFactory
+
+    middleware = TestMiddleware(TestClientServiceLocator())
+    client_seats = SeatsServiceClientFactory.create(middleware)
+
+    assert client_seats is not None
 
     print("============= BUILDING LOCAL HORN SERVICE ===================")
     from hornservice_service_sdk.horn_pb2_grpc import HornServiceServicer
@@ -127,13 +138,15 @@ def test_pip_package_is_usable():
 
     assert server_horn is not None
 
-    print("============= BUILDING CLIENT ===================")
+    print("============= BUILDING HORN Service CLIENT ===================")
     os.chdir(os.environ["SERVICE_CLIENT_ROOT"])
     assert subprocess.check_call(["velocitas", "init", "-v"]) == 0
 
-    from seats_service_sdk.SeatsServiceClientFactory import SeatsServiceClientFactory
+    from seats_service_sdk.HornServiceServiceServerFactory import (
+        HornServiceServiceClientFactory,
+    )
 
     middleware = TestMiddleware(TestClientServiceLocator())
-    client = SeatsServiceClientFactory.create(middleware)
+    client_horn = HornServiceServiceClientFactory.create(middleware)
 
-    assert client is not None
+    assert client_horn is not None

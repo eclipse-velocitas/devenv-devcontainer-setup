@@ -247,6 +247,7 @@ class PythonGrpcInterfaceGenerator(GrpcServiceSdkGenerator):  # type: ignore
         source_content = replace_item_in_list(
             source_content,
             "context.set",
+            remove_empty=True,
         )
 
         return source_content
