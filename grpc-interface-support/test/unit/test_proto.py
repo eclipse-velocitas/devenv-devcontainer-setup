@@ -25,7 +25,7 @@ from proto import ProtoFileHandle  # noqa
 proto_file_contents = """
 package velocitas.toolchain.test.v1;
 
-import velocitas.toolchain.test.types
+import "velocitas/toolchain/test/v1/types.proto"
 
 service TestService {
   rpc Method1(Method1Request) returns (Method1Response);
@@ -54,7 +54,7 @@ def test_get_service_name(mock_filesystem: FakeFilesystem, env):
 
 def test_get_imports(mock_filesystem: FakeFilesystem, env):
     proto_file = ProtoFileHandle(proto_file_path)
-    assert proto_file.get_imports() == "velocitas.toolchain.test.types"
+    assert proto_file.get_imports() == ["velocitas/toolchain/test/v1/types.proto"]
 
 
 def test_get_package(mock_filesystem: FakeFilesystem, env):
