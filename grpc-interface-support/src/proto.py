@@ -14,7 +14,8 @@
 
 from typing import List
 
-from proto_schema_parser.parser import Parser, ast
+from proto_schema_parser import ast
+from proto_schema_parser.parser import Parser
 
 
 class ProtoFileHandle:
@@ -66,7 +67,7 @@ class ProtoFileHandle:
         return service_name
 
     def get_imports(self) -> List[str]:
-        """Get the name of the service.
+        """Get the name of the imports.
 
         Returns:
             List[str]: The names to the imports
