@@ -111,11 +111,11 @@ def get_absolute_proto_include_path(relative_path: str) -> str:
         str: The absolute path to the proto include directory.
     """
 
-    if os.path.isdir(relative_path):
+    if os.path.isabs(relative_path):
         return relative_path
-    elif os.path.isdir(os.path.join(get_workspace_dir(), relative_path)):
+    elif os.path.isabs(os.path.join(get_workspace_dir(), relative_path)):
         return os.path.join(get_workspace_dir(), relative_path)
-    if os.path.isdir(os.path.join(DOWNLOAD_PATH, relative_path)):
+    if os.path.isabs(os.path.join(DOWNLOAD_PATH, relative_path)):
         return os.path.join(DOWNLOAD_PATH, relative_path)
     else:
         raise FileNotFoundError(
