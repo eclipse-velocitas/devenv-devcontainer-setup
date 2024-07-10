@@ -41,24 +41,23 @@ def get_subdirs(path: str) -> List[str]:
     return [f.path for f in os.scandir(path) if f.is_dir()]
 
 
-def get_project_cache_dir() -> str:
-    project_caches = os.path.join(os.path.expanduser("~"), ".velocitas", "projects")
-    return get_subdirs(project_caches)[0]
-
-
-def start_app(
-    python_file_name: str, env=os.environ
-) -> subprocess.CompletedProcess[bytes]:
-    python_file = f"app/src/{python_file_name}.py"
-    return subprocess.run(
-        args=["python", python_file],
-        env=env,
-        shell=True,
+def get_project_cache_dir(index: int = 0) -> str:
+    velocitas_home = os.getenv("VELOCITAS_HOME")
+    project_caches = os.path.join(
+        velocitas_home if velocitas_home else os.path.expanduser("~"),
+        ".velocitas",
+        "projects",
     )
+    return get_subdirs(project_caches)[index]
+
+
+def start_app(python_file_name: str, env=os.environ) -> subprocess.Popen[bytes]:
+    python_file = f"app/src/{python_file_name}.py"
+    return subprocess.Popen(["python", python_file], env=env)
 
 
 def assert_python_package_generated(service_name: str, proto_filename: str) -> None:
-    service_path = os.path.join(get_project_cache_dir(), "services", service_name)
+    service_path = os.path.join(get_project_cache_dir(0), "services", service_name)
     assert os.path.isdir(service_path)
     assert os.path.isfile(os.path.join(service_path, "pyproject.toml"))
 
@@ -77,6 +76,9 @@ def test_pip_package_is_generated():
     assert_python_package_generated("hornservice", "horn")
 
 
+@pytest.mark.skip(
+    "Skip b/c a running MQTT broker is required for the test at the moment. See: https://github.com/eclipse-velocitas/vehicle-app-python-sdk/issues/143"
+)
 def test_pip_package_is_usable():
     envs = os.environ.copy()
     envs["SDV_SEATS_ADDRESS"] = "127.0.0.1:1234"
@@ -87,15 +89,15 @@ def test_pip_package_is_usable():
 
     assert subprocess.check_call(["velocitas", "init", "-v"]) == 0
 
-    launcher = start_app("launcher", envs)
-
-    assert launcher.returncode == 0
+    server_process = start_app("launcher", envs)
 
     print("============= TEST CLIENTS ===================")
     os.chdir(os.environ["SERVICE_CLIENT_ROOT"])
 
     assert subprocess.check_call(["velocitas", "init", "-v"]) == 0
 
-    launcher = start_app("launcher", envs)
+    client_process = start_app("launcher", envs)
 
-    assert launcher.returncode == 0
+    client_code = client_process.wait()
+    server_process.kill()
+    assert client_code == 0

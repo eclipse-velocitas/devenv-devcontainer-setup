@@ -13,8 +13,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import os
-import shutil
-import subprocess
 
 
 def pytest_sessionstart(session):
@@ -23,12 +21,4 @@ def pytest_sessionstart(session):
     before performing collection and entering the run test loop.
     """
 
-    os.chdir(os.environ["VELOCITAS_TEST_ROOT"])
-    shutil.copy("../../common/AppManifest.json", "./app/AppManifest.json")
-
-    # FIXME: The C++ base image does not install conan globally
-    # but just for the vscode user, hence we have to download
-    # conan manually here. Can be removed once conan is installed
-    # globally.
-    if os.environ["VELOCITAS_TEST_LANGUAGE"] == "cpp":
-        subprocess.check_call(["python", "-m", "pip", "install", "conan==1.63.0"])
+    os.chdir(os.environ["VELOCITAS_TEMPLATE_REPO_PATH"])

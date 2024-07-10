@@ -22,6 +22,6 @@ def pytest_sessionstart(session):
     before performing collection and entering the run test loop.
     """
 
-    os.chdir(os.environ["VELOCITAS_TEST_ROOT"])
+    os.chdir(os.environ["VELOCITAS_TEMPLATE_REPO_PATH"])
 
     subprocess.check_call(["velocitas", "init", "-v"], stdin=subprocess.PIPE)

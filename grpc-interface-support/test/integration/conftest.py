@@ -14,7 +14,6 @@
 
 import os
 import shutil
-import subprocess
 
 
 def pytest_sessionstart(session):
@@ -26,36 +25,29 @@ def pytest_sessionstart(session):
     client_path = "/tmp/service_client"
     server_path = "/tmp/service_server"
 
-    shutil.copytree(os.environ["VELOCITAS_TEST_ROOT"], client_path)
-    shutil.copytree(os.environ["VELOCITAS_TEST_ROOT"], server_path)
+    shutil.copytree(os.environ["VELOCITAS_TEMPLATE_REPO_PATH"], client_path)
+    shutil.copytree(os.environ["VELOCITAS_TEMPLATE_REPO_PATH"], server_path)
 
     shutil.copytree(
-        f"test/{os.environ['VELOCITAS_TEST_LANGUAGE']}/service_client",
+        f"{os.environ['VELOCITAS_PACKAGE_REPO_PATH']}/test/{os.environ['VELOCITAS_TEST_LANGUAGE']}/service_client",
         client_path,
         dirs_exist_ok=True,
     )
     shutil.copytree(
-        f"test/{os.environ['VELOCITAS_TEST_LANGUAGE']}/service_server",
+        f"{os.environ['VELOCITAS_PACKAGE_REPO_PATH']}/test/{os.environ['VELOCITAS_TEST_LANGUAGE']}/service_server",
         server_path,
         dirs_exist_ok=True,
     )
     shutil.copytree(
-        "test/common/proto",
+        f"{os.environ['VELOCITAS_PACKAGE_REPO_PATH']}/test/common/proto",
         server_path,
         dirs_exist_ok=True,
     )
     shutil.copytree(
-        "test/common/proto",
+        f"{os.environ['VELOCITAS_PACKAGE_REPO_PATH']}/test/common/proto",
         client_path,
         dirs_exist_ok=True,
     )
 
     os.environ["SERVICE_CLIENT_ROOT"] = client_path
     os.environ["SERVICE_SERVER_ROOT"] = server_path
-
-    if os.environ["VELOCITAS_TEST_LANGUAGE"] == "cpp":
-        # FIXME: The C++ base image does not install conan globally
-        # but just for the vscode user, hence we have to download
-        # conan manually here. Can be removed once conan is installed
-        # globally.
-        subprocess.check_call(["python", "-m", "pip", "install", "conan==1.63.0"])

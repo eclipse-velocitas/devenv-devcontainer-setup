@@ -1,0 +1,41 @@
+#!/bin/bash
+# Copyright (c) 2022-2024 Contributors to the Eclipse Foundation
+#
+# This program and the accompanying materials are made available under the
+# terms of the Apache License, Version 2.0 which is available at
+# https://www.apache.org/licenses/LICENSE-2.0.
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
+
+sudo chmod +x .devcontainer/scripts/*.sh
+sudo chown -R $(whoami) $HOME
+
+.devcontainer/scripts/setup-git.sh
+
+if [[ -z "${VELOCITAS_OFFLINE}" ]]; then
+    .devcontainer/scripts/configure-codespaces.sh
+    .devcontainer/scripts/upgrade-cli.sh
+fi
+
+echo "#######################################################"
+echo "### Run VADF Lifecycle Management                   ###"
+echo "#######################################################"
+velocitas init
+velocitas sync
+
+# Some language specific setup might be required even in offline mode
+.devcontainer/scripts/language-specific-setup.sh
+
+echo "#######################################################"
+echo "### VADF package status                             ###"
+echo "#######################################################"
+velocitas upgrade --dry-run
+
+# Don't let container creation fail if lifecycle management fails
+echo "Done!"

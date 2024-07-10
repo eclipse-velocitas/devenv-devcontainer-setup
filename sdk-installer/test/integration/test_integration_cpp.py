@@ -17,8 +17,16 @@ import subprocess
 
 import pytest
 
+PACKAGE_NAME = "vehicle-app-sdk"
+
 if not os.environ["VELOCITAS_TEST_LANGUAGE"] == "cpp":
     pytest.skip("skipping C++ only tests", allow_module_level=True)
+
+
+@pytest.fixture(autouse=True)
+def remove_preinstalled_package():
+    print("Removing old packages")
+    remove_package(PACKAGE_NAME)
 
 
 def is_package_installed(package_name: str) -> bool:
@@ -26,6 +34,10 @@ def is_package_installed(package_name: str) -> bool:
         ["conan", "search", package_name], encoding="utf-8"
     )
     return output.find("Existing package recipes:") != -1
+
+
+def remove_package(package_name: str):
+    subprocess.check_call(["conan", "remove", "-f", package_name])
 
 
 def test_no_sdk_reference_found__nothing_installed():
@@ -37,7 +49,7 @@ def test_no_sdk_reference_found__nothing_installed():
         conanfile.write(conanfile_contents)
 
     subprocess.check_call(["velocitas", "init", "-f", "-v"], stdin=subprocess.PIPE)
-    assert not is_package_installed("vehicle-app-sdk")
+    assert not is_package_installed(PACKAGE_NAME)
 
 
 def test_sdk_reference_found__sdk_installed():

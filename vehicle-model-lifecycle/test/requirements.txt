@@ -4,7 +4,3 @@ pytest-asyncio==0.20.3
 pytest-cov==4.0.0
 pyfakefs
 types-mock
-# FIXME: The C++ base image does not install conan globally
-# but just for the vscode user, hence we have to install here.
-# Can be removed once conan is installed globally.
-conan==1.63.0

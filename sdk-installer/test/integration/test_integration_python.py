@@ -36,6 +36,11 @@ def clean_velocitas_download_directory():
     )
 
 
+@pytest.fixture(autouse=True)
+def remove_preinstalled_package():
+    remove_package("velocitas_sdk")
+
+
 def get_subdirs(path: str) -> List[str]:
     return [f.path for f in os.scandir(path) if f.is_dir()]
 
@@ -48,6 +53,10 @@ def get_project_cache_dir() -> str:
 def is_package_installed(package_name: str) -> bool:
     return_code = subprocess.call(["pip", "show", package_name])
     return return_code == 0
+
+
+def remove_package(package_name: str):
+    subprocess.call(["pip", "uninstall", "-y", package_name])
 
 
 def can_import_and_use_vehicleapp() -> bool:

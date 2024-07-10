@@ -32,12 +32,19 @@ def test_normal_build_successful():
 
 def test_cross_build_successful():
     subprocess.check_call(
-        ["apt", "update"],
+        ["sudo", "apt", "update"],
         stdin=subprocess.PIPE,
     )
 
     subprocess.check_call(
-        ["apt", "install", "-y", "gcc-aarch64-linux-gnu", "g++-aarch64-linux-gnu"],
+        [
+            "sudo",
+            "apt",
+            "install",
+            "-y",
+            "gcc-aarch64-linux-gnu",
+            "g++-aarch64-linux-gnu",
+        ],
         stdin=subprocess.PIPE,
     )
 
