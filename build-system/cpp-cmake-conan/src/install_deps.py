@@ -30,7 +30,13 @@ def safe_get_workspace_dir() -> str:
     try:
         return get_workspace_dir()
     except Exception:
-        return "."
+        return os.path.abspath(".")
+
+
+def get_build_folder(build_arch: str, host_arch: str):
+    if host_arch == build_arch:
+        return os.path.join(safe_get_workspace_dir(), "build")
+    return os.path.join(safe_get_workspace_dir(), f"build_linux_{host_arch}")
 
 
 def get_profile_name(arch: str, build_variant: str) -> str:
@@ -71,7 +77,7 @@ def install_deps_via_conan(
         )
     )
 
-    build_folder = os.path.join(safe_get_workspace_dir(), "build")
+    build_folder = get_build_folder(build_arch, host_arch)
     os.makedirs(build_folder, exist_ok=True)
 
     deps_to_build = "missing" if not build_all_deps else "*"
@@ -96,7 +102,7 @@ def install_deps_via_conan(
             profile_build_path,
             "--build",
             deps_to_build,
-            "..",
+            safe_get_workspace_dir(),
         ],
         env=os.environ,
         cwd=build_folder,
