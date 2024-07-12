@@ -46,6 +46,13 @@ def get_project_cache_dir() -> str:
     return get_subdirs(project_caches)[0]
 
 
+def start_app(env, python_file_name: str) -> subprocess.CompletedProcess[bytes]:
+    return subprocess.run(
+        [f"python app/src/{python_file_name}.py"],
+        env=env,
+    )
+
+
 def test_python_package_is_generated():
     os.chdir(os.environ["SERVICE_CLIENT_ROOT"])
     assert subprocess.check_call(["velocitas", "init", "-v"]) == 0
@@ -97,52 +104,32 @@ def test_pip_package_is_usable():
 
     print("============= BUILDING SEATS SERVER ===================")
     os.chdir(os.environ["SERVICE_SERVER_ROOT"])
+
     assert subprocess.check_call(["velocitas", "init", "-v"]) == 0
 
-    from seats_service_sdk.SeatsServiceServerFactory import SeatsServiceServerFactory
-    from SeatsServiceImpl import SeatsService
+    new_env = os.environ.copy()
+    new_env["SDV_SEATS_ADDRESS"] = "127.0.0.1:1234"
 
-    middleware_server_mock = TestMiddleware(TestServerServiceLocator())
-    servicer = SeatsService()
+    assert subprocess.check_call(["velocitas", "init", "-v"]) == 0
 
-    server_seats = SeatsServiceServerFactory.create(
-        middleware_server_mock,
-        servicer,
-    )
+    launcher = start_app(new_env, "launcher_seats")
 
-    assert server_seats is not None
+    assert launcher.returncode == 0
 
     print("============= TEST HORN SERVER ===================")
-    from hornservice_service_sdk.HornServiceServiceServerFactory import (
-        HornServiceServiceServerFactory,
-    )
-    from HornServiceServiceImpl import HornServiceService
+    new_env["SDV_HORN_SERVICE_ADDRESS"] = "127.0.0.1:1234"
 
-    servicer_horn = HornServiceService()
-
-    server_horn = HornServiceServiceServerFactory.create(
-        middleware_server_mock,
-        servicer_horn,
-    )
-
-    assert server_horn is not None
-
-    print("============= BUILDING SEATS CLIENT ===================")
-    os.chdir(os.environ["SERVICE_CLIENT_ROOT"])
     assert subprocess.check_call(["velocitas", "init", "-v"]) == 0
 
-    from seats_service_sdk.SeatsServiceClientFactory import SeatsServiceClientFactory
+    launcher = start_app(new_env, "launcher_horn")
 
-    middleware_client_mock = TestMiddleware(TestClientServiceLocator())
-    client_seats = SeatsServiceClientFactory.create(middleware_client_mock)
+    assert launcher.returncode == 0
 
-    assert client_seats is not None
+    print("============= BUILDING CLIENTS ===================")
+    os.chdir(os.environ["SERVICE_CLIENT_ROOT"])
 
-    print("============= TEST HORN Service CLIENT ===================")
-    from hornservice_service_sdk.HornServiceServiceClientFactory import (
-        HornServiceServiceClientFactory,
-    )
+    assert subprocess.check_call(["velocitas", "init", "-v"]) == 0
 
-    client_horn = HornServiceServiceClientFactory.create(middleware_client_mock)
+    launcher = start_app(new_env, "launcher")
 
-    assert client_horn is not None
+    assert launcher.returncode == 0

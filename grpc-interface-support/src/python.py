@@ -67,7 +67,7 @@ class GrpcCodeExtractor:
 
         file_prefix = Path(self.__proto_file.file_path).stem
         self.file_name_prefix = f"{file_prefix}_pb2_grpc"
-        self.file_name = f"{self.file_name_prefix}.py"
+        self.file_name = f"{self.file_name_prefix}Service.py"
         self.grpc_source_path = os.path.join(
             self.__base_path,
             self.__source_path,
