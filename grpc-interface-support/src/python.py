@@ -67,7 +67,7 @@ class GrpcCodeExtractor:
 
         file_prefix = Path(self.__proto_file.file_path).stem
         self.file_name_prefix = f"{file_prefix}_pb2_grpc"
-        self.file_name = f"{self.file_name_prefix}Service.py"
+        self.file_name = f"{self.file_name_prefix}.py"
         self.grpc_source_path = os.path.join(
             self.__base_path,
             self.__source_path,
@@ -266,7 +266,7 @@ class PythonGrpcInterfaceGenerator(GrpcServiceSdkGenerator):  # type: ignore
             "imports": f"from {self.__service_name}ServiceStub import {self.__service_name}ServiceStub",
             "service_name": f"{self.__service_name}",
             "service_name_parent_postfix": "ServiceStub",
-            "service_name_postfix": "",
+            "service_name_postfix": "Service",
         }
 
     def __install_module(self) -> None:
