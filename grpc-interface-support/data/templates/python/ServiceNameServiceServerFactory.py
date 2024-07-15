@@ -1,4 +1,4 @@
-# Copyright (c) 2023-2024 Contributors to the Eclipse Foundation
+# Copyright (c) 2024 Contributors to the Eclipse Foundation
 #
 # This program and the accompanying materials are made available under the
 # terms of the Apache License, Version 2.0 which is available at
@@ -13,16 +13,22 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import grpc
+import concurrent.futures
+
 from ${{ service_name_lower }}_service_sdk.${{ grpc_file_name_prefix }} import (
-    ${{ service_name }}Stub,
+    ${{ service_name }}Servicer, add_${{ service_name }}Servicer_to_server
 )
 from velocitas_sdk.base import Middleware
 
+MAX_THREAD_POOL_WORKERS = 10
 
-class ${{ service_name }}ServiceClientFactory:
+class ${{ service_name }}ServiceServerFactory:
     @staticmethod
-    def create(middleware: Middleware) -> ${{ service_name }}Stub:
+    def create(middleware: Middleware, servicer: ${{ service_name }}Servicer) -> grpc.Server:
         address = middleware.service_locator.get_service_location("${{ service_name }}")
-        channel = grpc.aio.insecure_channel(address)
+        server = grpc.server(concurrent.futures.ThreadPoolExecutor(MAX_THREAD_POOL_WORKERS))
+        server.add_insecure_port(address)
 
-        return ${{ service_name }}Stub(channel)
+        add_${{ service_name }}Servicer_to_server(servicer, server)
+
+        return server

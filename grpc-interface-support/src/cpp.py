@@ -32,8 +32,12 @@ from velocitas_lib.conan_utils import (
     export_conan_project,
     get_required_sdk_version,
 )
+from velocitas_lib.text_utils import (
+    capture_area_in_file,
+    to_camel_case,
+)
+
 from velocitas_lib.templates import CopySpec, copy_templates
-from velocitas_lib.text_utils import capture_area_in_file, to_camel_case
 
 CONAN_PROFILE_NAME = "host"
 
@@ -46,7 +50,7 @@ def get_template_dir() -> str:
 
 class GrpcCodeExtractor:
     """
-    Provides methods for extracing code from generated gRPC c++ files.
+    Provides methods for extracting code from generated gRPC c++ files.
     """
 
     def __init__(self, proto_file: ProtoFileHandle, base_path: str):

@@ -25,7 +25,7 @@ For generating a client SDK:
             "type": "grpc-interface",
             "config": {
                 "src": "<uri_to_proto_file>",
-                "required": {},
+                "required": {}
             }
         }
     ]
@@ -42,7 +42,7 @@ For generating a server SDK:
             "type": "grpc-interface",
             "config": {
                 "src": "<uri_to_proto_file>",
-                "provided": {},
+                "provided": {}
             }
         }
     ]
@@ -60,7 +60,7 @@ For generating both:
             "config": {
                 "src": "<uri_to_proto_file>",
                 "required": {},
-                "provided": {},
+                "provided": {}
             }
         }
     ]
@@ -94,14 +94,14 @@ int main(int argc, char** argv) {
 
 ### Server
 
-When generating a server SDK, in addition to the SDK package, 2 files are auto generated into your application's source directory:
+When generating a server SDK, in addition to the SDK package, one or more files (depending on the target language) are auto generated into your application's source directory. To instantiate a server with your custom implementation, use the provided factory API to interface with the Velocitas core SDK.
 
-* `<Service>ServerImpl.h` contains class defintion and method declarations for implementing the server. This file is continously auto-generated! To add custom methods place them within the `// <user-defined>` block.
-* `<Service>ServerImpl.cc` contains method definitions for all server methods, defaulting to `UNIMPLEMENTED`. This file is only generated **once** if it does not exist.
+***C++***
 
-Why is the header continously re-generated and the cpp file is not? - The header always contains up-to-date method declarations reflecting the proto state. If they change, the source code, which most likely has more LoC, needs to be adapted manually.
+Generated files:
 
-To instantiate a server with your custom implementation, use the provided factory API to interface with the Velocitas core SDK:
+* `<Service-Name>ServiceImpl.h` contains class definition and method declarations for implementing the server. This file is continuously auto-generated! To add custom methods place them within the `// <user-defined>` block.
+* `<Service-Name>ServiceImpl.cpp` contains method definitions for all server methods, defaulting to `UNIMPLEMENTED`. This file is only generated **once** if it does not exist.
 
 ```cpp
 #include "sdk/middleware/Middleware.h"
@@ -123,3 +123,29 @@ int main(int argc, char** argv) {
 }
 
 ```
+
+***Python***
+
+Generated files:
+
+* `<Service-Name>ServiceStub.py` contains class definition and method declarations for implementing the server. This file is continuously auto-generated! To add custom methods place them inside the `<Service-Name>ServiceImpl.py` class.
+* `<Service-Name>ServiceImpl.py` contains method definitions for all server methods, defaulting to `UNIMPLEMENTED`. This file is only generated **once** if it does not exist.
+
+```python
+from velocitas_sdk.config import middleware
+from seats_service_sdk.seats_pb2_grpc import SeatsServicer
+from seats_service_sdk.SeatsServiceServerFactory import SeatsServiceServerFactory
+from SeatsServiceImpl import SeatsService
+
+async def on_start(self):
+    seatsService = SeatsService()
+    server = SeatsServiceServerFactory.create(
+        seatsService,
+        middleware, # Create your own middleware sub class
+    )
+
+    server.start()
+    server.wait_for_termination()
+```
+
+**Why is one file continuously re-generated and the another file is not?** - One file always contains up-to-date method declarations reflecting the proto state. If they change, the source code, which most likely has more LoC, needs to be adapted manually.
