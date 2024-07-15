@@ -125,6 +125,23 @@ class PythonGrpcInterfaceGenerator(GrpcServiceSdkGenerator):  # type: ignore
                 self.__proto_file_handle.file_path,
             ]
         )
+        imports = self.__proto_file_handle.get_imports()
+        for element in imports:
+            path = os.path.join(self.__proto_include_path, element)
+            args = [
+                "python",
+                "-m",
+                "grpc_tools.protoc",
+                f"-I{self.__proto_include_path}",
+                f"--pyi_out={self.__package_directory_path}",
+                path,
+            ]
+            subprocess.check_call(
+                args,
+                cwd=self.__proto_include_path,
+                env=os.environ,
+                stdout=subprocess.DEVNULL if not self.__verbose else None,
+            )
 
     def __copy_code_and_templates(
         self, client_required: bool, server_required: bool

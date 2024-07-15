@@ -21,19 +21,19 @@ from proto_schema_parser.parser import Parser
 class ProtoFileHandle:
     def __init__(self, file_path: str):
         self.file_path = file_path
-        self.service_name = None
-        self.imports: List[str] = []
+        self.__service_name = None
+        self.__imports: List[str] = []
 
         with open(file_path, "r") as file:
             parsed_data = Parser().parse(file.read())
 
         for element in parsed_data.file_elements:
             if isinstance(element, ast.Service):
-                self.service_name = str(element.name)
+                self.__service_name = str(element.name)
             if isinstance(element, ast.Import):
-                self.imports.append(str(element.name))
+                self.__imports.append(str(element.name))
 
-        if self.service_name is None:
+        if self.__service_name is None:
             raise RuntimeError("No service name found in proto file!")
 
     def get_package(self) -> str:
@@ -65,9 +65,9 @@ class ProtoFileHandle:
         Returns:
             str: The name of the service.
         """
-        if self.service_name is None:
+        if self.__service_name is None:
             raise RuntimeError("No service name found in proto file!")
-        return self.service_name
+        return self.__service_name
 
     def get_imports(self) -> List[str]:
         """Get the name of the imports.
@@ -75,4 +75,4 @@ class ProtoFileHandle:
         Returns:
             List[str]: The names to the imports
         """
-        return self.imports
+        return self.__imports

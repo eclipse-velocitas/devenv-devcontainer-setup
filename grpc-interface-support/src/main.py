@@ -87,7 +87,7 @@ def create_service_sdk_dir(proto_file_handle: proto.ProtoFileHandle) -> str:
     Returns:
         str: The absolute path to the SDK directory.
     """
-    service_name = proto_file_handle.service_name
+    service_name = proto_file_handle.get_service_name()
     service_sdk_path = os.path.join(
         get_project_cache_dir(), "services", service_name.lower()
     )
