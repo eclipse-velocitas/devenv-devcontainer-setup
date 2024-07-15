@@ -116,3 +116,20 @@ def test_files_synced():
 
     if changes_in_common or changes_in_lang:
         assert git_status_output != ""
+
+
+def test_devcontainer_base_image():
+    subprocess.check_call(["velocitas", "init", "-v"], stdin=subprocess.PIPE)
+    subprocess.check_call(["velocitas", "sync"])
+
+    from_instruction = None
+    with open("./.devcontainer/Dockerfile", encoding="utf-8") as dockerfile:
+        for line in dockerfile.readlines():
+            if line.startswith("FROM"):
+                from_instruction = line.strip()
+
+    language = os.environ["VELOCITAS_TEST_LANGUAGE"]
+    assert (
+        from_instruction
+        == f"FROM ghcr.io/eclipse-velocitas/devcontainer-base-images/{language}:v0.3"
+    )
