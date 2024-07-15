@@ -74,7 +74,7 @@ def test_pip_package_is_generated():
     assert subprocess.check_call(["velocitas", "init", "-v"]) == 0
 
     assert_python_package_generated("seats")
-    assert_python_package_generated("hornservice")
+    assert_python_package_generated("horn")
 
 
 def test_pip_package_is_usable():
@@ -86,7 +86,6 @@ def test_pip_package_is_usable():
     os.chdir(os.environ["SERVICE_SERVER_ROOT"])
 
     assert subprocess.check_call(["velocitas", "init", "-v"]) == 0
-
 
     launcher = start_app("launcher", envs)
 
