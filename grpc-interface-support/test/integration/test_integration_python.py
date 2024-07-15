@@ -57,24 +57,24 @@ def start_app(
     )
 
 
-def assert_python_package_generated(service_name: str):
+def assert_python_package_generated(service_name: str, proto_filename: str) -> None:
     service_path = os.path.join(get_project_cache_dir(), "services", service_name)
     assert os.path.isdir(service_path)
     assert os.path.isfile(os.path.join(service_path, "pyproject.toml"))
 
     source_path = os.path.join(service_path, f"{service_name}_service_sdk")
     assert os.path.isdir(source_path)
-    assert os.path.isfile(os.path.join(source_path, f"{service_name}_pb2_grpc.py"))
-    assert os.path.isfile(os.path.join(source_path, f"{service_name}_pb2.py"))
-    assert os.path.isfile(os.path.join(source_path, f"{service_name}_pb2.pyi"))
+    assert os.path.isfile(os.path.join(source_path, f"{proto_filename}_pb2_grpc.py"))
+    assert os.path.isfile(os.path.join(source_path, f"{proto_filename}_pb2.py"))
+    assert os.path.isfile(os.path.join(source_path, f"{proto_filename}_pb2.pyi"))
 
 
 def test_pip_package_is_generated():
     os.chdir(os.environ["SERVICE_CLIENT_ROOT"])
     assert subprocess.check_call(["velocitas", "init", "-v"]) == 0
 
-    assert_python_package_generated("seats")
-    assert_python_package_generated("horn")
+    assert_python_package_generated("seats", "seats")
+    assert_python_package_generated("hornservice", "horn")
 
 
 def test_pip_package_is_usable():
