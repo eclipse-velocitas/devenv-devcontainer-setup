@@ -15,7 +15,7 @@
 import os
 import shutil
 import subprocess
-from typing import List, Optional
+from typing import List
 
 import pytest
 
@@ -57,83 +57,45 @@ def start_app(
     )
 
 
-def test_python_package_is_generated():
-    os.chdir(os.environ["SERVICE_CLIENT_ROOT"])
-    assert subprocess.check_call(["velocitas", "init", "-v"]) == 0
-
-    assert_python_package_generated("seats")
-
-
-def assert_python_package_generated(service_name: str):
+def assert_python_package_generated(service_name: str, proto_filename: str) -> None:
     service_path = os.path.join(get_project_cache_dir(), "services", service_name)
     assert os.path.isdir(service_path)
     assert os.path.isfile(os.path.join(service_path, "pyproject.toml"))
 
     source_path = os.path.join(service_path, f"{service_name}_service_sdk")
     assert os.path.isdir(source_path)
-    assert os.path.isfile(os.path.join(source_path, f"{service_name}_pb2_grpc.py"))
-    assert os.path.isfile(os.path.join(source_path, f"{service_name}_pb2.py"))
-    assert os.path.isfile(os.path.join(source_path, f"{service_name}_pb2.pyi"))
+    assert os.path.isfile(os.path.join(source_path, f"{proto_filename}_pb2_grpc.py"))
+    assert os.path.isfile(os.path.join(source_path, f"{proto_filename}_pb2.py"))
+    assert os.path.isfile(os.path.join(source_path, f"{proto_filename}_pb2.pyi"))
+
+
+def test_pip_package_is_generated():
+    os.chdir(os.environ["SERVICE_CLIENT_ROOT"])
+    assert subprocess.check_call(["velocitas", "init", "-v"]) == 0
+
+    assert_python_package_generated("seats", "seats")
+    assert_python_package_generated("hornservice", "horn")
 
 
 def test_pip_package_is_usable():
-    from velocitas_sdk.base import Middleware, ServiceLocator
+    envs = os.environ.copy()
+    envs["SDV_SEATS_ADDRESS"] = "127.0.0.1:1234"
+    envs["SDV_HORNSERVICE_ADDRESS"] = "127.0.0.1:1235"
 
-    class TestClientServiceLocator(ServiceLocator):
-        def get_service_location(self, service_name: str) -> str:
-            return f"{service_name}@127.0.0.1:1234"  # noqa: E231
-
-        def get_metadata(self, service_name: Optional[str] = None):
-            pass
-
-    class TestServerServiceLocator(ServiceLocator):
-        def get_service_location(self, service_name: str) -> str:
-            return "127.0.0.1:1234"  # noqa: E231
-
-        def get_metadata(self, service_name: Optional[str] = None):
-            pass
-
-    class TestMiddleware(Middleware):
-        def __init__(self, serviceLocator: ServiceLocator) -> None:
-            self.service_locator = serviceLocator
-
-        async def start(self):
-            pass
-
-        async def wait_until_ready(self):
-            pass
-
-        async def stop(self):
-            pass
-
-    print("============= BUILDING SEATS SERVER ===================")
+    print("============= TEST SERVER ===================")
     os.chdir(os.environ["SERVICE_SERVER_ROOT"])
 
     assert subprocess.check_call(["velocitas", "init", "-v"]) == 0
 
-    new_env = os.environ.copy()
-    new_env["SDV_SEATS_ADDRESS"] = "127.0.0.1:1234"
-
-    assert subprocess.check_call(["velocitas", "init", "-v"]) == 0
-
-    launcher = start_app("launcher_seats", new_env)
+    launcher = start_app("launcher", envs)
 
     assert launcher.returncode == 0
 
-    print("============= TEST HORN SERVER ===================")
-    new_env["SDV_HORN_SERVICE_ADDRESS"] = "127.0.0.1:1234"
-
-    assert subprocess.check_call(["velocitas", "init", "-v"]) == 0
-
-    launcher = start_app("launcher_horn", new_env)
-
-    assert launcher.returncode == 0
-
-    print("============= BUILDING CLIENTS ===================")
+    print("============= TEST CLIENTS ===================")
     os.chdir(os.environ["SERVICE_CLIENT_ROOT"])
 
     assert subprocess.check_call(["velocitas", "init", "-v"]) == 0
 
-    launcher = start_app("launcher", new_env)
+    launcher = start_app("launcher", envs)
 
     assert launcher.returncode == 0

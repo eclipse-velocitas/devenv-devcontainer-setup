@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Contributors to the Eclipse Foundation
+# Copyright (c) 2022-2024 Contributors to the Eclipse Foundation
 #
 # This program and the accompanying materials are made available under the
 # terms of the Apache License, Version 2.0 which is available at
@@ -12,25 +12,38 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import grpc
+"""A sample skeleton vehicle app."""
+
+from hornservice_service_sdk.HornServiceServiceServerFactory import (
+    HornServiceServiceServerFactory,
+)
+from HornServiceServiceImpl import HornServiceService
 from seats_service_sdk.SeatsServiceServerFactory import SeatsServiceServerFactory
 from SeatsServiceImpl import SeatsService
-from test_middleware import TestMiddleware, TestServerServiceLocator
+from velocitas_sdk import config
 from velocitas_sdk.base import Middleware
 
 
-def create_seats_server(middleware: Middleware) -> grpc.Server:
+def start_seats_server(middleware: Middleware):
     servicer = SeatsService()
 
-    return SeatsServiceServerFactory.create(
+    server = SeatsServiceServerFactory.create(
         middleware,
         servicer,
     )
+    server.start()
+
+
+def start_horn_server(middleware: Middleware):
+    servicer = HornServiceService()
+
+    server = HornServiceServiceServerFactory.create(
+        middleware,
+        servicer,
+    )
+    server.start()
 
 
 if __name__ == "__main__":
-    middleware_server_mock = TestMiddleware(TestServerServiceLocator())
-
-    server = create_seats_server(middleware_server_mock)
-    server.start()
-    server.wait_for_termination()
+    start_horn_server(config.middleware)
+    start_seats_server(config.middleware)
