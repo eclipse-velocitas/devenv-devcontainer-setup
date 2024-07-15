@@ -126,7 +126,7 @@ def get_absolute_proto_include_path(relative_path: str) -> str:
 def generate_services(
     factory: GrpcServiceSdkGeneratorFactory, if_config: Dict[str, Any]
 ) -> None:
-    """Generate SDKs for the services defined in the AppManifest..
+    """Generate SDKs for the services defined in the AppManifest.
 
     Raises:
         RuntimeError: If there is no service defined in any proto files given.
@@ -173,6 +173,9 @@ def generate_services(
                 proto_service_file, factory, is_client, is_server, proto_include_dir
             )
         except RuntimeError:
+            print(
+                f"File {proto_file} has no services defined. If it's a types definition ignore this error!"
+            )
             skipped_files += 1
 
     if skipped_files == len(proto_files):
@@ -192,8 +195,8 @@ def generate_single_service(
         proto_file_handle (proto:ProtoFileHandle): A file containing the service to generate.
         factory (GrpcPackageGeneratorFactory):
             The factory from which to generate an SDK generator for a single service.
-        generate_client (bool):     Generates client code.
-        generate_server (bool):     Generates server code.
+        generate_client (bool):     Whether to create client code or not.
+        generate_server (bool):     Whether to create server code or not.
         proto_include_dir (str):          The directory in which to search for imports.
     """
 

@@ -21,8 +21,20 @@ from proto_schema_parser.parser import Parser
 class ProtoFileHandle:
     def __init__(self, file_path: str):
         self.file_path = file_path
-        self.service_name = self.get_service_name()
-        self.imports = self.get_imports()
+        self.service_name = None
+        self.imports: List[str] = []
+
+        with open(file_path, "r") as file:
+            parsed_data = Parser().parse(file.read())
+
+        for element in parsed_data.file_elements:
+            if isinstance(element, ast.Service):
+                self.service_name = str(element.name)
+            if isinstance(element, ast.Import):
+                self.imports.append(str(element.name))
+
+        if self.service_name is None:
+            raise RuntimeError("No service name found in proto file!")
 
     def get_package(self) -> str:
         """Return the package of the proto file.
@@ -53,18 +65,9 @@ class ProtoFileHandle:
         Returns:
             str: The name of the service.
         """
-        service_name = None
-        with open(self.file_path, "r") as file:
-            parsed_data = Parser().parse(file.read())
-
-        for element in parsed_data.file_elements:
-            if isinstance(element, ast.Service):
-                service_name = str(element.name)
-
-        if service_name is None:
+        if self.service_name is None:
             raise RuntimeError("No service name found in proto file!")
-
-        return service_name
+        return self.service_name
 
     def get_imports(self) -> List[str]:
         """Get the name of the imports.
@@ -72,12 +75,4 @@ class ProtoFileHandle:
         Returns:
             List[str]: The names to the imports
         """
-        imports = []
-        with open(self.file_path, "r") as file:
-            parsed_data = Parser().parse(file.read())
-
-        for element in parsed_data.file_elements:
-            if isinstance(element, ast.Import):
-                imports.append(str(element.name))
-
-        return imports
+        return self.imports
