@@ -46,10 +46,14 @@ def get_project_cache_dir() -> str:
     return get_subdirs(project_caches)[0]
 
 
-def start_app(env, python_file_name: str) -> subprocess.CompletedProcess[bytes]:
+def start_app(
+    python_file_name: str, env=os.environ
+) -> subprocess.CompletedProcess[bytes]:
+    python_file = f"app/src/{python_file_name}.py"
     return subprocess.run(
-        [f"python app/src/{python_file_name}.py"],
+        args=["python", python_file],
         env=env,
+        shell=True,
     )
 
 
@@ -112,7 +116,7 @@ def test_pip_package_is_usable():
 
     assert subprocess.check_call(["velocitas", "init", "-v"]) == 0
 
-    launcher = start_app(new_env, "launcher_seats")
+    launcher = start_app("launcher_seats", new_env)
 
     assert launcher.returncode == 0
 
@@ -121,7 +125,7 @@ def test_pip_package_is_usable():
 
     assert subprocess.check_call(["velocitas", "init", "-v"]) == 0
 
-    launcher = start_app(new_env, "launcher_horn")
+    launcher = start_app("launcher_horn", new_env)
 
     assert launcher.returncode == 0
 
@@ -130,6 +134,6 @@ def test_pip_package_is_usable():
 
     assert subprocess.check_call(["velocitas", "init", "-v"]) == 0
 
-    launcher = start_app(new_env, "launcher")
+    launcher = start_app("launcher", new_env)
 
     assert launcher.returncode == 0
