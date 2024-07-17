@@ -16,4 +16,5 @@
 
 # Provides backward compatibility for all scripts and pipelines
 # which use the bash variant.
-python3 ./build.py $@
+
+velocitas exec build-system build $@
