@@ -138,10 +138,13 @@ def cli() -> None:
     args = argument_parser.parse_args()
 
     build_arch = subprocess.check_output(["arch"], encoding="utf-8").strip()
+
     host_arch = args.cross
 
     if host_arch is None:
         host_arch = build_arch
+    else:
+        host_arch = get_valid_arch(host_arch)
 
     subprocess.check_call(["conan", "config", "set", "general.revisions_enabled=1"])
 
