@@ -185,7 +185,7 @@
                     "name": "sdkGitRef",
                     "type": "string",
                     "default": "auto",
-                    "description": "Git reference for the SDK repository to use. If set to 'auto', it will use the version identifier from the dependency file."
+                    "description": "Git reference (branch or tag) for the SDK repository to use. If set to 'auto', it will use the version identifier from the dependency file."
                 },
                 {
                     "name": "additionalPackages",
