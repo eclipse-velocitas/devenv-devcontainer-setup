@@ -178,7 +178,7 @@ def force_clone_repo(
 
     Args:
         git_url (str): The URL of the git repo to clone.
-        git_ref (str): The git ref (branch, tag, SHA) to clone.
+        git_ref (str): The git ref (branch or tag) to clone.
         output_dir (str): The output directory to which to output the cloned
             repository.
         verbose_logging (bool): Enable verbose logging.
@@ -198,7 +198,7 @@ def force_clone_repo(
     )
 
 
-def install_packge_if_required(
+def install_package_if_required(
     package_dict: Dict[str, str], lang: str, verbose_logging: bool
 ):
     required_package_version: Optional[str] = None
@@ -234,9 +234,7 @@ def install_packge_if_required(
     force_clone_repo(git_url, git_ref, package_clone_path, verbose_logging)
 
     # install SDK
-    print(
-        f"Installing package version {required_package_version!r} from {git_url!r}..."
-    )
+    print(f"Installing package version {git_ref!r} from {git_url!r}...")
     package_path = os.path.join(package_clone_path, package_dict["packageSubdirectory"])
     package_manager.install_local_package(package_path)
 
@@ -254,9 +252,9 @@ def main(verbose: bool):
 
     additional_packages = json.loads(require_env("additionalPackages"))
     for package in additional_packages:
-        install_packge_if_required(package, lang, verbose)
+        install_package_if_required(package, lang, verbose)
 
-    install_packge_if_required(
+    install_package_if_required(
         {
             "id": "vehicle-app-sdk" if lang == "cpp" else "velocitas_sdk",
             "gitRepo": require_env("sdkGitRepo"),
