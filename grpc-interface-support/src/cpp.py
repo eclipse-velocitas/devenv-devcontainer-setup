@@ -125,8 +125,8 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
             self.__get_binary_path("protoc"),
             f"--plugin=protoc-gen-grpc={self.__get_binary_path('grpc_cpp_plugin')}",
             f"-I{self.__proto_include_path}",
-            f"--cpp_out={self.__output_path}",
-            f"--grpc_out={self.__output_path}",
+            f"--cpp_out={self.__package_directory_path}",
+            f"--grpc_out={self.__package_directory_path}",
             self.__proto_file_handle.file_path,
         ]
         subprocess.check_call(
@@ -143,7 +143,7 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
             args = [
                 self.__get_binary_path("protoc"),
                 f"-I{self.__proto_include_path}",
-                f"--cpp_out={self.__output_path}",
+                f"--cpp_out={self.__package_directory_path}",
                 path,
             ]
             subprocess.check_call(
