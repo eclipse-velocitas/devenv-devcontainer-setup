@@ -17,7 +17,7 @@ import os
 import shutil
 import zipfile
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 import proto
 from cpp import CppGrpcServiceSdkGeneratorFactory
@@ -28,53 +28,13 @@ from velocitas_lib import (
     get_project_cache_dir,
     get_workspace_dir,
     obtain_local_file_path,
+    extract_zip,
+    discover_files_in_filetree,
 )
 from velocitas_lib.functional_interface import get_interfaces_for_type
 
 DEPENDENCY_TYPE_KEY = "grpc-interface"
 DOWNLOAD_PATH = os.path.join(get_project_cache_dir(), "downloads")
-
-
-def extract_zip(file_path: str, extract_to: str) -> str:
-    """Extract a zip file.
-
-    Args:
-        file_path (str): The file path to the zip.
-        extract_to (str): The file path to extract to.
-
-    Raises:
-        RuntimeError if the file_path is not a zip.
-
-    Returns:
-        str: The file path to the extracted top level folder.
-    """
-    if zipfile.is_zipfile(file_path):
-        with zipfile.ZipFile(file_path, "r") as zip_ref:
-            zip_ref.extractall(extract_to)
-
-        return extract_to
-    else:
-        raise RuntimeError(f"{file_path!r} is not a zip file!")
-
-
-def discover_service_proto_files_in_filetree(
-    tree_root: str,
-) -> List[str]:
-    """
-    Recursively search for .proto files under the specified tree root.
-
-    Args:
-        tree_root (str): The path to the tree root to search from.
-
-    Returns:
-        List[str]: A list of file paths, relative to the search tree root, each pointing to a proto file.
-    """
-    proto_files = []
-    for dir, _, files in os.walk(tree_root):
-        for file in files:
-            if file.endswith(".proto"):
-                proto_files.append(os.path.join(dir, file))
-    return proto_files
 
 
 def create_service_sdk_dir(proto_file_handle: proto.ProtoFileHandle) -> str:
@@ -154,7 +114,7 @@ def generate_services(
         else:
             proto_files.append(path)
 
-    proto_service_files = discover_service_proto_files_in_filetree(path)
+    proto_service_files = discover_files_in_filetree(path, ".proto")
     proto_files.extend(proto_service_files) if proto_service_files else None
 
     is_client = "required" in if_config
@@ -174,7 +134,7 @@ def generate_services(
             )
         except RuntimeError:
             print(
-                f"File {proto_file} has no services defined. If it's a types definition ignore this error!"
+                f"File {proto_file} has no services defined. If it is an import file ignore this error!"
             )
             skipped_files += 1
 

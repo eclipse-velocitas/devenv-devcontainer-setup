@@ -105,6 +105,13 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
         self.__proto_include_path = proto_include_path
         self.__service_name = self.__proto_file_handle.get_service_name()
         self.__service_name_lower = self.__service_name.lower()
+        self.__output_path = os.path.join(
+            self.__package_directory_path,
+            os.path.relpath(
+                str(Path(self.__proto_file_handle.file_path).parent),
+                self.__proto_include_path,
+            ),
+        )
 
     def __get_binary_path(self, binary_name: str) -> str:
         path = shutil.which(binary_name)
@@ -112,17 +119,14 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
             raise KeyError(f"{binary_name!r} missing!")
         return path
 
-    def __invoke_code_generator(self, include_path: str, output_path: str) -> None:
+    def __invoke_code_generator(self) -> None:
         print("Invoking gRPC code generator")
-        self.__output_path = os.path.join(
-            output_path, os.path.relpath(include_path, self.__proto_include_path)
-        )
         args = [
             self.__get_binary_path("protoc"),
             f"--plugin=protoc-gen-grpc={self.__get_binary_path('grpc_cpp_plugin')}",
             f"-I{self.__proto_include_path}",
-            f"--cpp_out={output_path}",
-            f"--grpc_out={output_path}",
+            f"--cpp_out={self.__output_path}",
+            f"--grpc_out={self.__output_path}",
             self.__proto_file_handle.file_path,
         ]
         subprocess.check_call(
@@ -139,7 +143,7 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
             args = [
                 self.__get_binary_path("protoc"),
                 f"-I{self.__proto_include_path}",
-                f"--cpp_out={output_path}",
+                f"--cpp_out={self.__output_path}",
                 path,
             ]
             subprocess.check_call(
@@ -150,10 +154,7 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
             )
 
     def generate_package(self, client_required: bool, server_required: bool) -> None:
-        self.__invoke_code_generator(
-            str(Path(self.__proto_file_handle.file_path).parent),
-            self.__package_directory_path,
-        )
+        self.__invoke_code_generator()
 
         files_to_copy: List[CopySpec] = []
 

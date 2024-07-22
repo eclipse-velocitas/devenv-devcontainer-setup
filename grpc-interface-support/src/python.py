@@ -106,8 +106,6 @@ class PythonGrpcInterfaceGenerator(GrpcServiceSdkGenerator):  # type: ignore
         self.__proto_include_path = proto_include_path
         self.__service_name = self.__proto_file_handle.get_service_name()
         self.__service_name_lower = self.__service_name.lower()
-
-    def __invoke_code_generator(self) -> None:
         self.__output_path = os.path.join(
             self.__package_directory_path,
             os.path.relpath(
@@ -115,6 +113,13 @@ class PythonGrpcInterfaceGenerator(GrpcServiceSdkGenerator):  # type: ignore
                 self.__proto_include_path,
             ),
         )
+        self.__service_grpc_code_extractor = GrpcCodeExtractor(
+            self.__proto_file_handle,
+            self.__output_path,
+            f"{self.__service_name_lower}_service_sdk",
+        )
+
+    def __invoke_code_generator(self) -> None:
         subprocess.check_call(
             [
                 "python",
@@ -148,11 +153,6 @@ class PythonGrpcInterfaceGenerator(GrpcServiceSdkGenerator):  # type: ignore
     def __copy_code_and_templates(
         self, client_required: bool, server_required: bool
     ) -> None:
-        self.__service_grpc_code_extractor = GrpcCodeExtractor(
-            self.__proto_file_handle,
-            self.__output_path,
-            f"{self.__service_name_lower}_service_sdk",
-        )
         module_name = f"{self.__service_name_lower}_service_sdk"
         source_path = os.path.join(self.__output_path, module_name)
         os.makedirs(os.path.join(self.__output_path, source_path), exist_ok=True)
