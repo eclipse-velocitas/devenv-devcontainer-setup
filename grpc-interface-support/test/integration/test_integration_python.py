@@ -15,7 +15,7 @@
 import os
 import shutil
 import subprocess
-from typing import List
+from typing import List, Optional
 
 import pytest
 
@@ -57,12 +57,17 @@ def start_app(
     )
 
 
-def assert_python_package_generated(service_name: str, proto_filename: str) -> None:
+def assert_python_package_generated(
+    service_name: str, proto_filename: str, sub_dir: Optional[str] = None
+) -> None:
     service_path = os.path.join(get_project_cache_dir(), "services", service_name)
     assert os.path.isdir(service_path)
     assert os.path.isfile(os.path.join(service_path, "pyproject.toml"))
 
-    source_path = os.path.join(service_path, f"{service_name}_service_sdk")
+    if sub_dir is not None:
+        source_path = os.path.join(service_path, sub_dir, f"{service_name}_service_sdk")
+    else:
+        source_path = os.path.join(service_path, f"{service_name}_service_sdk")
     assert os.path.isdir(source_path)
     assert os.path.isfile(os.path.join(source_path, f"{proto_filename}_pb2_grpc.py"))
     assert os.path.isfile(os.path.join(source_path, f"{proto_filename}_pb2.py"))
@@ -75,7 +80,7 @@ def test_pip_package_is_generated():
 
     assert_python_package_generated("seats", "seats")
     assert_python_package_generated("hornservice", "horn")
-    assert_python_package_generated("val", "val")
+    assert_python_package_generated("val", "val", "kuksa/val/v1")
     assert_python_package_generated("vcsptcpbylimservice", "vcsptcpbylimservice")
     assert_python_package_generated("vcsmotortrqmngservice", "vcsmotortrqmngservice")
 
