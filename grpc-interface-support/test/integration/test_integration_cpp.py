@@ -91,7 +91,7 @@ def ensure_added_conan():
 
 def ensure_packages_are_generated():
     ensure_package_is_generated("seats")
-    ensure_package_is_generated("horn")
+    ensure_package_is_generated("hornservice")
     ensure_package_is_generated("val")
     ensure_package_is_generated("bcmdoor")
     ensure_package_is_generated("vcsptcpbylims")

@@ -81,8 +81,8 @@ def test_pip_package_is_generated():
     assert_python_package_generated("seats", "seats")
     assert_python_package_generated("hornservice", "horn")
     assert_python_package_generated("val", "val", "kuksa/val/v1")
-    assert_python_package_generated("vcsptcpbylimservice", "vcsptcpbylimservice")
-    assert_python_package_generated("vcsmotortrqmngservice", "vcsmotortrqmngservice")
+    assert_python_package_generated("vcsptcpbylimservice", "capacitylimit")
+    assert_python_package_generated("vcsmotortrqmngservice", "motorcontrol")
 
 
 def test_pip_package_is_usable():
