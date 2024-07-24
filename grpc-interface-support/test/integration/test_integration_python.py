@@ -75,12 +75,18 @@ def test_pip_package_is_generated():
 
     assert_python_package_generated("seats", "seats")
     assert_python_package_generated("hornservice", "horn")
+    assert_python_package_generated("val", "val")
+    assert_python_package_generated("vcsptcpbylimservice", "vcsptcpbylimservice")
+    assert_python_package_generated("vcsmotortrqmngservice", "vcsmotortrqmngservice")
 
 
 def test_pip_package_is_usable():
     envs = os.environ.copy()
     envs["SDV_SEATS_ADDRESS"] = "127.0.0.1:1234"
     envs["SDV_HORNSERVICE_ADDRESS"] = "127.0.0.1:1235"
+    envs["SDV_VAL_ADDRESS"] = "127.0.0.1:1236"
+    envs["SDV_VCSPTCPBYLIMSERVICE_ADDRESS"] = "127.0.0.1:1237"
+    envs["SDV_VCSMOTORTRQMNGSERVICE_ADDRESS"] = "127.0.0.1:1238"
 
     print("============= TEST SERVER ===================")
     os.chdir(os.environ["SERVICE_SERVER_ROOT"])

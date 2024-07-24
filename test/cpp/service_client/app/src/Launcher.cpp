@@ -14,13 +14,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "SampleApp.h"
-
-#include "sdk/middleware/Middleware.h"
-#include "services/seats/SeatsServiceClientFactory.h"
-#include "services/seats/seats.grpc.pb.h"
+#include <sdk/middleware/Middleware.h>
+#include <services/hornservice/HornServiceClientFactory.h>
+#include <services/hornservice/horn.grpc.pb.h>
+#include <services/seats/SeatsServiceClientFactory.h>
+#include <services/seats/seats.grpc.pb.h>
+#include <services/val/kuksa/val/v1/ValServiceClientFactory.h>
+#include <services/val/kuksa/val/v1/val.grpc.pb.h>
+#include <services/vcsmotortrqmngservice/VcsmotortrqmngserviceServiceClientFactory.h>
+#include <services/vcsmotortrqmngservice/motorcontrol.grpc.pb.h>
+#include <services/vcsptcpbylimservice/VcsptcpbylimserviceServiceClientFactory.h>
+#include <services/vcsptcpbylimservice/capacitylimit.grpc.pb.h>
 
 #include <iostream>
+
+#include "SampleApp.h"
 
 using namespace velocitas;
 
@@ -28,17 +36,80 @@ int main(int argc, char** argv) {
     auto seatService =
         SeatsServiceClientFactory::create(Middleware::getInstance());
 
+    auto hornService = HornServiceClientFactory::create(Middleware::getInstance());
+
+    auto valService = ValServiceClientFactory::create(Middleware::getInstance());
+
+    auto motorcontrolService =
+        VcsmotortrqmngserviceServiceClientFactory::create(Middleware::getInstance());
+
+    auto capacityService =
+        VcsptcpbylimserviceServiceClientFactory::create(Middleware::getInstance());
+
     ::grpc::ClientContext context;
     ::sdv::edge::comfort::seats::v1::MoveRequest request;
     ::sdv::edge::comfort::seats::v1::MoveReply response;
-    auto status = seatService->Move(&context, request, &response);
+    auto status = seatService->Move(&context, &request, &response);
 
     std::cout << "gRPC Server returned code: " << status.error_code() << std::endl;
     std::cout << "gRPC error message: " << status.error_message().c_str() << std::endl;
 
-    if (status.error_code () == ::grpc::StatusCode::UNIMPLEMENTED) {
-        return 0;
+    if (status.error_code() != ::grpc::StatusCode::UNIMPLEMENTED)
+    {
+       return 1;
     }
 
-    return 1;
+    ::bcm::horn::v1::StartRequest start_request;
+    ::bcm::horn::v1::StartResponse start_response;
+
+    status = hornService->Start(&context, &start_request, &start_response);
+
+    std::cout << "gRPC Server returned code: " << status.error_code() << std::endl;
+    std::cout << "gRPC error message: " << status.error_message().c_str() << std::endl;
+
+    if (status.error_code() != ::grpc::StatusCode::UNIMPLEMENTED)
+    {
+       return 1;
+    }
+
+    ::kuksa::val::v1::GetRequest get_reqeuest;
+    ::kuksa::val::v1::GetResponse get_response;
+
+    status = valService->Get(&context, &get_reqeuest, &get_response);
+
+    std::cout << "gRPC Server returned code: " << status.error_code() << std::endl;
+    std::cout << "gRPC error message: " << status.error_message().c_str() << std::endl;
+
+    if (status.error_code() != ::grpc::StatusCode::UNIMPLEMENTED)
+    {
+       return 1;
+    }
+
+    ::vcs::powertrain::v1::SetMCUCtrlReqRequest set_mcu_request;
+    ::vcs::powertrain::v1::SetMCUCtrlReqResponse set_mcu_response;
+
+    status = motorcontrolService->SetMCUCtrlReq(&context, &set_mcu_request, &set_mcu_response);
+
+    std::cout << "gRPC Server returned code: " << status.error_code() << std::endl;
+    std::cout << "gRPC error message: " << status.error_message().c_str() << std::endl;
+
+    if (status.error_code() != ::grpc::StatusCode::UNIMPLEMENTED)
+    {
+       return 1;
+    }
+
+    : vcs::powertrain::v1::NtfPtPwrLimRequest pwr_lim_request;
+    ::vcs::powertrain::v1::NtfPtPwrLimResponse pwr_lim_response;
+
+    status = capacityService->NtfPtPwrLim(&context, &pwr_lim_request, &pwr_lim_response);
+
+    std::cout << "gRPC Server returned code: " << status.error_code() << std::endl;
+    std::cout << "gRPC error message: " << status.error_message().c_str() << std::endl;
+
+    if (status.error_code() != ::grpc::StatusCode::UNIMPLEMENTED)
+    {
+       return 1;
+    }
+
+    return 0;
 }

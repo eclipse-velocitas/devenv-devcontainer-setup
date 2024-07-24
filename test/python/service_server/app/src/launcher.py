@@ -14,9 +14,13 @@
 
 """A sample skeleton vehicle app."""
 
-from hornservice_service_sdk.HornServiceServiceServerFactory import (
-    HornServiceServiceServerFactory,
-)
+from val_service_sdk import VALServiceServerFactory
+from VALServiceImpl import VALService
+from vcsmotortrqmngservice_service_sdk import VCSMotorTrqMngServiceServiceServerFactory
+from VCSMotorTrqMngServiceServiceImpl import VCSMotorTrqMngServiceService
+from vcsptcpbylimservice_service_sdk import VCSPtCpbyLimServiceServiceServerFactory
+from VCSPtCpbyLimServiceServiceImpl import VCSPtCpbyLimServiceService
+from hornservice_service_sdk import HornServiceServiceServerFactory
 from HornServiceServiceImpl import HornServiceService
 from seats_service_sdk.SeatsServiceServerFactory import SeatsServiceServerFactory
 from SeatsServiceImpl import SeatsService
@@ -44,6 +48,39 @@ def start_horn_server(middleware: Middleware):
     server.start()
 
 
+def start_val_server(middleware: Middleware):
+    servicer = VALService()
+
+    server = VALServiceServerFactory.create(
+        middleware,
+        servicer,
+    )
+    server.start()
+
+
+def start_motorcontrol_server(middleware: Middleware):
+    servicer = VCSMotorTrqMngServiceService()
+
+    server = VCSMotorTrqMngServiceServiceServerFactory.create(
+        middleware,
+        servicer,
+    )
+    server.start()
+
+
+def start_capacitycontrol_server(middleware: Middleware):
+    servicer = VCSPtCpbyLimServiceService()
+
+    server = VCSPtCpbyLimServiceServiceServerFactory.create(
+        middleware,
+        servicer,
+    )
+    server.start()
+
+
 if __name__ == "__main__":
     start_horn_server(config.middleware)
     start_seats_server(config.middleware)
+    start_val_server(config.middleware)
+    start_motorcontrol_server(config.middleware)
+    start_capacitycontrol_server(config.middleware)

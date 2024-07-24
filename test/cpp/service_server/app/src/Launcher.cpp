@@ -14,11 +14,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "sdk/middleware/Middleware.h"
-#include "services/seats/SeatsServiceServerFactory.h"
-#include "SeatsServiceImpl.h"
+#include <services/hornservice/HornServiceServerFactory.h>
+#include <services/seats/SeatsServiceServerFactory.h>
+#include <services/val/kuksa/val/v1/ValServiceServerFactory.h>
+#include <services/vcsmotortrqmngservice/VcsmotortrqmngserviceServiceServerFactory.h>
+#include <services/vcsptcpbylimservice/VcsptcpbylimserviceServiceServerFactory.h>
 
 #include <memory>
+#include <thread>
+
+#include "HornServiceServiceImpl.h"
+#include "SeatsServiceImpl.h"
+#include "VALServiceImpl.h"
+#include "VCSMotorTrqMngServiceServiceImpl.h"
+#include "VCSPtCpbyLimServiceServiceImpl.h"
+#include "sdk/middleware/Middleware.h"
 
 using namespace velocitas;
 
@@ -28,6 +38,39 @@ int main(int argc, char** argv) {
     auto seatServer =
         SeatsServiceServerFactory::create(Middleware::getInstance(), seatsImpl);
 
-    seatServer->Wait();
+    std::thread seatThread(seatServer->Wait());
+
+    auto hornImpl = std::make_shared<HornService>();
+
+    auto hornserver = HornServiceServerFactory::create(Middleware::getInstance(), hornImpl);
+
+    std::thread hornThread(hornserver->Wait());
+
+    auto valImpl = std::make_shared<VALService>();
+
+    auto valServer = ValServiceServerFactory::create(Middleware::getInstance(), valImpl);
+
+    std::thread valThread(valServer->Wait());
+
+    auto motorcontrolImpl = std::make_shared<VCSMotorTrqMngServiceService>();
+
+    auto motorcontrolServer = VcsmotortrqmngserviceServiceServerFactory::create(
+        Middleware::getInstance(), motorcontrolImpl);
+
+    std::thread motorcontrolThread(motorcontrolServer->Wait());
+
+    auto capacitycontrolImpl = std::make_shared<VCSPtCpbyLimServiceService>();
+
+    auto capacitycontrolServer = VcsptcpbylimserviceServiceServerFactory::create(
+        Middleware::getInstance(), capacitycontrolImpl);
+
+    std::thread capacitycontrolThread(capacitycontrolServer->Wait());
+
+    seatThread.detach();
+    hornThread.detach();
+    valThread.detach();
+    motorcontrolThread.detach();
+    capacitycontrolThread.detach();
+
     return 0;
 }
