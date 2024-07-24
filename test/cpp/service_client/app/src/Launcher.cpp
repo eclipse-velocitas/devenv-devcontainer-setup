@@ -15,7 +15,7 @@
  */
 
 #include <sdk/middleware/Middleware.h>
-#include <services/hornservice/HornServiceClientFactory.h>
+#include <services/hornservice/HornserviceServiceClientFactory.h>
 #include <services/hornservice/horn.grpc.pb.h>
 #include <services/seats/SeatsServiceClientFactory.h>
 #include <services/seats/seats.grpc.pb.h>
@@ -36,7 +36,7 @@ int main(int argc, char** argv) {
     auto seatService =
         SeatsServiceClientFactory::create(Middleware::getInstance());
 
-    auto hornService = HornServiceClientFactory::create(Middleware::getInstance());
+    auto hornService = HornserviceServiceClientFactory::create(Middleware::getInstance());
 
     auto valService = ValServiceClientFactory::create(Middleware::getInstance());
 

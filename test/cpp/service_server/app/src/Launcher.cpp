@@ -14,7 +14,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <services/hornservice/HornServiceServerFactory.h>
+#include <services/hornservice/HornserviceServiceServerFactory.h>
 #include <services/seats/SeatsServiceServerFactory.h>
 #include <services/val/kuksa/val/v1/ValServiceServerFactory.h>
 #include <services/vcsmotortrqmngservice/VcsmotortrqmngserviceServiceServerFactory.h>
@@ -42,7 +42,8 @@ int main(int argc, char** argv) {
 
     auto hornImpl = std::make_shared<HornService>();
 
-    auto hornserver = HornServiceServerFactory::create(Middleware::getInstance(), hornImpl);
+    auto hornserver =
+        HornserviceServiceServerFactory::create(Middleware::getInstance(), hornImpl);
 
     std::thread hornThread(hornserver->Wait());
 
