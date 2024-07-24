@@ -84,7 +84,6 @@ def ensure_added_conan():
     assert get_dependency_count("seats-service-sdk") == 1
     assert get_dependency_count("hornservice-service-sdk") == 1
     assert get_dependency_count("val-service-sdk") == 1
-    assert get_dependency_count("bcmdoorservice-service-sdk") == 1
     assert get_dependency_count("vcsptcpbylimservice-service-sdk") == 1
     assert get_dependency_count("vcsmotortrqmngservice-service-sdk") == 1
 
@@ -93,7 +92,6 @@ def ensure_packages_are_generated():
     ensure_package_is_generated("seats")
     ensure_package_is_generated("hornservice")
     ensure_package_is_generated("val")
-    ensure_package_is_generated("bcmdoor")
     ensure_package_is_generated("vcsptcpbylims")
     ensure_package_is_generated("vcsmotortrqmng")
 
