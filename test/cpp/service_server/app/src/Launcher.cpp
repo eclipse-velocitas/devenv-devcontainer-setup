@@ -16,7 +16,7 @@
 
 #include <services/hornservice/HornserviceServiceServerFactory.h>
 #include <services/seats/SeatsServiceServerFactory.h>
-#include <services/val/kuksa/val/v1/ValServiceServerFactory.h>
+#include <services/val/ValServiceServerFactory.h>
 #include <services/vcsmotortrqmngservice/VcsmotortrqmngserviceServiceServerFactory.h>
 #include <services/vcsptcpbylimservice/VcsptcpbylimserviceServiceServerFactory.h>
 
@@ -25,9 +25,9 @@
 
 #include "HornServiceServiceImpl.h"
 #include "SeatsServiceImpl.h"
-#include "VALServiceImpl.h"
 #include "VCSMotorTrqMngServiceServiceImpl.h"
 #include "VCSPtCpbyLimServiceServiceImpl.h"
+#include "ValServiceImpl.h"
 #include "sdk/middleware/Middleware.h"
 
 using namespace velocitas;
