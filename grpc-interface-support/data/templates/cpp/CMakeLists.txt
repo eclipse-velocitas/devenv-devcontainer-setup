@@ -14,7 +14,7 @@ target_include_directories(${PROJECT_NAME}
 
 include_directories(
     ${CMAKE_INCLUDE_PATH}
-    include/services/${{ service_name_lower }}
+    include/
 )
 
 set(HEADERS
@@ -28,3 +28,5 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 install(TARGETS ${PROJECT_NAME}
     PUBLIC_HEADER DESTINATION include/services/${{ service_name_lower }}
 )
+
+install(FILES ${HEADERS} DESTINATION include/${{ proto_location }})

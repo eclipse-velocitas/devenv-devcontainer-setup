@@ -103,6 +103,10 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
         self.__proto_file_handle = proto_file_handle
         self.__verbose = verbose
         self.__proto_include_path = proto_include_path
+        self.__proto_include_rel_path = os.path.relpath(
+            str(Path(self.__proto_file_handle.file_path).parent),
+            self.__proto_include_path,
+        )
         self.__service_name = self.__proto_file_handle.get_service_name()
         self.__service_name_lower = self.__service_name.lower()
         self.__output_path = os.path.join(
@@ -172,33 +176,44 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
         )
 
     def __get_template_variables(self) -> Dict[str, str]:
+        if self.__proto_include_rel_path != ".":
+            grpc_service_header_path = os.path.join(
+                self.__proto_include_rel_path,
+                f"{Path(self.__proto_file_handle.file_path).stem}.grpc.pb.h",
+            )
+        else:
+            grpc_service_header_path = (
+                f"{Path(self.__proto_file_handle.file_path).stem}.grpc.pb.h"
+            )
         return {
             "service_name": self.__service_name,
             "service_name_lower": self.__service_name_lower,
             "service_name_camel_case": to_camel_case(self.__service_name),
             "package_id": self.__proto_file_handle.get_package().replace(".", "::"),
             "core_sdk_version": str(get_required_sdk_version()),
-            "service_include_dir": self.__get_relative_file_dir(),
-            "grpc_service_header_path": os.path.join(
-                self.__get_relative_file_dir(),
-                f"{Path(self.__proto_file_handle.file_path).stem}.grpc.pb.h",
-            ),
+            "service_include_dir": self.__get_service_dir(),
+            "proto_location": self.__proto_include_rel_path,
+            "grpc_service_header_path": grpc_service_header_path,
         }
 
-    def __get_relative_file_dir(self) -> str:
-        rel_path = os.path.relpath(
-            Path(self.__proto_file_handle.file_path).parent, self.__proto_include_path
-        )
-        if rel_path == ".":
-            return f"services/{self.__service_name_lower}"
-
-        return f"services/{self.__service_name_lower}/{rel_path}"
+    def __get_service_dir(self) -> str:
+        return f"services/{self.__service_name_lower}"
 
     def __get_include_dir(self) -> str:
-        return f"include/{self.__get_relative_file_dir()}"
+        return f"include/{self.__get_service_dir()}"
 
     def __get_source_dir(self) -> str:
-        return f"src/{self.__get_relative_file_dir()}"
+        return f"src/{self.__get_service_dir()}"
+
+    def __get_include_proto_dir(self) -> str:
+        if self.__proto_include_rel_path == ".":
+            return "include/"
+        return f"include/{self.__proto_include_rel_path}"
+
+    def __get_source_proto_dir(self) -> str:
+        if self.__proto_include_rel_path == ".":
+            return "src/"
+        return f"src/{self.__proto_include_rel_path}"
 
     def __get_service_client_files(self, service_name: str) -> List[CopySpec]:
         return [
@@ -266,8 +281,8 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
     def install_package(self) -> None:
         self.__move_generated_sources(
             self.__package_directory_path,
-            self.__get_include_dir(),
-            self.__get_source_dir(),
+            self.__get_include_proto_dir(),
+            self.__get_source_proto_dir(),
         )
 
         files_to_copy = [
@@ -278,18 +293,54 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
         variables = self.__get_template_variables()
 
         cmake_headers = [
-            os.path.join(self.__get_include_dir(), file)
-            for file in os.listdir(
-                os.path.join(self.__package_directory_path, self.__get_include_dir())
+            os.path.relpath(
+                os.path.join(self.__get_include_dir(), file),
+                self.__package_directory_path,
             )
+            for file in Path(
+                os.path.join(self.__package_directory_path, self.__get_include_dir())
+            ).iterdir()
+            if file.is_file()
         ]
+        cmake_headers.extend(
+            [
+                os.path.relpath(
+                    os.path.join(self.__get_include_proto_dir(), file),
+                    self.__package_directory_path,
+                )
+                for file in Path(
+                    os.path.join(
+                        self.__package_directory_path, self.__get_include_proto_dir()
+                    )
+                ).iterdir()
+                if file.is_file()
+            ]
+        )
 
         cmake_sources = [
-            os.path.join(self.__get_source_dir(), file)
-            for file in os.listdir(
-                os.path.join(self.__package_directory_path, self.__get_source_dir())
+            os.path.relpath(
+                os.path.join(self.__get_source_dir(), file),
+                self.__package_directory_path,
             )
+            for file in Path(
+                os.path.join(self.__package_directory_path, self.__get_source_dir())
+            ).iterdir()
+            if file.is_file()
         ]
+        cmake_sources.extend(
+            [
+                os.path.relpath(
+                    os.path.join(self.__get_source_proto_dir(), file),
+                    self.__package_directory_path,
+                )
+                for file in Path(
+                    os.path.join(
+                        self.__package_directory_path, self.__get_source_proto_dir()
+                    )
+                ).iterdir()
+                if file.is_file()
+            ]
+        )
 
         variables["cmake_headers"] = "\n\t".join(cmake_headers)
         variables["cmake_sources"] = "\n\t".join(cmake_sources)
@@ -330,12 +381,12 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
     def __create_or_update_service_header(self) -> None:
         header_stub_code = GrpcCodeExtractor(
             self.__proto_file_handle, self.__package_directory_path
-        ).get_header_stub_code(self.__get_include_dir())
+        ).get_header_stub_code(self.__get_include_proto_dir())
 
         header_stub_code = self.__transform_header_stub_code(header_stub_code)
 
         app_source_dir = os.path.join(get_workspace_dir(), "app", "src")
-        service_header_file_name = f"{self.__service_name}ServiceImpl.h"
+        service_header_file_name = f"{to_camel_case(self.__service_name)}ServiceImpl.h"
         service_header_file_path = os.path.join(
             app_source_dir, service_header_file_name
         )
@@ -364,7 +415,9 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
 
     def __create_service_source(self) -> None:
         app_source_dir = os.path.join(get_workspace_dir(), "app", "src")
-        service_source_file_name = f"{self.__service_name}ServiceImpl.cpp"
+        service_source_file_name = (
+            f"{to_camel_case(self.__service_name)}ServiceImpl.cpp"
+        )
         service_source_file_path = os.path.join(
             app_source_dir, service_source_file_name
         )
@@ -374,7 +427,7 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
 
         source_code = GrpcCodeExtractor(
             self.__proto_file_handle, self.__package_directory_path
-        ).get_source_stub_code(self.__get_source_dir())
+        ).get_source_stub_code(self.__get_source_proto_dir())
 
         source_code = self.__transform_source_stub_code(source_code)
 

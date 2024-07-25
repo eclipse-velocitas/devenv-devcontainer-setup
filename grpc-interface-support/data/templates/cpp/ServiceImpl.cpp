@@ -14,7 +14,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "${{ service_name }}ServiceImpl.h"
+#include "${{ service_name_camel_case }}ServiceImpl.h"
 
 namespace velocitas {
 
