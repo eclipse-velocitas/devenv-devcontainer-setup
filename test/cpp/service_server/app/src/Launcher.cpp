@@ -38,34 +38,34 @@ int main(int argc, char** argv) {
     auto seatServer =
         SeatsServiceServerFactory::create(Middleware::getInstance(), seatsImpl);
 
-    std::thread seatThread([seatServer]() { seatServer->Wait(); });
+    std::thread seatThread([&seatServer]() { seatServer->Wait(); });
 
     auto hornImpl = std::make_shared<HornserviceService>();
 
     auto hornServer =
         HornserviceServiceServerFactory::create(Middleware::getInstance(), hornImpl);
 
-    std::thread hornThread([hornServer]() { hornServer->Wait(); });
+    std::thread hornThread([&hornServer]() { hornServer->Wait(); });
 
     auto valImpl = std::make_shared<ValService>();
 
     auto valServer = ValServiceServerFactory::create(Middleware::getInstance(), valImpl);
 
-    std::thread valThread([valServer]() { valServer->Wait(); });
+    std::thread valThread([&valServer]() { valServer->Wait(); });
 
     auto motorcontrolImpl = std::make_shared<VcsmotortrqmngserviceService>();
 
     auto motorcontrolServer = VcsmotortrqmngserviceServiceServerFactory::create(
         Middleware::getInstance(), motorcontrolImpl);
 
-    std::thread motorcontrolThread([motorcontrolServer]() { motorcontrolServer->Wait(); });
+    std::thread motorcontrolThread([&motorcontrolServer]() { motorcontrolServer->Wait(); });
 
     auto capacitycontrolImpl = std::make_shared<VcsptcpbylimserviceService>();
 
     auto capacitycontrolServer = VcsptcpbylimserviceServiceServerFactory::create(
         Middleware::getInstance(), capacitycontrolImpl);
 
-    std::thread capacitycontrolThread([capacitycontrolServer]()
+    std::thread capacitycontrolThread([&capacitycontrolServer]()
                                       { capacitycontrolServer->Wait(); });
 
     seatThread.detach();
