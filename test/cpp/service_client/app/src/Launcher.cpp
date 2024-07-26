@@ -47,9 +47,9 @@ int main(int argc, char** argv) {
         VcsptcpbylimserviceServiceClientFactory::create(Middleware::getInstance());
 
     ::grpc::ClientContext context;
-    ::sdv::edge::comfort::seats::v1::MoveRequest request;
-    ::sdv::edge::comfort::seats::v1::MoveReply response;
-    auto status = seatService->Move(&context, &request, &response);
+    ::sdv::edge::comfort::seats::v1::MoveRequest move_request;
+    ::sdv::edge::comfort::seats::v1::MoveReply move_response;
+    auto status = seatService->Move(&context, move_request, &move_response);
 
     std::cout << "gRPC Server returned code: " << status.error_code() << std::endl;
     std::cout << "gRPC error message: " << status.error_message().c_str() << std::endl;
@@ -62,7 +62,7 @@ int main(int argc, char** argv) {
     ::bcm::horn::v1::StartRequest start_request;
     ::bcm::horn::v1::StartResponse start_response;
 
-    status = hornService->Start(&context, &start_request, &start_response);
+    status = hornService->Start(&context, start_request, &start_response);
 
     std::cout << "gRPC Server returned code: " << status.error_code() << std::endl;
     std::cout << "gRPC error message: " << status.error_message().c_str() << std::endl;
@@ -75,7 +75,7 @@ int main(int argc, char** argv) {
     ::kuksa::val::v1::GetRequest get_reqeuest;
     ::kuksa::val::v1::GetResponse get_response;
 
-    status = valService->Get(&context, &get_reqeuest, &get_response);
+    status = valService->Get(&context, get_reqeuest, &get_response);
 
     std::cout << "gRPC Server returned code: " << status.error_code() << std::endl;
     std::cout << "gRPC error message: " << status.error_message().c_str() << std::endl;
@@ -88,7 +88,7 @@ int main(int argc, char** argv) {
     ::vcs::powertrain::v1::SetMCUCtrlReqRequest set_mcu_request;
     ::vcs::powertrain::v1::SetMCUCtrlReqResponse set_mcu_response;
 
-    status = motorcontrolService->SetMCUCtrlReq(&context, &set_mcu_request, &set_mcu_response);
+    status = motorcontrolService->SetMCUCtrlReq(&context, set_mcu_request, &set_mcu_response);
 
     std::cout << "gRPC Server returned code: " << status.error_code() << std::endl;
     std::cout << "gRPC error message: " << status.error_message().c_str() << std::endl;
@@ -101,7 +101,7 @@ int main(int argc, char** argv) {
     : vcs::powertrain::v1::NtfPtPwrLimRequest pwr_lim_request;
     ::vcs::powertrain::v1::NtfPtPwrLimResponse pwr_lim_response;
 
-    status = capacityService->NtfPtPwrLim(&context, &pwr_lim_request, &pwr_lim_response);
+    status = capacityService->NtfPtPwrLim(&context, pwr_lim_request, &pwr_lim_response);
 
     std::cout << "gRPC Server returned code: " << status.error_code() << std::endl;
     std::cout << "gRPC error message: " << status.error_message().c_str() << std::endl;
