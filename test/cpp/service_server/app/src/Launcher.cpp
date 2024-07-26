@@ -25,9 +25,9 @@
 
 #include "HornserviceServiceImpl.h"
 #include "SeatsServiceImpl.h"
-#include "VCSMotorTrqMngServiceServiceImpl.h"
-#include "VCSPtCpbyLimServiceServiceImpl.h"
 #include "ValServiceImpl.h"
+#include "VcsmotortrqmngserviceServiceImpl.h"
+#include "VcsptcpbylimserviceServiceImpl.h"
 #include "sdk/middleware/Middleware.h"
 
 using namespace velocitas;
