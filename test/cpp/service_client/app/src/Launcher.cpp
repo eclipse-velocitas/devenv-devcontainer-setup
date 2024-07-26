@@ -98,7 +98,7 @@ int main(int argc, char** argv) {
        return 1;
     }
 
-    : vcs::powertrain::v1::NtfPtPwrLimRequest pwr_lim_request;
+    ::vcs::powertrain::v1::NtfPtPwrLimRequest pwr_lim_request;
     ::vcs::powertrain::v1::NtfPtPwrLimResponse pwr_lim_response;
 
     status = capacityService->NtfPtPwrLim(&context, pwr_lim_request, &pwr_lim_response);
