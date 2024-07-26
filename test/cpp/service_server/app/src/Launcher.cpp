@@ -68,11 +68,11 @@ int main(int argc, char** argv) {
     std::thread capacitycontrolThread([&capacitycontrolServer]()
                                       { capacitycontrolServer->Wait(); });
 
-    seatThread.detach();
-    hornThread.detach();
-    valThread.detach();
-    motorcontrolThread.detach();
-    capacitycontrolThread.detach();
+    seatThread.join();
+    hornThread.join();
+    valThread.join();
+    motorcontrolThread.join();
+    capacitycontrolThread.join();
 
     return 0;
 }
