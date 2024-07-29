@@ -507,6 +507,7 @@ class CppGrpcServiceSdkGeneratorFactory(GrpcServiceSdkGeneratorFactory):  # type
             "grpc-proto",
             "zlib",
             "protobuf",
+            "openssl",
         ]
         deps_patterns = [
             re.compile(r"^.*\"(" + dep + r"\/.*)\".*$") for dep in deps_to_extract
