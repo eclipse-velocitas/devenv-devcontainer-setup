@@ -293,24 +293,23 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
         variables = self.__get_template_variables()
 
         cmake_headers = [
-        os.path.join(self.__get_include_dir(), file)
-        for file in os.listdir(
-            os.path.join(self.__package_directory_path, self.__get_include_dir())
-        )
+            os.path.join(self.__get_include_dir(), file)
+            for file in os.listdir(
+                os.path.join(self.__package_directory_path, self.__get_include_dir())
+            )
         ]
 
         cmake_sources = [
-        os.path.join(self.__get_source_dir(), file)
-        for file in os.listdir(
-            os.path.join(self.__package_directory_path, self.__get_source_dir())
-        )
+            os.path.join(self.__get_source_dir(), file)
+            for file in os.listdir(
+                os.path.join(self.__package_directory_path, self.__get_source_dir())
+            )
         ]
 
         variables["cmake_headers"] = "\n\t".join(cmake_headers)
         variables["cmake_sources"] = "\n\t".join(cmake_sources)
         variables["proto_headers"] = "\n\t".join(proto_headers)
         variables["proto_sources"] = "\n\t".join(proto_sources)
-
 
         copy_templates(
             get_template_dir(),
