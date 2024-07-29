@@ -35,20 +35,10 @@ using namespace velocitas;
 int main(int argc, char** argv) {
    auto seatService = SeatsServiceClientFactory::create(Middleware::getInstance());
 
-   auto hornService = HornserviceServiceClientFactory::create(Middleware::getInstance());
-
-   auto valService = ValServiceClientFactory::create(Middleware::getInstance());
-
-   auto motorcontrolService =
-       VcsmotortrqmngserviceServiceClientFactory::create(Middleware::getInstance());
-
-   auto capacityService =
-       VcsptcpbylimserviceServiceClientFactory::create(Middleware::getInstance());
-
-   ::grpc::ClientContext context;
+   ::grpc::ClientContext seat_context;
    ::sdv::edge::comfort::seats::v1::MoveRequest move_request;
    ::sdv::edge::comfort::seats::v1::MoveReply move_response;
-   auto status = seatService->Move(&context, move_request, &move_response);
+   auto status = seatService->Move(&seat_context, move_request, &move_response);
 
    std::cout << "gRPC Server returned code: " << status.error_code() << std::endl;
    std::cout << "gRPC error message: " << status.error_message().c_str() << std::endl;
@@ -57,6 +47,9 @@ int main(int argc, char** argv) {
    {
       return 1;
    }
+
+   auto hornService =
+       HornserviceServiceClientFactory::create(Middleware::getInstance());
 
    ::grpc::ClientContext hornContext;
    ::bcm::horn::v1::StartRequest start_request;
@@ -72,6 +65,8 @@ int main(int argc, char** argv) {
       return 1;
    }
 
+   auto valService = ValServiceClientFactory::create(Middleware::getInstance());
+
    ::grpc::ClientContext valContext;
    ::kuksa::val::v1::GetRequest get_reqeuest;
    ::kuksa::val::v1::GetResponse get_response;
@@ -85,6 +80,9 @@ int main(int argc, char** argv) {
    {
       return 1;
    }
+
+   auto motorcontrolService = VcsmotortrqmngserviceServiceClientFactory::create(
+       Middleware::getInstance());
 
    ::grpc::ClientContext motorcontrolContext;
    ::vcs::powertrain::v1::SetMCUCtrlReqRequest set_mcu_request;
@@ -100,6 +98,9 @@ int main(int argc, char** argv) {
    {
       return 1;
    }
+
+   auto capacityService = VcsptcpbylimserviceServiceClientFactory::create(
+       Middleware::getInstance());
 
    ::grpc::ClientContext capacitycontrolContext;
    ::vcs::powertrain::v1::NtfPtPwrLimRequest pwr_lim_request;
