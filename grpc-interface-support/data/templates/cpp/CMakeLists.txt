@@ -14,11 +14,16 @@ target_include_directories(${PROJECT_NAME}
 
 include_directories(
     ${CMAKE_INCLUDE_PATH}
-    include/
+    include/services/${{ service_name_lower }}
+    include/${{ proto_location }}
 )
 
 set(HEADERS
     ${{ cmake_headers }}
+)
+
+set(PROTO_HEADERS
+    ${{ proto_headers }}
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
@@ -26,7 +31,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 )
 
 install(TARGETS ${PROJECT_NAME}
-    PUBLIC_HEADER DESTINATION include/services/${{ service_name_lower }}
+    PUBLIC_HEADER DESTINATION include/services/${{ service_name_lower }}/${{ proto_location }}
 )
 
-install(FILES ${HEADERS} DESTINATION include/${{ proto_location }})
+install(FILES ${PROTO_HEADERS} DESTINATION include/${{ proto_location }})

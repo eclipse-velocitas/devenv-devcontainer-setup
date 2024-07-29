@@ -14,13 +14,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <kuksa/val/v1/val.grpc.pb.h>
 #include <sdk/middleware/Middleware.h>
 #include <services/hornservice/HornserviceServiceClientFactory.h>
 #include <services/hornservice/horn.grpc.pb.h>
 #include <services/seats/SeatsServiceClientFactory.h>
 #include <services/seats/seats.grpc.pb.h>
-#include <services/val/ValServiceClientFactory.h>
+#include <services/val/kuksa/val/v1/ValServiceClientFactory.h>
+#include <services/val/kuksa/val/v1/val.grpc.pb.h>
 #include <services/vcsmotortrqmngservice/VcsmotortrqmngserviceServiceClientFactory.h>
 #include <services/vcsmotortrqmngservice/motorcontrol.grpc.pb.h>
 #include <services/vcsptcpbylimservice/VcsptcpbylimserviceServiceClientFactory.h>

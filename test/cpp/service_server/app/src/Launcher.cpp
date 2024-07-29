@@ -16,7 +16,7 @@
 
 #include <services/hornservice/HornserviceServiceServerFactory.h>
 #include <services/seats/SeatsServiceServerFactory.h>
-#include <services/val/ValServiceServerFactory.h>
+#include <services/val/kuksa/val/v1/ValServiceServerFactory.h>
 #include <services/vcsmotortrqmngservice/VcsmotortrqmngserviceServiceServerFactory.h>
 #include <services/vcsptcpbylimservice/VcsptcpbylimserviceServiceServerFactory.h>
 
