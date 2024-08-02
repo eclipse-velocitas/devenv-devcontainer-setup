@@ -41,14 +41,10 @@ def get_subdirs(path: str) -> List[str]:
     return [f.path for f in os.scandir(path) if f.is_dir()]
 
 
-def get_project_cache_dir(index: int = 0) -> str:
-    velocitas_home = os.getenv("VELOCITAS_HOME")
-    project_caches = os.path.join(
-        velocitas_home if velocitas_home else os.path.expanduser("~"),
-        ".velocitas",
-        "projects",
-    )
-    return get_subdirs(project_caches)[index]
+def get_project_cache_dir() -> str:
+    return subprocess.check_output(
+        ["velocitas", "cache", "get", "--path"], encoding="utf-8"
+    ).strip()
 
 
 def start_app(python_file_name: str, env=os.environ) -> subprocess.Popen[bytes]:
@@ -57,7 +53,7 @@ def start_app(python_file_name: str, env=os.environ) -> subprocess.Popen[bytes]:
 
 
 def assert_python_package_generated(service_name: str, proto_filename: str) -> None:
-    service_path = os.path.join(get_project_cache_dir(0), "services", service_name)
+    service_path = os.path.join(get_project_cache_dir(), "services", service_name)
     assert os.path.isdir(service_path)
     assert os.path.isfile(os.path.join(service_path, "pyproject.toml"))
 

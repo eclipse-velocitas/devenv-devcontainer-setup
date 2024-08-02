@@ -26,14 +26,10 @@ def get_subdirs(path: str) -> List[str]:
     return [f.path for f in os.scandir(path) if f.is_dir()]
 
 
-def get_project_cache_dir(index: int = 0) -> str:
-    velocitas_home = os.getenv("VELOCITAS_HOME")
-    project_caches = os.path.join(
-        velocitas_home if velocitas_home else os.path.expanduser("~"),
-        ".velocitas",
-        "projects",
-    )
-    return get_subdirs(project_caches)[index]
+def get_project_cache_dir() -> str:
+    return subprocess.check_output(
+        ["velocitas", "cache", "get", "--path"], encoding="utf-8"
+    ).strip()
 
 
 def get_dependency_count(service_name: str) -> int:
@@ -53,8 +49,8 @@ def get_dependency_count(service_name: str) -> int:
     return dependency_count
 
 
-def ensure_package_is_generated(index: int):
-    services_dir = os.path.join(get_project_cache_dir(index), "services")
+def ensure_package_is_generated():
+    services_dir = os.path.join(get_project_cache_dir(), "services")
     service_path = os.path.join(services_dir, "seats")
 
     assert os.path.isdir(service_path)
@@ -83,7 +79,7 @@ def test__integration():
     print("============= BUILDING SERVER ===================")
     os.chdir(os.environ["SERVICE_SERVER_ROOT"])
     ensure_project_initialized()
-    ensure_package_is_generated(1)
+    ensure_package_is_generated()
     assert get_dependency_count("seats-service-sdk") == 1
     assert get_dependency_count("hornservice-service-sdk") == 1
     ensure_build_successful()
@@ -92,7 +88,7 @@ def test__integration():
     print("============= BUILDING CLIENT ===================")
     os.chdir(os.environ["SERVICE_CLIENT_ROOT"])
     ensure_project_initialized()
-    ensure_package_is_generated(2)
+    ensure_package_is_generated()
     assert get_dependency_count("seats-service-sdk") == 1
     assert get_dependency_count("hornservice-service-sdk") == 1
     ensure_build_successful()
