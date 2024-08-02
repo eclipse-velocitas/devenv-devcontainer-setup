@@ -108,7 +108,8 @@ jobs:
   run-integration-tests:
     name: Run Integration Test
     runs-on: ubuntu-22.04
-    container: ghcr.io/eclipse-velocitas/devcontainer-base-images/${{ matrix.language }}:v0.3
+    env:
+      packageInstallPath: .velocitas/packages/package_under_test/@main
     strategy:
       matrix:
         language: ["python", "cpp"]
@@ -123,46 +124,39 @@ jobs:
       fail-fast: false
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Add safe directory
-        run: |
-          git config --global --add safe.directory $(pwd)
-
       - name: Checkout template repository
         uses: actions/checkout@v4
         with:
           repository: eclipse-velocitas/vehicle-app-${{ matrix.language }}-template
-          path: test/${{ matrix.language }}/repo
+          fetch-depth: 0
 
-      - name: Replace project config
-        run: |
-          cp -f test/${{ matrix.language }}/.velocitas.json test/${{ matrix.language }}/repo
+      - name: Checkout package repository
+        uses: actions/checkout@v4
+        with:
+          path: ${{ env.packageInstallPath }}
+          fetch-depth: 0
 
       - name: Add safe directory
         run: |
-          git config --global --add safe.directory $(pwd)/test/${{ matrix.language }}/repo
+          git config --global --add safe.directory "*"
 
-      - name: Setup local package version
-        shell: bash
+      - name: Replace project config
         run: |
-          shopt -s dotglob
-          export PACKAGE_PATH=~/.velocitas/packages/package_under_test/@main
-          mkdir -p $PACKAGE_PATH
-          cp -r * $PACKAGE_PATH
-          git init $PACKAGE_PATH
-          ls -al $PACKAGE_PATH
+          cp -f ${{ env.packageInstallPath }}/test/${{ matrix.language }}/.velocitas.json .
 
-      - name: Run integration tests
-        run: |
-          export THIS_REPO_PATH=$(pwd)
-          export VELOCITAS_TEST_LANGUAGE=${{ matrix.language }}
-          export VELOCITAS_TEST_ROOT=test/${{ matrix.language }}/repo
-          export VELOCITAS_COMPONENT_PATH=${THIS_REPO_PATH}/${{ matrix.component }}
+      - name: Run devContainer
+        uses: devcontainers/ci@v0.3
+        with:
+          env: VELOCITAS_HOME=/workspaces/devenv-devcontainer-setup
+          runCmd: |
+            CWD=$(pwd)
 
-          python -m pip install -r ./${{ matrix.component }}/test/requirements.txt
-          python -m pip install -r ./${{ matrix.component }}/requirements.txt
-          pytest -s ./${{ matrix.component }}/test/integration
+            export VELOCITAS_TEMPLATE_REPO_PATH=$CWD
+            export VELOCITAS_PACKAGE_REPO_PATH=$CWD/${{ env.packageInstallPath }}
+            export VELOCITAS_TEST_LANGUAGE=${{ matrix.language }}
+            export VELOCITAS_COMPONENT_PATH=${VELOCITAS_PACKAGE_REPO_PATH}/${{ matrix.component }}
+
+            cd $VELOCITAS_PACKAGE_REPO_PATH
+            python -m pip install -r ./${{ matrix.component }}/test/requirements.txt
+            python -m pip install -r ./${{ matrix.component }}/requirements.txt
+            pytest -s ./${{ matrix.component }}/test/integration

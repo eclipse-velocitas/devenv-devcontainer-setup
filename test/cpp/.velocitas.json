@@ -10,5 +10,5 @@
         "appExecutionPlatforms": "linux/amd64",
         "generatedModelPath": "./app/vehicle_model"
     },
-    "cliVersion": "v0.11.0"
+    "cliVersion": "v0.12.0"
 }
