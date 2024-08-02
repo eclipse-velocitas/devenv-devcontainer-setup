@@ -21,9 +21,3 @@ if [[ -n "${GIT_CONFIG_NAME}" && -n "${GIT_CONFIG_EMAIL}" ]]; then
     git config --global user.name $GIT_CONFIG_NAME
     git config --global user.email $GIT_CONFIG_EMAIL
 fi
-
-echo "#######################################################"
-echo "### Init submodules                                 ###"
-echo "#######################################################"
-git config --global --add safe.directory "*"
-git submodule update --init

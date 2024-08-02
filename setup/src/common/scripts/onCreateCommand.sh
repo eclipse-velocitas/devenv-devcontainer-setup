@@ -29,13 +29,13 @@ echo "#######################################################"
 velocitas init
 velocitas sync
 
-# Some language specific setup might be required even in offline mode
-.devcontainer/scripts/language-specific-setup.sh
+# Some setup might be required even in offline mode
+.devcontainer/scripts/setup-dependencies.sh
 
 echo "#######################################################"
 echo "### VADF package status                             ###"
 echo "#######################################################"
-velocitas upgrade --dry-run
+velocitas upgrade --dry-run --ignore-bounds
 
 # Don't let container creation fail if lifecycle management fails
 echo "Done!"
