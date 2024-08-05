@@ -205,16 +205,6 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
     def __get_source_dir(self) -> str:
         return f"src/{self.__get_relative_file_dir()}"
 
-    # def __get_include_dir(self) -> str:
-    #     if self.__proto_include_rel_path == ".":
-    #         return "include/"
-    #     return f"include/{self.__proto_include_rel_path}"
-
-    # def __get_source_dir(self) -> str:
-    #     if self.__proto_include_rel_path == ".":
-    #         return "src/"
-    #     return f"src/{self.__proto_include_rel_path}"
-
     def __get_service_client_files(self, service_name: str) -> List[CopySpec]:
         return [
             CopySpec(
