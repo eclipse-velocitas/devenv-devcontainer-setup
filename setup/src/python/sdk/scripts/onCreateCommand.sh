@@ -23,6 +23,7 @@ fi
 echo "#######################################################"
 echo "### Run VADF Lifecycle Management                   ###"
 echo "#######################################################"
+.devcontainer/scripts/upgrade-cli.sh
 velocitas init
 velocitas sync
 

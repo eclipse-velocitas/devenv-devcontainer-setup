@@ -23,6 +23,7 @@ fi
 echo "#######################################################"
 echo "### Run VADF Lifecycle Management                   ###"
 echo "#######################################################"
+.devcontainer/scripts/upgrade-cli.sh
 # needed to get rid of old leftovers
 sudo rm -rf ~/.velocitas
 velocitas init

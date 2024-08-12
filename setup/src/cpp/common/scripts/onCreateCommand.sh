@@ -31,10 +31,7 @@ echo "#######################################################"
  # Do not change or remove
  # PIP_EXTRA_CONFIG
 
-if [ -z "${VELOCITAS_OFFLINE}" ]; then
-    .devcontainer/scripts/upgrade-cli.sh
-fi
-
+.devcontainer/scripts/upgrade-cli.sh
 velocitas init
 velocitas sync
 
