@@ -42,19 +42,14 @@ def get_subdirs(path: str) -> List[str]:
 
 
 def get_project_cache_dir() -> str:
-    project_caches = os.path.join(os.path.expanduser("~"), ".velocitas", "projects")
-    return get_subdirs(project_caches)[0]
+    return subprocess.check_output(
+        ["velocitas", "cache", "get", "--path"], encoding="utf-8"
+    ).strip()
 
 
-def start_app(
-    python_file_name: str, env=os.environ
-) -> subprocess.CompletedProcess[bytes]:
+def start_app(python_file_name: str, env=os.environ) -> subprocess.Popen[bytes]:
     python_file = f"app/src/{python_file_name}.py"
-    return subprocess.run(
-        args=["python", python_file],
-        env=env,
-        shell=True,
-    )
+    return subprocess.Popen(["python", python_file], env=env)
 
 
 def assert_python_package_generated(
@@ -97,16 +92,40 @@ def test_pip_package_is_usable():
     os.chdir(os.environ["SERVICE_SERVER_ROOT"])
 
     assert subprocess.check_call(["velocitas", "init", "-v"]) == 0
+    assert (
+        subprocess.check_call(
+            [
+                "docker",
+                "run",
+                "-d",
+                "--rm",
+                "--init",
+                "--name",
+                "mqtt-broker",
+                "-p",
+                "1883:1883",
+                "-p",
+                "9001:9001",
+                "--network",
+                "host",
+                "eclipse-mosquitto:2.0.14",
+                "mosquitto",
+                "-c",
+                "/mosquitto-no-auth.conf",
+            ]
+        )
+        == 0
+    )
 
-    launcher = start_app("launcher", envs)
-
-    assert launcher.returncode == 0
+    server_process = start_app("launcher", envs)
 
     print("============= TEST CLIENTS ===================")
     os.chdir(os.environ["SERVICE_CLIENT_ROOT"])
 
     assert subprocess.check_call(["velocitas", "init", "-v"]) == 0
 
-    launcher = start_app("launcher", envs)
+    client_process = start_app("launcher", envs)
 
-    assert launcher.returncode == 0
+    client_code = client_process.wait()
+    server_process.kill()
+    assert client_code == 0

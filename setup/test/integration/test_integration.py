@@ -84,7 +84,7 @@ def test_post_start_auto_upgrade_cli():
 
 
 def test_files_synced():
-    repo_path = os.environ["THIS_REPO_PATH"]
+    repo_path = os.environ["VELOCITAS_PACKAGE_REPO_PATH"]
     print(repo_path)
     # check if there are any changes in the files to sync
     changed_files = (

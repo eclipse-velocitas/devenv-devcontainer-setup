@@ -27,8 +27,9 @@ def get_subdirs(path: str) -> List[str]:
 
 
 def get_project_cache_dir() -> str:
-    project_caches = os.path.join(os.path.expanduser("~"), ".velocitas", "projects")
-    return get_subdirs(project_caches)[0]
+    return subprocess.check_output(
+        ["velocitas", "cache", "get", "--path"], encoding="utf-8"
+    ).strip()
 
 
 def get_dependency_count(service_name: str) -> int:
