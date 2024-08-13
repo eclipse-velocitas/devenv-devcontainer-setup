@@ -1,0 +1,167 @@
+/*
+ * Provides door control and status service, one atomic service for each door.
+ */
+syntax = "proto3";
+package bcm.door.v1;
+
+import "bcm_types.proto";
+
+service BCMDoorService {
+  /* The door is unlocked. */
+  rpc Unlock(UnlockRequest) returns (UnlockResponse);
+
+  /* Door lock.  */
+  rpc Lock(LockRequest) returns (LockResponse);
+
+  /* The doors are super locked. */
+  rpc Superlock(SuperlockRequest) returns (SuperlockResponse);
+
+  /* Return to the door lock status */
+  rpc GetLockStatus(GetLockStatusRequest) returns (GetLockStatusResponse);
+
+  /* Fold the door handle. */
+  rpc FoldHandle(FoldHandleRequest) returns (FoldHandleResponse);
+
+  /* Deploy the door handle. */
+  rpc UnfoldHandle(UnfoldHandleRequest) returns (UnfoldHandleResponse);
+
+  /* Returns whether the door handle is folded
+   * The door handle is folded back to true, otherwise false is returned
+   */
+  rpc IsHandleFolded(IsHandleFoldedRequest) returns (IsHandleFoldedResponse);
+
+  /* Open the door */
+  rpc Open(OpenRequest) returns (OpenResponse);
+
+  /* Close the door */
+  rpc Close(CloseRequest) returns (CloseResponse);
+
+  /* Stop opening or closing the door. */
+  rpc Stop(StopRequest) returns (StopResponse);
+
+  /* Return to door execution status */
+  rpc GetActuateStatus(GetActuateStatusRequest) returns (GetActuateStatusResponse);
+
+  /* Adjust the door opening size. */
+  /* Position: Door opening size in 1% of maximum opening */
+  rpc AdjustmentPosition(AdjustmentPositionRequest) returns (AdjustmentPositionResponse);
+
+  /* Returns the door opening information */
+  /* Door opening information for the current door in %  */
+  rpc GetPosition(GetPositionRequest) returns (GetPositionResponse);
+
+  /* The child safety lock is locked.  */
+  rpc LockChildLock(LockChildLockRequest) returns (LockChildLockResponse);
+
+  /* The child safety lock is unlocked.  */
+  rpc UnlockChildLock(UnlockChildLockRequest) returns (UnlockChildLockResponse);
+
+  /* Return to the state of the child safety lock */
+  rpc GetChildLockStatus(GetChildLockStatusRequest) returns (GetChildLockStatusResponse);
+
+  /* Return to the door type */
+  /* The type of door, such as manual door, automatic scissor door, automatic wing door, automatic sliding door, etc */
+  rpc GetDoorType(GetDoorTypeRequest) returns (GetDoorTypeResponse);
+}
+
+message UnlockRequest {}
+
+message UnlockResponse {
+  bcm.v1.BCMReturnCode code = 1;
+}
+
+message LockRequest {}
+
+message LockResponse {
+  bcm.v1.BCMReturnCode code = 1;
+}
+
+message SuperlockRequest {}
+
+message SuperlockResponse {
+  bcm.v1.BCMReturnCode code = 1;
+}
+
+message GetLockStatusRequest {}
+
+message GetLockStatusResponse {
+  bcm.v1.BCMReturnCode code = 1;
+}
+
+message FoldHandleRequest {}
+
+message FoldHandleResponse {
+  bcm.v1.BCMReturnCode code = 1;
+}
+
+message UnfoldHandleRequest {}
+
+message UnfoldHandleResponse {
+  bcm.v1.BCMReturnCode code = 1;
+}
+
+message IsHandleFoldedRequest {}
+
+message IsHandleFoldedResponse {
+  bcm.v1.BCMReturnCode code = 1;
+}
+
+message OpenRequest {}
+
+message OpenResponse {
+  bcm.v1.BCMReturnCode code = 1;
+}
+
+message CloseRequest {}
+
+message CloseResponse {
+  bcm.v1.BCMReturnCode code = 1;
+}
+
+message StopRequest {}
+
+message StopResponse {
+  bcm.v1.BCMReturnCode code = 1;
+}
+
+message GetActuateStatusRequest {}
+
+message GetActuateStatusResponse {
+  bcm.v1.BCMReturnCode code = 1;
+}
+
+message AdjustmentPositionRequest {}
+
+message AdjustmentPositionResponse {
+  bcm.v1.BCMReturnCode code = 1;
+}
+
+message GetPositionRequest {}
+
+message GetPositionResponse {
+  bcm.v1.BCMReturnCode code = 1;
+}
+
+message LockChildLockRequest {}
+
+message LockChildLockResponse {
+  bcm.v1.BCMReturnCode code = 1;
+}
+
+message UnlockChildLockRequest {}
+
+message UnlockChildLockResponse {
+  bcm.v1.BCMReturnCode code = 1;
+}
+
+message GetChildLockStatusRequest {}
+
+message GetChildLockStatusResponse {
+  bcm.v1.BCMReturnCode code = 1;
+}
+
+message GetDoorTypeRequest {}
+
+message GetDoorTypeResponse {
+  bcm.v1.BCMReturnCode code = 1;
+}

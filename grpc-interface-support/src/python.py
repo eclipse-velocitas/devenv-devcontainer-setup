@@ -106,9 +106,16 @@ class PythonGrpcInterfaceGenerator(GrpcServiceSdkGenerator):  # type: ignore
         self.__proto_include_path = proto_include_path
         self.__service_name = self.__proto_file_handle.get_service_name()
         self.__service_name_lower = self.__service_name.lower()
+        self.__output_path = os.path.join(
+            self.__package_directory_path,
+            os.path.relpath(
+                str(Path(self.__proto_file_handle.file_path).parent),
+                self.__proto_include_path,
+            ),
+        )
         self.__service_grpc_code_extractor = GrpcCodeExtractor(
             self.__proto_file_handle,
-            self.__package_directory_path,
+            self.__output_path,
             f"{self.__service_name_lower}_service_sdk",
         )
 
@@ -125,24 +132,37 @@ class PythonGrpcInterfaceGenerator(GrpcServiceSdkGenerator):  # type: ignore
                 self.__proto_file_handle.file_path,
             ]
         )
+        imports = self.__proto_file_handle.get_imports()
+        for element in imports:
+            path = os.path.join(self.__proto_include_path, element)
+            args = [
+                "python",
+                "-m",
+                "grpc_tools.protoc",
+                f"-I{self.__proto_include_path}",
+                f"--pyi_out={self.__package_directory_path}",
+                path,
+            ]
+            subprocess.check_call(
+                args,
+                cwd=self.__proto_include_path,
+                env=os.environ,
+                stdout=subprocess.DEVNULL if not self.__verbose else None,
+            )
 
     def __copy_code_and_templates(
         self, client_required: bool, server_required: bool
     ) -> None:
         module_name = f"{self.__service_name_lower}_service_sdk"
-        source_path = os.path.join(self.__package_directory_path, module_name)
-        os.makedirs(
-            os.path.join(self.__package_directory_path, source_path), exist_ok=True
-        )
+        source_path = os.path.join(self.__output_path, module_name)
+        os.makedirs(os.path.join(self.__output_path, source_path), exist_ok=True)
 
-        generated_sources = glob.glob(
-            os.path.join(self.__package_directory_path, "*.py*")
-        )
+        generated_sources = glob.glob(os.path.join(self.__output_path, "*.py*"))
         grpc_file_name = self.__service_grpc_code_extractor.file_name
         proto_file_prefix = Path(self.__proto_file_handle.file_path).stem
         replace_text_in_file(
             os.path.join(
-                self.__package_directory_path,
+                self.__output_path,
                 f"{grpc_file_name}",
             ),
             f"import {proto_file_prefix}_pb2 as {proto_file_prefix}__pb2",

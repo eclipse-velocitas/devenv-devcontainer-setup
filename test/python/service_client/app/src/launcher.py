@@ -13,14 +13,19 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
+from vcsptcpbylimservice_service_sdk import VCSPtCpbyLimServiceStub
+from vcsptcpbylimservice_service_sdk import VCSPtCpbyLimServiceServiceClientFactory
+from vcsptcpbylimservice_service_sdk.motorcontrol_pb2 import NtfPtPwrLimRequest
+from vcsmotortrqmngservice_service_sdk import VCSMotorTrqMngServiceStub
+from vcsmotortrqmngservice_service_sdk import VCSMotorTrqMngServiceServiceClientFactory
+from vcsmotortrqmngservice_service_sdk.motorcontrol_pb2 import SetMCUCtrlReqRequest
+from val_service_sdk.val_pb2_grpc import VALStub
+from val_service_sdk import VALServiceClientFactory
+from val_service_sdk.val_pb2 import GetRequest
 from hornservice_service_sdk.horn_pb2 import IsRunningRequest
 from hornservice_service_sdk.horn_pb2_grpc import HornServiceStub
-from hornservice_service_sdk.HornServiceServiceClientFactory import (
-    HornServiceServiceClientFactory,
-)
-from seats_service_sdk.seats_pb2_grpc import (
-    SeatsStub,
-)
+from hornservice_service_sdk import HornServiceServiceClientFactory
+from seats_service_sdk.seats_pb2_grpc import SeatsStub
 from seats_service_sdk.seats_pb2 import MoveRequest
 from seats_service_sdk.SeatsServiceClientFactory import SeatsServiceClientFactory
 from velocitas_sdk.base import Middleware
@@ -39,6 +44,24 @@ def create_horn_client(middleware: Middleware) -> HornServiceStub:
     return client
 
 
+def create_motorcontrol_client(middleware: Middleware) -> VCSMotorTrqMngServiceStub:
+    client = VCSMotorTrqMngServiceServiceClientFactory.create(middleware)
+
+    return client
+
+
+def create_capacitycontrol_client(middleware: Middleware) -> VCSPtCpbyLimServiceStub:
+    client = VCSPtCpbyLimServiceServiceClientFactory.create(middleware)
+
+    return client
+
+
+def create_val_client(middleware: Middleware) -> VALStub:
+    client = VALServiceClientFactory.create(middleware)
+
+    return client
+
+
 if __name__ == "__main__":
     client_seats = create_seats_client(config.middleware)
     move_request = MoveRequest()
@@ -47,3 +70,15 @@ if __name__ == "__main__":
     client_horn = create_horn_client(config.middleware)
     is_running_request = IsRunningRequest()
     client_horn.IsRunning(is_running_request)
+
+    client_motorcontrol = create_motorcontrol_client(config.middleware)
+    motorcontrol_request = SetMCUCtrlReqRequest()
+    client_motorcontrol.SetMCUCtrlReq(motorcontrol_request)
+
+    client_capacitycontrol = create_capacitycontrol_client(config.middleware)
+    capacitycontrol_request = NtfPtPwrLimRequest()
+    client_capacitycontrol.NtfPtPwrLim(capacitycontrol_request)
+
+    client_val = create_val_client(config.middleware)
+    get_request = GetRequest()
+    client_val.Get(get_request)

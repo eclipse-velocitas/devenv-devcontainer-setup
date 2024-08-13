@@ -49,9 +49,8 @@ def get_dependency_count(service_name: str) -> int:
     return dependency_count
 
 
-def ensure_package_is_generated():
-    services_dir = os.path.join(get_project_cache_dir(), "services")
-    service_path = os.path.join(services_dir, "seats")
+def ensure_package_is_generated(service_name: str):
+    service_path = os.path.join(get_project_cache_dir(), "services", service_name)
 
     assert os.path.isdir(service_path)
     assert os.path.isfile(os.path.join(service_path, "CMakeLists.txt"))
@@ -67,7 +66,14 @@ def ensure_build_successful():
 
 def ensure_app_running() -> subprocess.Popen:
     return subprocess.Popen(
-        ["./build/bin/app"], env={"SDV_SEATS_ADDRESS": "127.0.0.1:1234"}
+        ["./build/bin/app"],
+        env={
+            "SDV_SEATS_ADDRESS": "127.0.0.1:1234",
+            "SDV_VAL_ADDRESS": "127.0.0.1:1235",
+            "SDV_HORNSERVICE_ADDRESS": "127.0.0.1:1236",
+            "SDV_VCSPTCPBYLIMSERVICE_ADDRESS": "127.0.0.1:1237",
+            "SDV_VCSMOTORTRQMNGSERVICE_ADDRESS": "127.0.0.1:1238",
+        },
     )
 
 
@@ -75,22 +81,36 @@ def ensure_project_initialized():
     assert subprocess.check_call(["velocitas", "init", "-v"]) == 0
 
 
+def ensure_added_conan():
+    assert get_dependency_count("seats-service-sdk") == 1
+    assert get_dependency_count("hornservice-service-sdk") == 1
+    assert get_dependency_count("val-service-sdk") == 1
+    assert get_dependency_count("vcsptcpbylimservice-service-sdk") == 1
+    assert get_dependency_count("vcsmotortrqmngservice-service-sdk") == 1
+
+
+def ensure_packages_are_generated():
+    ensure_package_is_generated("seats")
+    ensure_package_is_generated("hornservice")
+    ensure_package_is_generated("val")
+    ensure_package_is_generated("vcsptcpbylimservice")
+    ensure_package_is_generated("vcsmotortrqmngservice")
+
+
 def test__integration():
     print("============= BUILDING SERVER ===================")
     os.chdir(os.environ["SERVICE_SERVER_ROOT"])
     ensure_project_initialized()
-    ensure_package_is_generated()
-    assert get_dependency_count("seats-service-sdk") == 1
-    assert get_dependency_count("hornservice-service-sdk") == 1
+    ensure_packages_are_generated()
+    ensure_added_conan()
     ensure_build_successful()
     server_process = ensure_app_running()
 
     print("============= BUILDING CLIENT ===================")
     os.chdir(os.environ["SERVICE_CLIENT_ROOT"])
     ensure_project_initialized()
-    ensure_package_is_generated()
-    assert get_dependency_count("seats-service-sdk") == 1
-    assert get_dependency_count("hornservice-service-sdk") == 1
+    ensure_packages_are_generated()
+    ensure_added_conan()
     ensure_build_successful()
     client_process = ensure_app_running()
 

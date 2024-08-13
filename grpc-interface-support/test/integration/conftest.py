@@ -48,6 +48,16 @@ def pytest_sessionstart(session):
         client_path,
         dirs_exist_ok=True,
     )
+    shutil.copytree(
+        "test/common/multiple/",
+        server_path,
+        dirs_exist_ok=True,
+    )
+    shutil.copytree(
+        "test/common/multiple/",
+        client_path,
+        dirs_exist_ok=True,
+    )
 
     os.environ["SERVICE_CLIENT_ROOT"] = client_path
     os.environ["SERVICE_SERVER_ROOT"] = server_path

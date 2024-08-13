@@ -15,41 +15,16 @@ velocitas exec grpc-interface-support generate-sdk
 
 Depending on the interfaces defined in the `AppManifest` file, either classes and SDKs for client, server or both are generated.
 
-For generating a client SDK:
-```json
-{
-    "manifestVersion": "v3",
-    "name": "App",
-    "interfaces": [
-        {
-            "type": "grpc-interface",
-            "config": {
-                "src": "<uri_to_proto_file>",
-                "required": {}
-            }
-        }
-    ]
-}
-```
 
-For generating a server SDK:
-```json
-{
-    "manifestVersion": "v3",
-    "name": "App",
-    "interfaces": [
-        {
-            "type": "grpc-interface",
-            "config": {
-                "src": "<uri_to_proto_file>",
-                "provided": {}
-            }
-        }
-    ]
-}
-```
+| parameters                          | meaning                                                          | client SDK                       | server SDK                       | local proto file (absolute path) | local proto file (relative path) | archive                          | downloadable file (raw not blob) |
+| -------------------------------- | ---------------------------------------------------------------- | -------------------------------- | -------------------------------- | -------------------------------- | -------------------------------- | -------------------------------- | -------------------------------- |
+| src                              | The source (absolute or relative) to the proto files (dir, zip, file, link) | /home/user/proto_file.proto       | /home/user/proto_file.proto       | /home/user/proto_file.proto       | proto_file.proto (located under workspace of template repository) | https://github.com/project/release.zip | https://github.com/project/raw/proto_file.proto |
+| required                         | The functions that the client uses                             | { client_function1(), client_function2(), ... }                 | not defined                      | see sdk examples                 | see sdk examples                 | see sdk examples                 | see sdk examples                 |
+| provided                         | Set if the server code shall be generated to {}                 | not defined                      | {}                               | see sdk examples                 | see sdk examples                 | see sdk examples                 | see sdk examples                 |
+| protoIncludeDir                  | The path to some imports in the protot files (default parent folder) | path_to_imports                  | path_to_imports                  | path_to_imports                  | path_to_imports                  | path_to_imports                  | path_to_imports                  |
+| pathInZip                        | If you have multiple folders in a zip and just want one to be generated | undefined                        | undefined                        | undefined                        | undefined                        | rel_path_archive                | undefined                        |
 
-For generating both:
+Example json:
 ```json
 {
     "manifestVersion": "v3",
@@ -58,9 +33,10 @@ For generating both:
         {
             "type": "grpc-interface",
             "config": {
-                "src": "<uri_to_proto_file>",
+                "src": "home/user/proto_file.proto",
+                "protoIncludeDir": "<path_to_imports>",
                 "required": {},
-                "provided": {}
+                "provided": {},
             }
         }
     ]

@@ -15,6 +15,7 @@
 import argparse
 import os
 import shutil
+import zipfile
 from pathlib import Path
 from typing import Any, Dict
 
@@ -25,12 +26,15 @@ from python import PythonGrpcServiceSdkGeneratorFactory
 from velocitas_lib import (
     get_programming_language,
     get_project_cache_dir,
+    get_workspace_dir,
     obtain_local_file_path,
+    extract_zip,
+    discover_files_in_filetree,
 )
 from velocitas_lib.functional_interface import get_interfaces_for_type
-from velocitas_lib.text_utils import create_truncated_string
 
 DEPENDENCY_TYPE_KEY = "grpc-interface"
+DOWNLOAD_PATH = os.path.join(get_project_cache_dir(), "downloads")
 
 
 def create_service_sdk_dir(proto_file_handle: proto.ProtoFileHandle) -> str:
@@ -54,34 +58,120 @@ def create_service_sdk_dir(proto_file_handle: proto.ProtoFileHandle) -> str:
     return service_sdk_path
 
 
-def generate_single_service(
+def get_absolute_proto_include_path(relative_path: str) -> str:
+    """Get the absolute path to the proto include directory.
+
+    Args:
+        relative_path (str): The relative path to check.
+
+    Raises:
+        FileNotFoundError: In case the specified directory does not exist
+
+    Returns:
+        str: The absolute path to the proto include directory.
+    """
+
+    if os.path.isabs(relative_path):
+        return relative_path
+    elif os.path.isdir(os.path.join(get_workspace_dir(), relative_path)):
+        return os.path.join(get_workspace_dir(), relative_path)
+    if os.path.isdir(os.path.join(DOWNLOAD_PATH, relative_path)):
+        return os.path.join(DOWNLOAD_PATH, relative_path)
+    else:
+        raise FileNotFoundError(
+            f"Directory {relative_path} not found! Searched additionally {get_workspace_dir()} and {DOWNLOAD_PATH}!"
+        )
+
+
+def generate_services(
     factory: GrpcServiceSdkGeneratorFactory, if_config: Dict[str, Any]
 ) -> None:
-    """Generate an SDK for a single service.
+    """Generate SDKs for the services defined in the AppManifest.
+
+    Raises:
+        RuntimeError: If there is no service defined in any proto files given.
 
     Args:
         factory (GrpcPackageGeneratorFactory):
             The factory from which to generate an SDK generator for a single service.
         if_config (Dict[str, Any]): The grpc-interface config.
     """
-    print(
-        f"Generating service SDK for {create_truncated_string(if_config['src'], 100)!r}"
-    )
-    proto_file_handle = proto.ProtoFileHandle(obtain_local_file_path(if_config["src"]))
-    service_sdk_dir = create_service_sdk_dir(proto_file_handle)
+
+    path_in_zip = if_config.get("pathInZip", None)
+    path = if_config["src"]
+    proto_files = []
+
+    if os.path.isdir(path):
+        pass
+    elif os.path.isdir(os.path.join(get_workspace_dir(), path)):
+        path = os.path.join(get_workspace_dir(), path)
+    else:
+        path = obtain_local_file_path(path)
+        if zipfile.is_zipfile(path):
+            path = extract_zip(path, DOWNLOAD_PATH)
+            if path_in_zip is not None:
+                path = os.path.join(path, path_in_zip)
+        else:
+            proto_files.append(path)
+
+    proto_service_files = discover_files_in_filetree(path, ".proto")
+    proto_files.extend(proto_service_files) if proto_service_files else None
 
     is_client = "required" in if_config
     is_server = "provided" in if_config
+    skipped_files = 0
+
+    for proto_file in proto_files:
+        try:
+            proto_service_file = proto.ProtoFileHandle(proto_file)
+            proto_include_dir = str(Path(proto_service_file.file_path).parent)
+            if "protoIncludeDir" in if_config:
+                proto_include_dir = get_absolute_proto_include_path(
+                    if_config["protoIncludeDir"]
+                )
+            generate_single_service(
+                proto_service_file, factory, is_client, is_server, proto_include_dir
+            )
+        except RuntimeError:
+            print(
+                f"File {proto_file} has no services defined. If it is an import file ignore this error!"
+            )
+            skipped_files += 1
+
+    if skipped_files == len(proto_files):
+        raise RuntimeError("No services defined!")
+
+
+def generate_single_service(
+    proto_file_handle: proto.ProtoFileHandle,
+    factory: GrpcServiceSdkGeneratorFactory,
+    generate_client: bool,
+    generate_server: bool,
+    proto_include_dir: str,
+) -> None:
+    """Generate an SDK for a single service.
+
+    Args:
+        proto_file_handle (proto:ProtoFileHandle): A file containing the service to generate.
+        factory (GrpcPackageGeneratorFactory):
+            The factory from which to generate an SDK generator for a single service.
+        generate_client (bool):     Whether to create client code or not.
+        generate_server (bool):     Whether to create server code or not.
+        proto_include_dir (str):          The directory in which to search for imports.
+    """
+
+    service_sdk_dir = create_service_sdk_dir(proto_file_handle)
+    print(f"Generating service SDK for {proto_file_handle.file_path}")
 
     generator = factory.create_service_generator(
         service_sdk_dir,
         proto_file_handle,
-        if_config.get("includeDir", str(Path(proto_file_handle.file_path).parent)),
+        proto_include_dir,
     )
-    generator.generate_package(is_client, is_server)
+    generator.generate_package(generate_client, generate_server)
     generator.install_package()
     generator.update_package_references()
-    if is_server:
+    if generate_server:
         generator.update_auto_generated_code()
 
 
@@ -115,7 +205,7 @@ def generate_sdks(verbose: bool) -> None:
 
     for grpc_service in interfaces:
         if_config = grpc_service["config"]
-        generate_single_service(factory, if_config)
+        generate_services(factory, if_config)
 
 
 if __name__ == "__main__":
