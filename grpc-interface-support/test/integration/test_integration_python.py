@@ -92,7 +92,6 @@ def test_pip_package_is_usable():
     os.chdir(os.environ["SERVICE_SERVER_ROOT"])
 
     assert subprocess.check_call(["velocitas", "init", "-v"]) == 0
-    assert subprocess.check_call(["velocitas", "exec", "runtime-up"]) == 0
 
     server_process = start_app("launcher", envs)
 
