@@ -92,28 +92,26 @@ def test_pip_package_is_usable():
     os.chdir(os.environ["SERVICE_SERVER_ROOT"])
 
     assert subprocess.check_call(["velocitas", "init", "-v"]) == 0
-    assert (
-        subprocess.check_call(
-            [
-                "docker",
-                "run",
-                "--rm",
-                "--init",
-                "--name",
-                "mqtt-broker",
-                "-p",
-                "1883:1883",
-                "-p",
-                "9001:9001",
-                "--network",
-                "host",
-                "eclipse-mosquitto:2.0.14",
-                "mosquitto",
-                "-c",
-                "/mosquitto-no-auth.conf",
-            ]
-        )
-        == 0
+
+    subprocess.Popen(
+        [
+            "docker",
+            "run",
+            "--rm",
+            "--init",
+            "--name",
+            "mqtt-broker",
+            "-p",
+            "1883:1883",
+            "-p",
+            "9001:9001",
+            "--network",
+            "host",
+            "eclipse-mosquitto:2.0.14",
+            "mosquitto",
+            "-c",
+            "/mosquitto-no-auth.conf",
+        ]
     )
 
     server_process = start_app("launcher", envs)
