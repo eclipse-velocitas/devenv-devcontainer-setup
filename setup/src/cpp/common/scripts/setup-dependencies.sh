@@ -47,3 +47,5 @@ echo "#######################################################"
 echo "### Install Dependencies                            ###"
 echo "#######################################################"
 velocitas exec build-system install 2>&1 | tee -a $HOME/install_dependencies.log
+# Install dependencies for target release build
+velocitas exec build-system install -x aarch64
