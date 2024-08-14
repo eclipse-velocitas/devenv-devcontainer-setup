@@ -28,6 +28,13 @@ if [[ -z "${VELOCITAS_OFFLINE}" ]]; then
     curl -fsSL https://bootstrap.pypa.io/get-pip.py | sudo python3
     sudo apt-get -y install --no-install-recommends ccache
 
+    build_arch=$(arch)
+
+    # ensure we can always build for an arm target
+    if [ "${build_arch}" != "aarch64" ]; then
+        sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+    fi
+
     pip3 install -r ./requirements.txt
 
     # Install static analyzer tools
