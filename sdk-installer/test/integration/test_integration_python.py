@@ -23,6 +23,9 @@ if not os.environ["VELOCITAS_TEST_LANGUAGE"] == "python":
     pytest.skip("skipping Python only tests", allow_module_level=True)
 
 
+PACKAGE_NAME = "velocitas_sdk"
+
+
 @pytest.fixture(autouse=True)
 def clean_velocitas_download_directory():
     # return early if project directory does not yet exist
@@ -36,18 +39,28 @@ def clean_velocitas_download_directory():
     )
 
 
+@pytest.fixture(autouse=True)
+def remove_preinstalled_package():
+    remove_package(PACKAGE_NAME)
+
+
 def get_subdirs(path: str) -> List[str]:
     return [f.path for f in os.scandir(path) if f.is_dir()]
 
 
 def get_project_cache_dir() -> str:
-    project_caches = os.path.join(os.path.expanduser("~"), ".velocitas", "projects")
-    return get_subdirs(project_caches)[0]
+    return subprocess.check_output(
+        ["velocitas", "cache", "get", "--path"], encoding="utf-8"
+    ).strip()
 
 
 def is_package_installed(package_name: str) -> bool:
     return_code = subprocess.call(["pip", "show", package_name])
     return return_code == 0
+
+
+def remove_package(package_name: str):
+    subprocess.call(["pip", "uninstall", "-y", package_name])
 
 
 def can_import_and_use_vehicleapp() -> bool:
@@ -75,8 +88,8 @@ def test_no_sdk_reference_found__nothing_installed():
         requirements.write(requirements_contents)
 
     subprocess.check_call(["velocitas", "init", "-f", "-v"], stdin=subprocess.PIPE)
-    assert not is_package_installed("velocitas_sdk") and not is_package_installed(
-        "velocitas-sdk"
+    assert not is_package_installed(PACKAGE_NAME) and not is_package_installed(
+        PACKAGE_NAME.replace("_", "-")
     )
 
 
@@ -90,7 +103,7 @@ velocitas_sdk==0.13.0
         requirements.write(requirements_contents)
 
     subprocess.check_call(["velocitas", "init", "-f", "-v"], stdin=subprocess.PIPE)
-    assert is_package_installed("velocitas_sdk") or is_package_installed(
-        "velocitas-sdk"
+    assert is_package_installed(PACKAGE_NAME) or is_package_installed(
+        PACKAGE_NAME.replace("_", "-")
     )
     assert can_import_and_use_vehicleapp()

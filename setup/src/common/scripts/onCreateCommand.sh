@@ -13,11 +13,14 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-# restart Docker connection if in Codespaces
-# Workaround according to https://github.com/devcontainers/features/issues/671#issuecomment-1701754897
-if [ "${CODESPACES}" = "true" ]; then
-    sudo pkill dockerd && sudo pkill containerd
-    /usr/local/share/docker-init.sh
+sudo chmod +x .devcontainer/scripts/*.sh
+sudo chown -R $(whoami) $HOME
+
+.devcontainer/scripts/setup-git.sh
+
+if [[ -z "${VELOCITAS_OFFLINE}" ]]; then
+    .devcontainer/scripts/configure-codespaces.sh
+    .devcontainer/scripts/upgrade-cli.sh
 fi
 
 echo "#######################################################"
@@ -26,33 +29,13 @@ echo "#######################################################"
 velocitas init
 velocitas sync
 
-echo "#######################################################"
-echo "### Executing add-python.sh                         ###"
-echo "#######################################################"
-.devcontainer/scripts/add-python.sh 2>&1 | tee -a $HOME/add-python.log
-
-echo "#######################################################"
-echo "### Install python requirements                     ###"
-echo "#######################################################"
-REQUIREMENTS="./requirements.txt"
-if [ -f $REQUIREMENTS ]; then
-    pip3 install -r $REQUIREMENTS
-fi
-REQUIREMENTS="./requirements-links.txt"
-if [ -f $REQUIREMENTS ]; then
-    pip3 install -r $REQUIREMENTS
-fi
-
-pip3 install -e .
-
-# add repo to git safe.directory
-REPO=$(pwd)
-git config --global --add safe.directory $REPO
+# Some setup might be required even in offline mode
+.devcontainer/scripts/setup-dependencies.sh
 
 echo "#######################################################"
 echo "### VADF package status                             ###"
 echo "#######################################################"
-velocitas upgrade --dry-run
+velocitas upgrade --dry-run --ignore-bounds
 
 # Don't let container creation fail if lifecycle management fails
 echo "Done!"

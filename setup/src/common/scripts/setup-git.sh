@@ -1,4 +1,5 @@
-# Copyright (c) 2023-2024 Contributors to the Eclipse Foundation
+#!/bin/bash
+# Copyright (c) 2022-2024 Contributors to the Eclipse Foundation
 #
 # This program and the accompanying materials are made available under the
 # terms of the Apache License, Version 2.0 which is available at
@@ -12,16 +13,13 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import os
-import subprocess
+echo "#######################################################"
+echo "### Setup Git                                       ###"
+echo "#######################################################"
+# Add git name and email from env variables
+if [[ -n "${GIT_CONFIG_NAME}" && -n "${GIT_CONFIG_EMAIL}" ]]; then
+    git config --global user.name $GIT_CONFIG_NAME
+    git config --global user.email $GIT_CONFIG_EMAIL
+fi
 
-
-def pytest_sessionstart(session):
-    """
-    Called after the Session object has been created and
-    before performing collection and entering the run test loop.
-    """
-
-    os.chdir(os.environ["VELOCITAS_TEMPLATE_REPO_PATH"])
-
-    subprocess.check_call(["velocitas", "init", "-v"], stdin=subprocess.PIPE)
+git config --global --add safe.directory "*"

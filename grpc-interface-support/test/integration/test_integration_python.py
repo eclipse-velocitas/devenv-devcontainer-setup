@@ -42,19 +42,14 @@ def get_subdirs(path: str) -> List[str]:
 
 
 def get_project_cache_dir() -> str:
-    project_caches = os.path.join(os.path.expanduser("~"), ".velocitas", "projects")
-    return get_subdirs(project_caches)[0]
+    return subprocess.check_output(
+        ["velocitas", "cache", "get", "--path"], encoding="utf-8"
+    ).strip()
 
 
-def start_app(
-    python_file_name: str, env=os.environ
-) -> subprocess.CompletedProcess[bytes]:
+def start_app(python_file_name: str, env=os.environ) -> subprocess.Popen[bytes]:
     python_file = f"app/src/{python_file_name}.py"
-    return subprocess.run(
-        args=["python", python_file],
-        env=env,
-        shell=True,
-    )
+    return subprocess.Popen(["python", python_file], env=env)
 
 
 def assert_python_package_generated(
@@ -85,6 +80,9 @@ def test_pip_package_is_generated():
     assert_python_package_generated("vcsmotortrqmngservice", "motorcontrol")
 
 
+@pytest.mark.skip(
+    "Skip b/c a running MQTT broker is required for the test at the moment. See: https://github.com/eclipse-velocitas/vehicle-app-python-sdk/issues/143"
+)
 def test_pip_package_is_usable():
     envs = os.environ.copy()
     envs["SDV_SEATS_ADDRESS"] = "127.0.0.1:1234"
@@ -98,15 +96,15 @@ def test_pip_package_is_usable():
 
     assert subprocess.check_call(["velocitas", "init", "-v"]) == 0
 
-    launcher = start_app("launcher", envs)
-
-    assert launcher.returncode == 0
+    server_process = start_app("launcher", envs)
 
     print("============= TEST CLIENTS ===================")
     os.chdir(os.environ["SERVICE_CLIENT_ROOT"])
 
     assert subprocess.check_call(["velocitas", "init", "-v"]) == 0
 
-    launcher = start_app("launcher", envs)
+    client_process = start_app("launcher", envs)
 
-    assert launcher.returncode == 0
+    client_code = client_process.wait()
+    server_process.kill()
+    assert client_code == 0

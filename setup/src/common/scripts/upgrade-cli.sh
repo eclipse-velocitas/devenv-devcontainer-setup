@@ -14,7 +14,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 echo "#######################################################"
-echo "### Auto-Upgrade CLI                                ###"
+echo "### Auto-upgrade CLI                                ###"
 echo "#######################################################"
 
 ROOT_DIRECTORY=$( realpath "$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )/../.." )
