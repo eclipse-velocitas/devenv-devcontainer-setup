@@ -251,7 +251,12 @@
             ],
             "files": [
                 {
-                    "src": "./cpp-cmake-conan/src",
+                    "src": "./cpp-cmake-conan/src/install_dependencies.sh",
+                    "dst": ".",
+                    "condition": "'${{ language }}' === 'cpp'"
+                },
+                {
+                    "src": "./cpp-cmake-conan/src/build.sh",
                     "dst": ".",
                     "condition": "'${{ language }}' === 'cpp'"
                 }
