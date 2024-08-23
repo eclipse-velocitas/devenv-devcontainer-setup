@@ -251,7 +251,7 @@
             ],
             "files": [
                 {
-                    "src": "./cpp-cmake-conan/src",
+                    "src": "./cpp-cmake-conan/install",
                     "dst": ".",
                     "condition": "'${{ language }}' === 'cpp'"
                 }
