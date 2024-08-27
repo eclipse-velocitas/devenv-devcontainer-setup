@@ -65,7 +65,11 @@
                     "id": "install-deps",
                     "executable": "python",
                     "args": [
-                        "./src/install_deps.py"
+                        "-m",
+                        "pip",
+                        "install",
+                        "-r",
+                        "./requirements.txt"
                     ]
                 },
                 {
@@ -231,7 +235,23 @@
         {
             "id": "build-system",
             "basePath": "build-system",
+            "onPostInit": [
+                {
+                    "ref": "install-deps"
+                }
+            ],
             "programs": [
+                {
+                    "id": "install-deps",
+                    "executable": "python",
+                    "args": [
+                        "-m",
+                        "pip",
+                        "install",
+                        "-r",
+                        "./cpp-cmake-conan/requirements.txt"
+                    ]
+                },
                 {
                     "id": "install",
                     "description": "Installs all necessary dependencies / packages for the application",
