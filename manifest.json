@@ -116,14 +116,28 @@
             "basePath": "./conan-setup",
             "programs": [
                 {
+                    "id": "install-deps",
+                    "executable": "python",
+                    "args": [
+                        "-m",
+                        "pip",
+                        "install",
+                        "-r",
+                        "./requirements.txt"
+                    ]
+                },
+                {
                     "id": "run",
-                    "executable": "python3",
+                    "executable": "python",
                     "args": [
                         "./src/run.py"
                     ]
                 }
             ],
             "onPostInit": [
+                {
+                    "ref": "install-deps"
+                },
                 {
                     "ref": "run"
                 }
