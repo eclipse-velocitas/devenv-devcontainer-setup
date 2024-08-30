@@ -1,6 +1,6 @@
 {
     "packages": {
-        "package_under_test": "@velocitas_offline"
+        "package_under_test": "@main"
     },
     "variables": {
         "language": "cpp",
