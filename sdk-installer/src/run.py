@@ -36,16 +36,13 @@ class PackageManager(ABC):
     @abstractmethod
     def is_package_installed(
         self, package_name: str, package_version: Optional[str] = None
-    ) -> bool:
-        ...
+    ) -> bool: ...
 
     @abstractmethod
-    def get_required_package_version(self, package_name: str) -> Optional[str]:
-        ...
+    def get_required_package_version(self, package_name: str) -> Optional[str]: ...
 
     @abstractmethod
-    def install_local_package(self, path: str) -> None:
-        ...
+    def install_local_package(self, path: str) -> None: ...
 
 
 class Conan(PackageManager):
@@ -137,7 +134,7 @@ class Pip(PackageManager):
 
     def install_local_package(self, path: str) -> None:
         subprocess.check_call(
-            ["python", "-m", "pip", "install", "."],
+            ["python3", "-m", "pip", "install", "."],
             stdout=subprocess.DEVNULL if not self._verbose_logging else None,
             cwd=path,
         )

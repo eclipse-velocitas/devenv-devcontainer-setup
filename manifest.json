@@ -63,7 +63,7 @@
             "programs": [
                 {
                     "id": "install-deps",
-                    "executable": "python",
+                    "executable": "python3",
                     "args": [
                         "-m",
                         "pip",
@@ -74,14 +74,14 @@
                 },
                 {
                     "id": "download-vspec",
-                    "executable": "python",
+                    "executable": "python3",
                     "args": [
                         "./src/download_vspec.py"
                     ]
                 },
                 {
                     "id": "generate-model",
-                    "executable": "python",
+                    "executable": "python3",
                     "args": [
                         "./src/generate_model.py"
                     ]
@@ -117,7 +117,7 @@
             "programs": [
                 {
                     "id": "install-deps",
-                    "executable": "python",
+                    "executable": "python3",
                     "args": [
                         "-m",
                         "pip",
@@ -128,7 +128,7 @@
                 },
                 {
                     "id": "run",
-                    "executable": "python",
+                    "executable": "python3",
                     "args": [
                         "./src/run.py"
                     ]
@@ -157,7 +157,7 @@
             "programs": [
                 {
                     "id": "install-deps",
-                    "executable": "python",
+                    "executable": "python3",
                     "args": [
                         "-m",
                         "pip",
@@ -168,7 +168,7 @@
                 },
                 {
                     "id": "run",
-                    "executable": "python",
+                    "executable": "python3",
                     "args": [
                         "./src/run.py"
                     ]
@@ -227,7 +227,7 @@
             "programs": [
                 {
                     "id": "install-deps",
-                    "executable": "python",
+                    "executable": "python3",
                     "args": [
                         "-m",
                         "pip",
@@ -239,7 +239,7 @@
                 {
                     "id": "generate-sdk",
                     "description": "Generates service client SDKs to be used in business logic.",
-                    "executable": "python",
+                    "executable": "python3",
                     "args": [
                         "./src/main.py"
                     ]
@@ -257,7 +257,7 @@
             "programs": [
                 {
                     "id": "install-deps",
-                    "executable": "python",
+                    "executable": "python3",
                     "args": [
                         "-m",
                         "pip",
@@ -269,7 +269,7 @@
                 {
                     "id": "install",
                     "description": "Installs all necessary dependencies / packages for the application",
-                    "executable": "python",
+                    "executable": "python3",
                     "args": [
                         "./cpp-cmake-conan/src/install_deps.py"
                     ]
@@ -277,7 +277,7 @@
                 {
                     "id": "build",
                     "description": "Builds the application",
-                    "executable": "python",
+                    "executable": "python3",
                     "args": [
                         "./cpp-cmake-conan/src/build.py"
                     ]
