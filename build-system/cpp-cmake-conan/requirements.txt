@@ -1,1 +1,1 @@
-velocitas-lib==0.0.11
+velocitas-lib==0.0.12

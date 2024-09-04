@@ -137,7 +137,7 @@ class Pip(PackageManager):
 
     def install_local_package(self, path: str) -> None:
         subprocess.check_call(
-            ["python", "-m", "pip", "install", "."],
+            ["python3", "-m", "pip", "install", "."],
             stdout=subprocess.DEVNULL if not self._verbose_logging else None,
             cwd=path,
         )

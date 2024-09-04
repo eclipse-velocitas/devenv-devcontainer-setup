@@ -122,7 +122,7 @@ class PythonGrpcInterfaceGenerator(GrpcServiceSdkGenerator):  # type: ignore
     def __invoke_code_generator(self) -> None:
         subprocess.check_call(
             [
-                "python",
+                "python3",
                 "-m",
                 "grpc_tools.protoc",
                 f"-I{self.__proto_include_path}",
@@ -136,7 +136,7 @@ class PythonGrpcInterfaceGenerator(GrpcServiceSdkGenerator):  # type: ignore
         for element in imports:
             path = os.path.join(self.__proto_include_path, element)
             args = [
-                "python",
+                "python3",
                 "-m",
                 "grpc_tools.protoc",
                 f"-I{self.__proto_include_path}",
