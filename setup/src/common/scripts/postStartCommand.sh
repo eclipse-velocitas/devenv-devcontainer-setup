@@ -13,6 +13,4 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-# Put your "post start" actions here:
-
 .devcontainer/scripts/upgrade-cli.sh
