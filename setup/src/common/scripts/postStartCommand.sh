@@ -14,3 +14,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 .devcontainer/scripts/upgrade-cli.sh
+
+# Call user initialization hook if present
+if [[ -x .devcontainer/scripts/onPostStartUserHook.sh ]]; then
+    .devcontainer/scripts/onPostStartUserHook.sh
+fi

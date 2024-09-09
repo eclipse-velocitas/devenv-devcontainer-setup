@@ -21,8 +21,11 @@ sudo chown -R $(whoami) $HOME
 if [[ -z "${VELOCITAS_OFFLINE}" ]]; then
     .devcontainer/scripts/configure-codespaces.sh
     .devcontainer/scripts/upgrade-cli.sh
-elif [[ -x .devcontainer/scripts/local-setup.sh ]]; then
-    .devcontainer/scripts/local-setup.sh
+fi
+
+# Call user initialization hook if present
+if [[ -x .devcontainer/scripts/onCreateUserHook.sh ]]; then
+    .devcontainer/scripts/onCreateUserHook.sh
 fi
 
 echo "#######################################################"
