@@ -16,6 +16,7 @@
 
 #include "${{ service_include_dir }}/${{ service_name_camel_case }}ServiceServerFactory.h"
 #include "sdk/middleware/Middleware.h"
+#include "sdk/Logger.h"
 
 #include <grpcpp/ext/proto_server_reflection_plugin.h>
 #include <grpcpp/grpcpp.h>
@@ -38,7 +39,7 @@ std::unique_ptr<grpc::Server> ${{ service_name_camel_case }}ServiceServerFactory
     builder.RegisterService(service.get());
     // Finally assemble the server.
     std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
-    std::cout << "Server listening on " << serviceLocation << std::endl;
+    velocitas::logger().info("Server ${{ package_id }}::${{ service_name }} listening on {}", serviceLocation);
 
     return server;
 }
