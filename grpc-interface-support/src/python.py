@@ -23,12 +23,14 @@ import proto
 from generator import GrpcServiceSdkGenerator, GrpcServiceSdkGeneratorFactory
 from proto import ProtoFileHandle
 from velocitas_lib import get_package_path, get_workspace_dir, templates
+from velocitas_lib.file_utils import (
+    capture_area_in_file,
+    replace_text_in_file,
+)
 from velocitas_lib.templates import CopySpec, copy_templates
 from velocitas_lib.text_utils import (
-    capture_area_in_file,
     replace_item_in_list,
     replace_text_area,
-    replace_text_in_file,
 )
 
 
