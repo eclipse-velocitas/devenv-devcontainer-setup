@@ -16,6 +16,7 @@
 .devcontainer/scripts/upgrade-cli.sh
 
 # Call user initialization hook if present
-if [[ -x .devcontainer/scripts/onPostStartUserHook.sh ]]; then
-    .devcontainer/scripts/onPostStartUserHook.sh
+POST_START_USER_HOOK_PATH=.devcontainer/scripts/onPostStartUserHook.sh
+if [[ -x $POST_START_USER_HOOK_PATH ]]; then
+    $POST_START_USER_HOOK_PATH
 fi

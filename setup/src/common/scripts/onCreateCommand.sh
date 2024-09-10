@@ -24,8 +24,9 @@ if [[ -z "${VELOCITAS_OFFLINE}" ]]; then
 fi
 
 # Call user initialization hook if present
-if [[ -x .devcontainer/scripts/onCreateUserHook.sh ]]; then
-    .devcontainer/scripts/onCreateUserHook.sh
+ON_CREATE_USER_HOOK_PATH=.devcontainer/scripts/onCreateUserHook.sh
+if [[ -x $ON_CREATE_USER_HOOK_PATH ]]; then
+    $ON_CREATE_USER_HOOK_PATH
 fi
 
 echo "#######################################################"
