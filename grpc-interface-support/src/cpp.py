@@ -32,9 +32,13 @@ from velocitas_lib.conan_utils import (
     export_conan_project,
     get_required_sdk_version,
 )
+from velocitas_lib.file_utils import (
+    capture_area_in_file,
+    read_file,
+    write_file,
+)
 from velocitas_lib.templates import CopySpec, copy_templates
 from velocitas_lib.text_utils import (
-    capture_area_in_file,
     to_camel_case,
 )
 
@@ -369,7 +373,7 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
             [CopySpec("ServiceImpl.h", service_header_file_name)],
             variables,
         )
-        
+
     def __update_service_header(self) -> None:
         header_generated_code = GrpcCodeExtractor(
             self.__proto_file_handle, self.__package_directory_path
@@ -391,28 +395,11 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
             "// </auto-generated>",
         )
 
-        header_file_content = self.__read_file_to_string(service_header_file_path)
+        header_file_content = read_file(service_header_file_path)
         modified_content = header_file_content.replace(
             "\n".join(auto_generated_code), "\n".join(header_generated_code)
         )
-        self.__write_string_to_file(service_header_file_path, modified_content)
-
-    def __read_file_to_string(self, filepath) -> str:
-        try:
-            with open(filepath, "r") as file:
-                file_content = file.read()
-            return file_content
-        except FileNotFoundError:
-            print(f"File {filepath} not found")
-        except Exception as e:
-            print(f"An error occurred: {e}")
-
-    def __write_string_to_file(self, filepath, content) -> None:
-        try:
-            with open(filepath, "w") as file:
-                file.write(content)
-        except Exception as e:
-            print(f"An error occurred: {e}")
+        write_file(service_header_file_path, modified_content)
 
     def __create_service_source(self) -> None:
         app_source_dir = os.path.join(get_workspace_dir(), "app", "src")
