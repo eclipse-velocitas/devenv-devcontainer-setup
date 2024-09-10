@@ -361,9 +361,6 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
 
         app_source_dir = os.path.join(get_workspace_dir(), "app", "src")
         service_header_file_name = f"{to_camel_case(self.__service_name)}ServiceImpl.h"
-        service_header_file_path = os.path.join(
-            app_source_dir, service_header_file_name
-        )
         variables = self.__get_template_variables()
         variables["service_header_code"] = "\n".join(header_stub_code)
 
