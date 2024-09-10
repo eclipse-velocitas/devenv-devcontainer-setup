@@ -42,7 +42,7 @@ jobs:
           pip install types-requests
 
       - name: Run Linters
-        uses: pre-commit/action@v3.0.0
+        uses: pre-commit/action@v3.0.1
 
   unit-test:
     name: "Run unit tests"
@@ -85,7 +85,7 @@ jobs:
           ./${{ matrix.component }}/test/unit
 
       - name: Publish Test Report
-        uses: mikepenz/action-junit-report@v3
+        uses: mikepenz/action-junit-report@v4
         if: always()
         with:
           report_paths: ./results/UnitTest/${{ matrix.component }}/junit.xml
