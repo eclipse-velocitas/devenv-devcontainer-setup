@@ -348,7 +348,7 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
         else:
             self.__create_service_header()
 
-    def __create_service_header(self) -> None: 
+    def __create_service_header(self) -> None:
         header_stub_code = GrpcCodeExtractor(
             self.__proto_file_handle, self.__package_directory_path
         ).get_header_stub_code(self.__get_include_dir())
@@ -375,7 +375,7 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
             self.__proto_file_handle, self.__package_directory_path
         ).get_header_stub_code(self.__get_include_dir())
 
-        header_generated_code = self.__transform_header_stub_code(header_stub_code)
+        header_generated_code = self.__transform_header_stub_code(header_generated_code)
 
         app_source_dir = os.path.join(get_workspace_dir(), "app", "src")
         service_header_file_name = (
@@ -392,12 +392,14 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
         )
 
         header_file_content = self.__read_file_to_string(service_header_file_path)
-        modified_content = header_file_content.replace('\n'.join(auto_generated_code), '\n'.join(header_generated_code))
+        modified_content = header_file_content.replace(
+            "\n".join(auto_generated_code), "\n".join(header_generated_code)
+        )
         self.__write_string_to_file(service_header_file_path, modified_content)
 
-    def __read_file_to_string(self, filepath):
+    def __read_file_to_string(self, filepath) -> str:
         try:
-            with open(filepath, 'r') as file:
+            with open(filepath, "r") as file:
                 file_content = file.read()
             return file_content
         except FileNotFoundError:
@@ -405,9 +407,9 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
         except Exception as e:
             print(f"An error occurred: {e}")
 
-    def __write_string_to_file(self, filepath, content):
+    def __write_string_to_file(self, filepath, content) -> None:
         try:
-            with open(filepath, 'w') as file:
+            with open(filepath, "w") as file:
                 file.write(content)
         except Exception as e:
             print(f"An error occurred: {e}")
