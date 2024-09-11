@@ -14,7 +14,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
 sudo chmod +x .devcontainer/scripts/*.sh
-sudo chown -R $(whoami) $HOME
 
 .devcontainer/scripts/setup-git.sh
 
