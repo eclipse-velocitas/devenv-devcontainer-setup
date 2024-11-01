@@ -66,8 +66,8 @@ def build(
     host_arch: str,
     build_target: str,
     static_build: bool,
-    coverage: bool = True,
     toolchain_file: str = "",
+    coverage: bool = True,
 ) -> None:
     xcompile_toolchain_file = ""
     if toolchain_file != "":
@@ -160,6 +160,7 @@ Builds the targets of the project in different flavors."""
     )
     parser.add_argument(
         "--toolchain",
+        default="",
         help="Specify a file (absolute path) containing the definitions of a custom toolchain.",
     )
     parser.add_argument(
