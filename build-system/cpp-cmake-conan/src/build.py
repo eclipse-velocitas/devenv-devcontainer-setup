@@ -85,7 +85,7 @@ def build(
         else:
             cxx_flags.append("-O0")
 
-            cmake_cxx_flags = f"-DCMAKE_CXX_FLAGS={' '.join(cxx_flags)}"
+        cmake_cxx_flags = f"-DCMAKE_CXX_FLAGS={' '.join(cxx_flags)}"
 
     build_folder = get_build_folder(build_arch, host_arch)
     os.makedirs(build_folder, exist_ok=True)
