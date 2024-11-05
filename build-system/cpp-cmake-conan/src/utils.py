@@ -58,6 +58,5 @@ def load_toolchain(toolchain_file: str) -> None:
     if proc.stdout is not None:
         for line in proc.stdout:
             (key, _, value) = line.decode().partition("=")
-            print(f"Setting {key} to {value}")
             os.environ[key] = value
     proc.communicate()

@@ -72,7 +72,7 @@ def build(
     xcompile_toolchain_file = ""
     if toolchain_file != "":
         load_toolchain(toolchain_file)
-        xcompile_toolchain_file = f"-DCMAKE_TOOLCHAIN_FILE={os.path.join(safe_get_workspace_dir(),'OEToolchainConfig.cmake')}"
+        xcompile_toolchain_file = f"-DCMAKE_TOOLCHAIN_FILE={os.environ.get('CMAKE_TOOLCHAIN_FILE', '').strip()}"
         cmake_cxx_flags = f"-DCMAKE_CXX_FLAGS={os.environ.get('CXXFLAGS', '')}"
         host_arch = os.environ.get("OECORE_TARGET_ARCH", build_arch).strip()
 
