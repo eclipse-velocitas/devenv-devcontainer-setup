@@ -58,5 +58,5 @@ def load_toolchain(toolchain_file: str) -> None:
     if proc.stdout is not None:
         for line in proc.stdout:
             (key, _, value) = line.decode().partition("=")
-            os.environ[key] = value
+            os.environ[key.strip()] = value.strip()
     proc.communicate()
