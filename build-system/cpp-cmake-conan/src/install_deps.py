@@ -77,9 +77,12 @@ def install_deps_via_conan(
     )
     if toolchain_file != "":
         load_toolchain(toolchain_file)
+        host_arch = get_valid_arch(
+            os.environ.get("OECORE_TARGET_ARCH", build_arch).strip()
+        )
         host_config = [
             "-s:h",
-            f"arch={get_valid_conan_arch(os.environ.get('OECORE_TARGET_ARCH','').strip())}",
+            f"arch={get_valid_conan_arch(host_arch)}",
             "-s:h",
             f"arch_build={get_valid_conan_arch(build_arch)}",
         ]
