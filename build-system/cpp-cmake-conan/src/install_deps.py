@@ -49,11 +49,11 @@ def get_valid_conan_arch(arch: str) -> str:
     Returns:
         str: The valid architecture.
     """
-    if arch == "x86_64":
+    if arch == "x86_64" or arch == "amd64":
         return "x86_64"
     elif arch == "aarch64" or arch == "armv8" or arch == "arm64":
         return "armv8"
-    elif arch == "armv7":
+    elif arch == "armv7" or arch == "arm" or arch == "arm32":
         return "armv7"
     else:
         raise ValueError(f"Unsupported architecture: {arch}")
@@ -77,9 +77,7 @@ def install_deps_via_conan(
     )
     if toolchain_file != "":
         load_toolchain(toolchain_file)
-        host_arch = get_valid_arch(
-            os.environ.get("OECORE_TARGET_ARCH", build_arch).strip()
-        )
+        host_arch = os.environ.get("OECORE_TARGET_ARCH", build_arch).strip()
         host_config = [
             "-s:h",
             f"arch={get_valid_conan_arch(host_arch)}",

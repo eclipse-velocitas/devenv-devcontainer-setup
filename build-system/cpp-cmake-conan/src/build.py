@@ -74,9 +74,8 @@ def build(
         load_toolchain(toolchain_file)
         xcompile_toolchain_file = f"-DCMAKE_TOOLCHAIN_FILE={os.path.join(safe_get_workspace_dir(),'OEToolchainConfig.cmake')}"
         cmake_cxx_flags = f"-DCMAKE_CXX_FLAGS={os.environ.get('CXXFLAGS', '')}"
-        host_arch = get_valid_arch(
-            os.environ.get("OECORE_TARGET_ARCH", build_arch).strip()
-        )
+        host_arch = os.environ.get("OECORE_TARGET_ARCH", build_arch).strip()
+
     else:
         cxx_flags = ["-g"]
         if coverage:
