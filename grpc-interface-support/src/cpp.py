@@ -340,9 +340,7 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
 
     def __create_or_update_service_header(self) -> None:
         app_source_dir = os.path.join(get_workspace_dir(), "app", "src")
-        service_header_file_name = (
-            f"{self.__proto_file_handle.get_service_name()}ServiceImpl.h"
-        )
+        service_header_file_name = f"{to_camel_case(self.__service_name)}ServiceImpl.h"
         service_header_file_path = os.path.join(
             app_source_dir, service_header_file_name
         )
@@ -379,9 +377,7 @@ class CppGrpcServiceSdkGenerator(GrpcServiceSdkGenerator):  # type: ignore
         header_generated_code = self.__transform_header_stub_code(header_generated_code)
 
         app_source_dir = os.path.join(get_workspace_dir(), "app", "src")
-        service_header_file_name = (
-            f"{self.__proto_file_handle.get_service_name()}ServiceImpl.h"
-        )
+        service_header_file_name = f"{to_camel_case(self.__service_name)}ServiceImpl.h"
         service_header_file_path = os.path.join(
             app_source_dir, service_header_file_name
         )
