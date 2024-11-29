@@ -178,7 +178,7 @@ Builds the targets of the project in different flavors."""
         action="store",
         help="Enables cross-compilation to the defined target architecture.",
     )
-    parser.add_argument("--coverage", action="store_true")
+    parser.add_argument("--coverage", action="store_true", help="Enable gtest coverage")
     args = parser.parse_args()
     if not args.variant:
         args.variant = "debug"
