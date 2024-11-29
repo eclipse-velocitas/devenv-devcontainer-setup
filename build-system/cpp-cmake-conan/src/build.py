@@ -88,7 +88,7 @@ def build(
     host_arch: str,
     build_target: str,
     static_build: bool,
-    coverage: bool = True,
+    coverage: bool = False,
 ) -> None:
     cxx_flags = ["-g"]
     if coverage:
@@ -178,6 +178,7 @@ Builds the targets of the project in different flavors."""
         action="store",
         help="Enables cross-compilation to the defined target architecture.",
     )
+    parser.add_argument("--coverage", action="store_true", help="Enable gtest coverage")
     args = parser.parse_args()
     if not args.variant:
         args.variant = "debug"
@@ -193,7 +194,7 @@ Builds the targets of the project in different flavors."""
         host_arch = get_valid_arch(host_arch)
 
     print_build_info(args.variant, build_arch, host_arch, args.target, args.static)
-    build(args.variant, build_arch, host_arch, args.target, args.static)
+    build(args.variant, build_arch, host_arch, args.target, args.static, args.coverage)
 
 
 if __name__ == "__main__":
