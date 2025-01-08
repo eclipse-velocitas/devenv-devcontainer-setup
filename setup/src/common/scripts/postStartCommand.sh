@@ -13,7 +13,9 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-.devcontainer/scripts/upgrade-cli.sh
+if [[ -z "${VELOCITAS_OFFLINE}" ]]; then
+    .devcontainer/scripts/upgrade-cli.sh
+fi
 
 # Call user initialization hook if present
 POST_START_USER_HOOK_PATH=.devcontainer/scripts/onPostStartUserHook.sh
