@@ -483,12 +483,7 @@ class CppGrpcServiceSdkGeneratorFactory(GrpcServiceSdkGeneratorFactory):  # type
 
         deps_to_extract = [
             "grpc",
-            "c-ares",
-            "googleapis",
-            "grpc-proto",
-            "zlib",
             "protobuf",
-            "openssl",
         ]
         deps_patterns = [
             re.compile(r"^.*\"(" + dep + r"\/.*)\".*$") for dep in deps_to_extract

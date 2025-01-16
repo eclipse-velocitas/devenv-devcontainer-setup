@@ -39,6 +39,8 @@ class ${{ service_name_camel_case }}ServiceConan(ConanFile):
     # Workaround1: Pin recipe revision for transient dependency googleapis for enabling the container build
     # Workaround2: Pin recipe revision for transient dependency paho-mqtt-c cause latest is pulling libanl which cannot be found
     requires = [
+        ("grpc/1.67.1"),
+        ("protobuf/5.27.0"),
         ("vehicle-app-sdk/${{ core_sdk_version }}")
     ]
 
