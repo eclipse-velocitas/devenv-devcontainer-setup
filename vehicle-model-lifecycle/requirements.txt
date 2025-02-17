@@ -1,4 +1,4 @@
-velocitas-lib==0.0.12
+velocitas-lib==0.0.13
 velocitas-model-generator @ git+https://github.com/eclipse-velocitas/vehicle-model-generator@conan2
 types-requests
 requests
