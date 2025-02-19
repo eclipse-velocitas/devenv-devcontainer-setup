@@ -39,42 +39,24 @@ def get_build_folder(build_arch: str, host_arch: str):
     return os.path.join(safe_get_workspace_dir(), f"build_linux_{host_arch}")
 
 
-def get_profile_name(arch: str, build_variant: str) -> str:
-    """Return the Conan profile name for the given `arch` and
-    `build_variant`.
-
-    Args:
-        arch (str): The architecture of the profile.
-        build_variant (str): The build variant (debug or release).
-
-    Returns:
-        str: The Conan profile name.
-    """
-    return f"linux_{get_valid_arch(arch)}_{build_variant}"
-
-
 def install_deps_via_conan(
     build_arch: str,
     host_arch: str,
     is_debug: bool = False,
     build_all_deps: bool = False,
 ) -> None:
-    build_variant = "debug" if is_debug else "release"
+    build_variant = "Debug" if is_debug else "Release"
 
     profile_build_path = (
         Path(__file__)
         .absolute()
-        .parent.joinpath(
-            ".conan", "profiles", get_profile_name(build_arch, build_variant)
-        )
+        .parent.joinpath(".conan", "profiles", f"linux_{build_variant}")
     )
 
     profile_host_path = (
         Path(__file__)
         .absolute()
-        .parent.joinpath(
-            ".conan", "profiles", get_profile_name(host_arch, build_variant)
-        )
+        .parent.joinpath(".conan", "profiles", f"linux_{build_variant}")
     )
 
     build_folder = get_build_folder(build_arch, host_arch)
