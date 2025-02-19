@@ -36,16 +36,13 @@ class PackageManager(ABC):
     @abstractmethod
     def is_package_installed(
         self, package_name: str, package_version: Optional[str] = None
-    ) -> bool:
-        ...
+    ) -> bool: ...
 
     @abstractmethod
-    def get_required_package_version(self, package_name: str) -> Optional[str]:
-        ...
+    def get_required_package_version(self, package_name: str) -> Optional[str]: ...
 
     @abstractmethod
-    def install_local_package(self, path: str) -> None:
-        ...
+    def install_local_package(self, path: str) -> None: ...
 
 
 class Conan(PackageManager):
@@ -73,13 +70,15 @@ class Conan(PackageManager):
         """
         package_version: Optional[str] = None
         with open(
-            os.path.join(get_workspace_dir(), "conanfile.txt"), encoding="utf-8"
+            os.path.join(get_workspace_dir(), "conanfile.py"), encoding="utf-8"
         ) as conanfile:
             for line in conanfile:
-                if line.startswith(f"{package_name}/"):
+                if line.strip().startswith(f'("{package_name}/'):
                     package_version = (
-                        line.split("/", maxsplit=1)[1].split("@")[0].strip()
+                        # line example: ("{package_name}/<version>@<revision>"),
+                        line.split("/", maxsplit=1)[1].split("@")[0].strip()[:-3]
                     )
+                    break
 
         return package_version
 
@@ -247,7 +246,7 @@ def main(verbose: bool):
     """
     lang = get_programming_language()
     if lang not in SUPPORTED_LANGUAGES:
-        print("No core SDK available yet for programming language " f"{lang!r}")
+        print(f"No core SDK available yet for programming language {lang!r}")
         return
 
     additional_packages = json.loads(require_env("additionalPackages"))
