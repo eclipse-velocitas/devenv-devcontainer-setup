@@ -17,7 +17,6 @@
 import os
 import shutil
 import subprocess
-import sys
 from pathlib import Path
 from typing import List
 
@@ -88,7 +87,7 @@ def install_model_if_required(language: str, model_path: str) -> None:
         model_path (str): The path where the generated model is stored.
     """
     if language == "python":
-        subprocess.check_call([sys.executable, "-m", "pip", "install", model_path])
+        subprocess.check_call(["pip", "install", model_path])
     elif language == "cpp" and os.path.isfile(os.path.join(model_path, "conanfile.py")):
         export_conan_project(model_path)
     else:
