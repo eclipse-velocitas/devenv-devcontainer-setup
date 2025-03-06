@@ -1,7 +1,7 @@
 [settings]
 os=Linux
-arch=armv8
+arch={{detect_api.detect_arch()}}
 compiler=gcc
 compiler.version=11
 compiler.libcxx=libstdc++11
-build_type=Debug
+build_type=Release

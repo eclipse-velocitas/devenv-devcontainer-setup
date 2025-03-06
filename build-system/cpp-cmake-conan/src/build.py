@@ -89,6 +89,8 @@ def build(
     build_target: str,
     static_build: bool,
     coverage: bool = False,
+    build_all_deps: bool = False,
+    num_jobs: int = 2,
 ) -> None:
     cxx_flags = ["-g"]
     if coverage:
@@ -111,36 +113,30 @@ def build(
             .parent.joinpath("cmake", f"{build_arch}_to_{host_arch}.cmake")
         )
         xcompile_toolchain_file = f"-DCMAKE_TOOLCHAIN_FILE={profile_build_path}"
-
-    subprocess.run(
-        [
-            CMAKE_EXECUTABLE,
-            "--no-warn-unused-cli",
-            "-DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE",
-            f"-DCMAKE_BUILD_TYPE:STRING={build_variant}",
-            f'-DBUILD_TOOLS_PATH:STRING="{get_build_tools_path(build_folder)}"',
-            f"-DSTATIC_BUILD:BOOL={'TRUE' if static_build else 'FALSE'}",
-            xcompile_toolchain_file,
-            "-S",
-            safe_get_workspace_dir(),
-            "-B.",
-            "-G",
-            "Ninja",
-            f"-DCMAKE_CXX_FLAGS={' '.join(cxx_flags)}",
-        ],
-        cwd=build_folder,
+    profile_build_path = (
+        Path(__file__)
+        .absolute()
+        .parent.joinpath(".conan", "profiles", f"linux_{build_variant}")
     )
     subprocess.run(
         [
-            CMAKE_EXECUTABLE,
-            "--build",
+            CONAN_EXECUTABLE,
+            "build",
             ".",
-            "--config",
-            build_variant,
-            "--target",
-            build_target,
+            "-pr:a",
+            profile_build_path,
+            "-s",
+            f"build_type={build_variant}",
+            f"-o:a=&:STATIC_BUILD={'ON' if static_build else 'OFF'}",
+            f"-o:a=&:COVERAGE={'ON' if coverage else 'OFF'}",
+            f"-o:a=&:BUILD_TARGET={build_target}",
+            f"-o:a=&:BUILD_ARCH={build_arch}",
+            f"-o:a=&:HOST_ARCH={host_arch}",
+            "--build",
+            "*'" if build_all_deps else "missing",
+            f"-c tools.build:jobs={num_jobs}",
         ],
-        cwd=build_folder,
+        cwd=safe_get_workspace_dir(),
     )
 
 
@@ -154,7 +150,7 @@ Builds the targets of the project in different flavors."""
         "-d",
         "--debug",
         action="store_const",
-        const="debug",
+        const="Debug",
         dest="variant",
         help="Builds the target(s) in debug mode.",
     )
@@ -162,7 +158,7 @@ Builds the targets of the project in different flavors."""
         "-r",
         "--release",
         action="store_const",
-        const="release",
+        const="Release",
         dest="variant",
         help="Builds the target(s) in release mode.",
     )
@@ -170,7 +166,16 @@ Builds the targets of the project in different flavors."""
         "-t", "--target", help="Builds only the target <name> instead of all targets."
     )
     parser.add_argument(
+        "-j", "--jobs", help="Number of parallel jobs to use for building."
+    )
+    parser.add_argument(
         "-s", "--static", action="store_true", help="Links all dependencies statically."
+    )
+    parser.add_argument(
+        "-ba",
+        "--build-all-deps",
+        action="store_true",
+        help="Forces all dependencies to be rebuild from source.",
     )
     parser.add_argument(
         "-x",
@@ -179,9 +184,10 @@ Builds the targets of the project in different flavors."""
         help="Enables cross-compilation to the defined target architecture.",
     )
     parser.add_argument("--coverage", action="store_true", help="Enable gtest coverage")
+
     args = parser.parse_args()
     if not args.variant:
-        args.variant = "debug"
+        args.variant = "Debug"
     if not args.target:
         args.target = "all"
     build_arch = subprocess.check_output(["arch"], encoding="utf-8").strip()
@@ -194,7 +200,16 @@ Builds the targets of the project in different flavors."""
         host_arch = get_valid_arch(host_arch)
 
     print_build_info(args.variant, build_arch, host_arch, args.target, args.static)
-    build(args.variant, build_arch, host_arch, args.target, args.static, args.coverage)
+    build(
+        args.variant,
+        build_arch,
+        host_arch,
+        args.target,
+        args.static,
+        args.coverage,
+        args.build_all_deps,
+        args.jobs,
+    )
 
 
 if __name__ == "__main__":
