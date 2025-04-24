@@ -26,7 +26,10 @@ def test_normal_build_successful():
         ["velocitas", "exec", "build-system", "install"], stdin=subprocess.PIPE
     )
     subprocess.check_call(
-        ["velocitas", "exec", "build-system", "build"], stdin=subprocess.PIPE
+        ["velocitas", "exec", "build-system", "build", "-r"], stdin=subprocess.PIPE
+    )
+    subprocess.check_call(
+        ["velocitas", "exec", "build-system", "build", "-d"], stdin=subprocess.PIPE
     )
 
 
@@ -53,6 +56,10 @@ def test_cross_build_successful():
         stdin=subprocess.PIPE,
     )
     subprocess.check_call(
-        ["velocitas", "exec", "build-system", "build", "-x", "aarch64"],
+        ["velocitas", "exec", "build-system", "build", "-r", "-x", "aarch64"],
+        stdin=subprocess.PIPE,
+    )
+    subprocess.check_call(
+        ["velocitas", "exec", "build-system", "build", "-d", "-x", "aarch64"],
         stdin=subprocess.PIPE,
     )

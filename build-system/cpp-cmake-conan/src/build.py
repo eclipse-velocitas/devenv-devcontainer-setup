@@ -12,13 +12,11 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import json
 import os
 import subprocess
 from argparse import ArgumentParser
-from pathlib import Path
-from typing import List
 
+from shell_source import source
 from velocitas_lib import get_valid_arch, get_workspace_dir
 
 CMAKE_EXECUTABLE = "cmake"
@@ -33,35 +31,36 @@ def safe_get_workspace_dir() -> str:
         return os.path.abspath(".")
 
 
-def get_build_folder(build_arch: str, host_arch: str):
-    if host_arch == build_arch:
-        return os.path.join(safe_get_workspace_dir(), "build")
-    return os.path.join(safe_get_workspace_dir(), f"build_linux_{host_arch}")
+def get_build_folder(op_sys: str, arch: str, build_type: str) -> str:
+    return os.path.join(
+        safe_get_workspace_dir(), f"build-{op_sys}-{arch}", f"{build_type}"
+    )
 
 
-def get_build_tools_path(build_folder_path: str) -> str:
-    paths: List[str] = []
-    with open(
-        os.path.join(build_folder_path, "conanbuildinfo.txt"), encoding="utf-8"
-    ) as file:
-        for line in file:
-            if line.startswith("PATH="):
-                path_list = json.loads(line[len("PATH=") :])
-                paths.extend(path_list)
-    return ";".join(paths)
+def safe_create_symlink_to_folder(target_folder: str, link_name: str):
+    try:
+        if os.readlink(link_name):
+            os.remove(link_name)
+    except FileNotFoundError:
+        pass
+    except OSError:
+        print(f"File '{link_name}' exists, but is not a symlink. Will not overwrite!")
+        return
+    os.symlink(target_folder, link_name, target_is_directory=True)
 
 
 def print_build_info(
-    build_variant: str,
+    build_type: str,
     build_arch: str,
     host_arch: str,
     build_target: str,
     is_static_build: bool,
+    coverage: bool,
 ) -> None:
     """Print information about the build.
 
     Args:
-        build_variant (str): The variant of the build: "release" or "debug"
+        build_type (str): The type of the build: "release" or "debug"
         build_arch (str): The architecture the app is built for.
         build_target (str): Which artefact is being built.
         is_static_build (bool): Enable static building.
@@ -77,70 +76,72 @@ def print_build_info(
     print(f"Conan version      {conan_version}")
     print(f"Build arch         {build_arch}")
     print(f"Host arch          {host_arch}")
-    print(f"Build variant      {build_variant}")
+    print(f"Build type         {build_type}")
     print(f"Build target       {build_target}")
     print(f"Static build       {'yes' if is_static_build else 'no'}")
+    print(f"Coverage enabled   {'yes' if coverage else 'no'}")
 
 
 def build(
-    build_variant: str,
+    build_type: str,
     build_arch: str,
     host_arch: str,
     build_target: str,
     static_build: bool,
     coverage: bool = False,
+    num_jobs: int = 2,
 ) -> None:
     cxx_flags = ["-g"]
     if coverage:
         cxx_flags.append("--coverage")
 
-    if build_variant == "release":
+    if build_type == "Release":
         cxx_flags.append("-s")
         cxx_flags.append("-O3")
     else:
         cxx_flags.append("-O0")
 
-    build_folder = get_build_folder(build_arch, host_arch)
+    build_folder = get_build_folder("linux", host_arch, build_type)
     os.makedirs(build_folder, exist_ok=True)
-
-    xcompile_toolchain_file = ""
-    if build_arch != host_arch:
-        profile_build_path = (
-            Path(__file__)
-            .absolute()
-            .parent.joinpath("cmake", f"{build_arch}_to_{host_arch}.cmake")
+    if build_arch == host_arch:
+        safe_create_symlink_to_folder(
+            build_folder, os.path.join(safe_get_workspace_dir(), "build")
         )
-        xcompile_toolchain_file = f"-DCMAKE_TOOLCHAIN_FILE={profile_build_path}"
+
+    build_env = source(
+        os.path.join(build_folder, "generators/conanbuild.sh"),
+        "bash",
+        ignore_locals=True,
+    )
 
     subprocess.run(
         [
             CMAKE_EXECUTABLE,
             "--no-warn-unused-cli",
             "-DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE",
-            f"-DCMAKE_BUILD_TYPE:STRING={build_variant}",
-            f'-DBUILD_TOOLS_PATH:STRING="{get_build_tools_path(build_folder)}"',
-            f"-DSTATIC_BUILD:BOOL={'TRUE' if static_build else 'FALSE'}",
-            xcompile_toolchain_file,
+            f"-DCMAKE_BUILD_TYPE:STRING={build_type}",
+            f"-DSTATIC_BUILD:BOOL={'ON' if static_build else 'OFF'}",
+            f"-DCMAKE_CXX_FLAGS={' '.join(cxx_flags)}",
+            "-DCMAKE_TOOLCHAIN_FILE=generators/conan_toolchain.cmake",
+            "-G",
+            "Ninja",
             "-S",
             safe_get_workspace_dir(),
             "-B.",
-            "-G",
-            "Ninja",
-            f"-DCMAKE_CXX_FLAGS={' '.join(cxx_flags)}",
         ],
         cwd=build_folder,
+        env=build_env,
     )
     subprocess.run(
         [
             CMAKE_EXECUTABLE,
             "--build",
             ".",
-            "--config",
-            build_variant,
             "--target",
             build_target,
         ],
         cwd=build_folder,
+        env=build_env,
     )
 
 
@@ -154,20 +155,23 @@ Builds the targets of the project in different flavors."""
         "-d",
         "--debug",
         action="store_const",
-        const="debug",
-        dest="variant",
+        const="Debug",
+        dest="build_type",
         help="Builds the target(s) in debug mode.",
     )
     parser.add_argument(
         "-r",
         "--release",
         action="store_const",
-        const="release",
-        dest="variant",
+        const="Release",
+        dest="build_type",
         help="Builds the target(s) in release mode.",
     )
     parser.add_argument(
         "-t", "--target", help="Builds only the target <name> instead of all targets."
+    )
+    parser.add_argument(
+        "-j", "--jobs", help="Number of parallel jobs to use for building."
     )
     parser.add_argument(
         "-s", "--static", action="store_true", help="Links all dependencies statically."
@@ -179,22 +183,32 @@ Builds the targets of the project in different flavors."""
         help="Enables cross-compilation to the defined target architecture.",
     )
     parser.add_argument("--coverage", action="store_true", help="Enable gtest coverage")
+
     args = parser.parse_args()
-    if not args.variant:
-        args.variant = "debug"
+    if not args.build_type:
+        args.build_type = "Debug"
     if not args.target:
         args.target = "all"
     build_arch = subprocess.check_output(["arch"], encoding="utf-8").strip()
 
     host_arch = args.cross
-
     if host_arch is None:
         host_arch = build_arch
     else:
         host_arch = get_valid_arch(host_arch)
 
-    print_build_info(args.variant, build_arch, host_arch, args.target, args.static)
-    build(args.variant, build_arch, host_arch, args.target, args.static, args.coverage)
+    print_build_info(
+        args.build_type, build_arch, host_arch, args.target, args.static, args.coverage
+    )
+    build(
+        args.build_type,
+        build_arch,
+        host_arch,
+        args.target,
+        args.static,
+        args.coverage,
+        args.jobs,
+    )
 
 
 if __name__ == "__main__":

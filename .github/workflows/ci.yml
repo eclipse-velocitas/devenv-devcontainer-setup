@@ -124,8 +124,17 @@ jobs:
       fail-fast: false
 
     steps:
+      - name: Checkout C++ template repository
+        uses: actions/checkout@v4
+        if: ${{ matrix.language == 'cpp' }}
+        with:
+          repository: eclipse-velocitas/vehicle-app-${{ matrix.language }}-template
+          ref: bjoern_conan2
+          fetch-depth: 0
+
       - name: Checkout template repository
         uses: actions/checkout@v4
+        if: ${{ matrix.language != 'cpp' }}
         with:
           repository: eclipse-velocitas/vehicle-app-${{ matrix.language }}-template
           fetch-depth: 0

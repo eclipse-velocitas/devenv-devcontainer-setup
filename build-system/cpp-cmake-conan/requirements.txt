@@ -1,1 +1,2 @@
-velocitas-lib==0.0.12
+shell-source>=3.0.0,<4
+velocitas-lib==0.0.13

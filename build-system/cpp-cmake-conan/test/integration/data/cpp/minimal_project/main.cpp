@@ -14,8 +14,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <iostream>
+#include <fmt/format.h>
 
 int main(int argc, char** argv) {
-    std::cout << "Hello World!" << std::endl;
+    fmt::print("{}\n", "Hello World!");
 }

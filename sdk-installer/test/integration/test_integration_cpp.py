@@ -26,21 +26,27 @@ if not os.environ["VELOCITAS_TEST_LANGUAGE"] == "cpp":
 @pytest.fixture(autouse=True)
 def remove_preinstalled_package():
     print("Removing old packages")
-    remove_package(PACKAGE_NAME)
+    if is_package_installed(PACKAGE_NAME):
+        print(f"Removing package {PACKAGE_NAME}")
+        remove_package(PACKAGE_NAME)
 
 
 def is_package_installed(package_name: str) -> bool:
-    output = subprocess.check_output(
-        ["conan", "search", package_name], encoding="utf-8"
-    )
-    return output.find("Existing package recipes:") != -1
+    output = subprocess.check_output(["conan", "list", package_name], encoding="utf-8")
+    return output.find("ERROR") == -1
 
 
 def remove_package(package_name: str):
-    subprocess.check_call(["conan", "remove", "-f", package_name])
+    subprocess.check_call(["conan", "remove", "--confirm", package_name])
 
 
 def test_no_sdk_reference_found__nothing_installed():
+    # Check pre-condition
+    assert not is_package_installed(PACKAGE_NAME)
+
+    # Remove possibly existing conanfile.py to enable simpler conanfile.txt below
+    if os.path.exists("./conanfile.py"):
+        os.remove("./conanfile.py")
     conanfile_contents = """
 [requires]
 
@@ -48,17 +54,27 @@ def test_no_sdk_reference_found__nothing_installed():
     with open("./conanfile.txt", mode="w", encoding="utf-8") as conanfile:
         conanfile.write(conanfile_contents)
 
-    subprocess.check_call(["velocitas", "init", "-f", "-v"], stdin=subprocess.PIPE)
+    subprocess.check_call(
+        ["velocitas", "exec", "sdk-installer", "run"], stdin=subprocess.PIPE
+    )
     assert not is_package_installed(PACKAGE_NAME)
 
 
 def test_sdk_reference_found__sdk_installed():
+    # Check pre-condition
+    assert not is_package_installed(PACKAGE_NAME)
+
+    # Remove possibly existing conanfile.py to enable simpler conanfile.txt below
+    if os.path.exists("./conanfile.py"):
+        os.remove("./conanfile.py")
     conanfile_contents = """
 [requires]
-vehicle-app-sdk/0.3.3
+vehicle-app-sdk/bjoern_conan2
     """
     with open("./conanfile.txt", mode="w", encoding="utf-8") as conanfile:
         conanfile.write(conanfile_contents)
 
-    subprocess.check_call(["velocitas", "init", "-f", "-v"], stdin=subprocess.PIPE)
+    subprocess.check_call(
+        ["velocitas", "exec", "sdk-installer", "run"], stdin=subprocess.PIPE
+    )
     assert is_package_installed("vehicle-app-sdk")

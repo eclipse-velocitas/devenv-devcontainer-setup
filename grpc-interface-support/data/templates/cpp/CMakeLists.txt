@@ -8,14 +8,19 @@ add_library(${PROJECT_NAME}
     ${{ cmake_sources }}
 )
 
-target_include_directories(${PROJECT_NAME}
-    PUBLIC include
+find_package(gRPC REQUIRED CONFIG)
+find_package(vehicle-app-sdk REQUIRED CONFIG)
+
+target_link_libraries(${PROJECT_NAME}
+    gRPC::grpc++
+    vehicle-app-sdk::vehicle-app-sdk
 )
 
-include_directories(
-    ${CMAKE_INCLUDE_PATH}
+target_include_directories(${PROJECT_NAME}
+    PUBLIC
+    include
+    PRIVATE
     include/services/${{ service_name_lower }}
-    include/${{ proto_location }}
 )
 
 set(HEADERS
