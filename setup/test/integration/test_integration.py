@@ -131,5 +131,5 @@ def test_devcontainer_base_image():
     language = os.environ["VELOCITAS_TEST_LANGUAGE"]
     assert (
         from_instruction
-        == f"FROM ghcr.io/eclipse-velocitas/devcontainer-base-images/{language}:v0.3"
+        == f"FROM ghcr.io/eclipse-velocitas/devcontainer-base-images/{language}:5cb71f75c9dbf10151d18f16867717cc1c79554d"
     )
