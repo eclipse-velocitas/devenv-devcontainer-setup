@@ -1,4 +1,4 @@
 velocitas-lib==0.0.13
-velocitas-model-generator==0.8.0a1
+velocitas-model-generator==0.8.0
 types-requests
 requests
