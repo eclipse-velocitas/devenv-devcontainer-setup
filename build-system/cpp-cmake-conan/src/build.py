@@ -32,7 +32,9 @@ def safe_get_workspace_dir() -> str:
 
 
 def get_build_folder(op_sys: str, arch: str, build_type: str) -> str:
-    return os.path.join(f"build-{op_sys}-{arch}", build_type)
+    return os.path.join(
+        safe_get_workspace_dir(), f"build-{op_sys}-{arch}", f"{build_type}"
+    )
 
 
 def safe_create_symlink_to_folder(target_folder: str, link_name: str):
@@ -100,7 +102,7 @@ def build(
         cxx_flags.append("-O0")
 
     build_folder = get_build_folder("linux", host_arch, build_type)
-    os.makedirs(os.path.join(safe_get_workspace_dir(), build_folder), exist_ok=True)
+    os.makedirs(build_folder, exist_ok=True)
     if build_arch == host_arch:
         safe_create_symlink_to_folder(
             build_folder, os.path.join(safe_get_workspace_dir(), "build")
