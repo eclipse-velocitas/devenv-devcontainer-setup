@@ -129,7 +129,7 @@ jobs:
         if: ${{ matrix.language == 'cpp' }}
         with:
           repository: eclipse-velocitas/vehicle-app-${{ matrix.language }}-template
-          ref: bjoern_conan2
+          ref: conan2-prerelease
           fetch-depth: 0
 
       - name: Checkout template repository
