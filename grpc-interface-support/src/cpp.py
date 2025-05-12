@@ -471,7 +471,6 @@ class CppGrpcServiceSdkGeneratorFactory(GrpcServiceSdkGeneratorFactory):  # type
     def __create_conan_profile(self) -> None:
         subprocess.check_call(
             ["conan", "profile", "detect", "--name", CONAN_PROFILE_NAME, "--force"],
-            stdout=subprocess.DEVNULL,
         )
 
     def __install_protoc_via_conan(self, conan_build_dir: str) -> None:
