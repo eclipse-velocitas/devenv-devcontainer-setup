@@ -508,7 +508,6 @@ class CppGrpcServiceSdkGeneratorFactory(GrpcServiceSdkGeneratorFactory):  # type
                 "install",
                 "-pr:a",
                 CONAN_PROFILE_NAME,
-                "-s:a=compiler.libcxx=libstdc++11",
                 "-s:a=build_type=Release",
                 "--build",
                 "missing",
