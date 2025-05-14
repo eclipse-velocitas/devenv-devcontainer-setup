@@ -101,6 +101,7 @@ class PythonGrpcInterfaceGenerator(GrpcServiceSdkGenerator):  # type: ignore
         proto_file_handle: proto.ProtoFileHandle,
         verbose: bool,
         proto_include_path: str,
+        is_first_service: bool,
     ):
         self.__package_directory_path = package_directory_path
         self.__proto_file_handle = proto_file_handle
@@ -120,6 +121,7 @@ class PythonGrpcInterfaceGenerator(GrpcServiceSdkGenerator):  # type: ignore
             self.__output_path,
             f"{self.__service_name_lower}_service_sdk",
         )
+        self.__is_first_service = is_first_service
 
     def __invoke_code_generator(self) -> None:
         subprocess.check_call(
@@ -325,7 +327,12 @@ class PythonGrpcServiceSdkGeneratorFactory(GrpcServiceSdkGeneratorFactory):  # t
         output_path: str,
         proto_file_handle: proto.ProtoFileHandle,
         proto_include_path: str,
+        is_first_service: bool,
     ) -> PythonGrpcInterfaceGenerator:
         return PythonGrpcInterfaceGenerator(
-            output_path, proto_file_handle, self._verbose, proto_include_path
+            output_path,
+            proto_file_handle,
+            self._verbose,
+            proto_include_path,
+            is_first_service,
         )

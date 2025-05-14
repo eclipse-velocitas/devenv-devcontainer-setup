@@ -29,10 +29,10 @@ def test_is_model_installed_cpp() -> None:
         return
 
     output = subprocess.check_output(
-        ["conan", "search", "vehicle-model"], encoding="utf-8"
+        ["conan", "list", "vehicle-model"], encoding="utf-8"
     )
 
-    assert output.find("Existing package recipes:") != -1
+    assert output.find("ERROR") == -1
 
 
 def test_package_can_be_used_by_project() -> None:

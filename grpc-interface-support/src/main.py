@@ -24,12 +24,12 @@ from cpp import CppGrpcServiceSdkGeneratorFactory
 from generator import GrpcServiceSdkGeneratorFactory
 from python import PythonGrpcServiceSdkGeneratorFactory
 from velocitas_lib import (
+    discover_files_in_filetree,
+    extract_zip,
     get_programming_language,
     get_project_cache_dir,
     get_workspace_dir,
     obtain_local_file_path,
-    extract_zip,
-    discover_files_in_filetree,
 )
 from velocitas_lib.functional_interface import get_interfaces_for_type
 
@@ -84,7 +84,9 @@ def get_absolute_proto_include_path(relative_path: str) -> str:
 
 
 def generate_services(
-    factory: GrpcServiceSdkGeneratorFactory, if_config: Dict[str, Any]
+    factory: GrpcServiceSdkGeneratorFactory,
+    if_config: Dict[str, Any],
+    is_first_config: bool,
 ) -> None:
     """Generate SDKs for the services defined in the AppManifest.
 
@@ -121,6 +123,7 @@ def generate_services(
     is_server = "provided" in if_config
     skipped_files = 0
 
+    is_first_service = is_first_config
     for proto_file in proto_files:
         try:
             proto_service_file = proto.ProtoFileHandle(proto_file)
@@ -130,8 +133,14 @@ def generate_services(
                     if_config["protoIncludeDir"]
                 )
             generate_single_service(
-                proto_service_file, factory, is_client, is_server, proto_include_dir
+                proto_service_file,
+                factory,
+                is_client,
+                is_server,
+                proto_include_dir,
+                is_first_service,
             )
+            is_first_service = False
         except RuntimeError:
             print(
                 f"File {proto_file} has no services defined. If it is an import file ignore this error!"
@@ -148,6 +157,7 @@ def generate_single_service(
     generate_client: bool,
     generate_server: bool,
     proto_include_dir: str,
+    is_first_service: bool,
 ) -> None:
     """Generate an SDK for a single service.
 
@@ -157,16 +167,17 @@ def generate_single_service(
             The factory from which to generate an SDK generator for a single service.
         generate_client (bool):     Whether to create client code or not.
         generate_server (bool):     Whether to create server code or not.
-        proto_include_dir (str):          The directory in which to search for imports.
+        proto_include_dir (str):    The directory in which to search for imports.
+        is_first_service (bool):    Indicates whether this is the first service
+            to be generated. This can be used to determine whether the
+            generator needs to initialize some common part or not.
     """
 
     service_sdk_dir = create_service_sdk_dir(proto_file_handle)
     print(f"Generating service SDK for {proto_file_handle.file_path}")
 
     generator = factory.create_service_generator(
-        service_sdk_dir,
-        proto_file_handle,
-        proto_include_dir,
+        service_sdk_dir, proto_file_handle, proto_include_dir, is_first_service
     )
     generator.generate_package(generate_client, generate_server)
     generator.install_package()
@@ -203,9 +214,11 @@ def generate_sdks(verbose: bool) -> None:
     print("Installing tooling...")
     factory.install_tooling()
 
+    is_first_config = True
     for grpc_service in interfaces:
         if_config = grpc_service["config"]
-        generate_services(factory, if_config)
+        generate_services(factory, if_config, is_first_config)
+        is_first_config = False
 
 
 if __name__ == "__main__":

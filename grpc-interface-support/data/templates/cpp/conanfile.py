@@ -13,7 +13,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, cmake_layout
 
 
 class ${{ service_name_camel_case }}ServiceConan(ConanFile):
@@ -34,26 +34,27 @@ class ${{ service_name_camel_case }}ServiceConan(ConanFile):
 
     # Sources are located in the same place as this recipe, copy them to the recipe
     exports_sources = "CMakeLists.txt", "src/*", "include/*"
-
-    # In general: Pin recipe revisions of dependencies having further dependencies to avoid build issues due to updated recipes
-    # Workaround1: Pin recipe revision for transient dependency googleapis for enabling the container build
-    # Workaround2: Pin recipe revision for transient dependency paho-mqtt-c cause latest is pulling libanl which cannot be found
-    requires = [
-        ("grpc/1.67.1"),
-        ("protobuf/5.27.0"),
-        ("vehicle-app-sdk/${{ core_sdk_version }}")
-    ]
+    generators = "CMakeDeps", "CMakeToolchain"
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+
+    def requirements(self):
+        self.requires("grpc/1.50.1", transitive_headers=True)
+        self.requires("vehicle-app-sdk/${{ core_sdk_version }}")
+
+    def build_requirements(self):
+        # Declare both, grpc and protobuf, here to enable proper x-build (w/o using qemu)
+        self.tool_requires("grpc/<host_version>")
+        self.tool_requires("protobuf/<host_version>")
+
     def layout(self):
         cmake_layout(self)
-
-    def generate(self):
-        tc = CMakeToolchain(self)
-        tc.generate()
 
     def build(self):
         cmake = CMake(self)

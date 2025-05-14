@@ -60,6 +60,7 @@ class GrpcServiceSdkGeneratorFactory(ABC):
         output_path: str,
         proto_file_handle: proto.ProtoFileHandle,
         proto_include_path: str,
+        is_first_service: bool,
     ) -> GrpcServiceSdkGenerator:
         """Create a new service SDK generator for a specific service.
 
@@ -68,6 +69,9 @@ class GrpcServiceSdkGeneratorFactory(ABC):
             proto_file_handle (proto.ProtoFileHandle): The proto file which serves
                 as the input for the generator.
             proto_include_path (str): The path which is used to look for imports.
+            is_first_service (bool): Indicates whether this is the first service
+                to be generated. This can be used to determine whether the
+                generator needs to initialize some common part or not.
 
         Returns:
             GrpcServiceSdkGenerator: A new GrpcServiceSdkGenerator which can

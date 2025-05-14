@@ -1,8 +1,8 @@
 # gRPC Interface Support
 
-Extends Velocitas applications and services with the ability to describe a dependency to a gRPC service via its interface definition in a proto file.
+Extends Velocitas applications with the ability to consume or provide gRPC services by just describing that dependency via its interface definition in a proto file.
 
-The component provides CLI exec targets which can generate service client SDKs and service server SDKs for all dependent services which will be made available for the application to use via a simple factory interface.
+The component provides CLI exec targets which can generate service consumer (i.e. client) SDKs and service provider (i.e. server) SDKs for all dependent services which will be made available for the application to use via a simple factory interface.
 
 ## Generation
 

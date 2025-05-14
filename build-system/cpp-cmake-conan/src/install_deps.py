@@ -33,65 +33,67 @@ def safe_get_workspace_dir() -> str:
         return os.path.abspath(".")
 
 
-def get_build_folder(build_arch: str, host_arch: str):
-    if host_arch == build_arch:
-        return os.path.join(safe_get_workspace_dir(), "build")
-    return os.path.join(safe_get_workspace_dir(), f"build_linux_{host_arch}")
-
-
-def get_profile_name(arch: str, build_variant: str) -> str:
-    """Return the Conan profile name for the given `arch` and
-    `build_variant`.
-
-    Args:
-        arch (str): The architecture of the profile.
-        build_variant (str): The build variant (debug or release).
-
-    Returns:
-        str: The Conan profile name.
-    """
-    return f"linux_{get_valid_arch(arch)}_{build_variant}"
+def get_build_folder(op_sys: str, arch: str, build_type: str) -> str:
+    return os.path.join(
+        safe_get_workspace_dir(), f"build-{op_sys}-{arch}", f"{build_type}"
+    )
 
 
 def install_deps_via_conan(
     build_arch: str,
     host_arch: str,
-    is_debug: bool = False,
+    build_type: str,
     build_all_deps: bool = False,
 ) -> None:
-    build_variant = "debug" if is_debug else "release"
+    is_mixed_build = build_type == "Mixed"
+    if is_mixed_build:
+        build_type = "Release"
+        print(
+            f'--> "MIXED" build type detected - preparing build for pure {build_type} and "mixed" buid type:'
+        )
+
+    op_sys = "linux"
 
     profile_build_path = (
         Path(__file__)
         .absolute()
-        .parent.joinpath(
-            ".conan", "profiles", get_profile_name(build_arch, build_variant)
-        )
+        .parent.joinpath(".conan", "profiles", f"{op_sys}-{build_arch}")
     )
 
     profile_host_path = (
         Path(__file__)
         .absolute()
-        .parent.joinpath(
-            ".conan", "profiles", get_profile_name(host_arch, build_variant)
-        )
+        .parent.joinpath(".conan", "profiles", f"{op_sys}-{host_arch}")
     )
-
-    build_folder = get_build_folder(build_arch, host_arch)
-    os.makedirs(build_folder, exist_ok=True)
 
     deps_to_build = "missing" if not build_all_deps else "*"
 
-    toolchain = f"/usr/bin/{host_arch}-linux-gnu"
-    build_host = f"{host_arch}-linux-gnu"
-    cc_compiler = "gcc"
-    cxx_compiler = "g++"
+    if is_mixed_build:
+        print(
+            '\n--> Installing dependencies for "mixed" build: Dependencies in Release mode, local stuff in Debug mode ...'
+        )
+        subprocess.check_call(
+            [
+                "conan",
+                "install",
+                "-pr:h",
+                profile_host_path,
+                "-pr:b",
+                profile_build_path,
+                "-s:a=build_type=Release",
+                "-s:h=&:build_type=Debug",
+                "--build",
+                deps_to_build,
+                "-of",
+                os.path.join(
+                    get_build_folder(op_sys, host_arch, "Debug"), "generators"
+                ),
+                safe_get_workspace_dir(),
+            ],
+            cwd=safe_get_workspace_dir(),
+        )
 
-    os.environ["CONAN_CMAKE_FIND_ROOT_PATH"] = toolchain
-    os.environ["CONAN_CMAKE_SYSROOT"] = toolchain
-    os.environ["CC"] = f"{build_host}-{cc_compiler}"
-    os.environ["CXX"] = f"{build_host}-{cxx_compiler}"
-
+    print(f"\n--> Installing dependencies for uniform build in {build_type} mode ...")
     subprocess.check_call(
         [
             "conan",
@@ -100,12 +102,14 @@ def install_deps_via_conan(
             profile_host_path,
             "-pr:b",
             profile_build_path,
+            f"-s:a=build_type={build_type}",
             "--build",
             deps_to_build,
+            "-of",
+            os.path.join(get_build_folder(op_sys, host_arch, build_type), "generators"),
             safe_get_workspace_dir(),
         ],
-        env=os.environ,
-        cwd=build_folder,
+        cwd=safe_get_workspace_dir(),
     )
 
 
@@ -140,17 +144,18 @@ def cli() -> None:
     build_arch = subprocess.check_output(["arch"], encoding="utf-8").strip()
 
     host_arch = args.cross
-
     if host_arch is None:
         host_arch = build_arch
     else:
         host_arch = get_valid_arch(host_arch)
 
-    subprocess.check_call(["conan", "config", "set", "general.revisions_enabled=1"])
+    build_type = "Mixed"
+    if args.debug and not args.release:
+        build_type = "Debug"
+    elif args.release and not args.debug:
+        build_type = "Release"
 
-    install_deps_via_conan(
-        build_arch, host_arch, args.debug and not args.release, args.build_all_deps
-    )
+    install_deps_via_conan(build_arch, host_arch, build_type, args.build_all_deps)
 
 
 if __name__ == "__main__":

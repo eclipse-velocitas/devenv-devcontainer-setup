@@ -72,14 +72,36 @@ class Conan(PackageManager):
             str: The required version.
         """
         package_version: Optional[str] = None
-        with open(
-            os.path.join(get_workspace_dir(), "conanfile.txt"), encoding="utf-8"
-        ) as conanfile:
-            for line in conanfile:
-                if line.startswith(f"{package_name}/"):
-                    package_version = (
-                        line.split("/", maxsplit=1)[1].split("@")[0].strip()
-                    )
+
+        # Try getting it from conanfile.py
+        try:
+            with open(
+                os.path.join(get_workspace_dir(), "conanfile.py"), encoding="utf-8"
+            ) as conanfile:
+                for line in conanfile:
+                    if line.strip().startswith(f'("{package_name}/'):
+                        package_version = (
+                            # line example: ("{package_name}/<version>@<revision>"),
+                            line.split("/", maxsplit=1)[1].split("@")[0].strip()[:-3]
+                        )
+                        break
+        except FileNotFoundError:
+            pass
+        else:
+            return package_version
+
+        # Try getting it from conanfile.txt
+        try:
+            with open(
+                os.path.join(get_workspace_dir(), "conanfile.txt"), encoding="utf-8"
+            ) as conanfile:
+                for line in conanfile:
+                    if line.startswith(f"{package_name}/"):
+                        package_version = (
+                            line.split("/", maxsplit=1)[1].split("@")[0].strip()
+                        )
+        except FileNotFoundError:
+            pass
 
         return package_version
 
@@ -247,7 +269,7 @@ def main(verbose: bool):
     """
     lang = get_programming_language()
     if lang not in SUPPORTED_LANGUAGES:
-        print("No core SDK available yet for programming language " f"{lang!r}")
+        print(f"No core SDK available yet for programming language {lang!r}")
         return
 
     additional_packages = json.loads(require_env("additionalPackages"))
