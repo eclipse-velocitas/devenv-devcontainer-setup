@@ -69,7 +69,7 @@ def test_sdk_reference_found__sdk_installed():
         os.remove("./conanfile.py")
     conanfile_contents = """
 [requires]
-vehicle-app-sdk/conan2-prerelease
+vehicle-app-sdk/0.7.0
     """
     with open("./conanfile.txt", mode="w", encoding="utf-8") as conanfile:
         conanfile.write(conanfile_contents)
